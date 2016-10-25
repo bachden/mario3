@@ -15,6 +15,57 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<delete failonerror="false">
+									<fileset dir="${project.build.directory}/release" />
+								</delete>
+								<mkdir dir="${project.build.directory}/release" />
+								<copy todir="${project.build.directory}/release/conf"
+									failonerror="false">
+									<fileset dir="${project.basedir}/conf" />
+								</copy>
+								<copy todir="${project.build.directory}/release/lib">
+									<fileset dir="${project.basedir}/lib-local">
+										<include name="*.jar" />
+										<exclude name="slf4j-log4j*" />
+									</fileset>
+								</copy>
+								<copy todir="${project.build.directory}/release/lib-boot">
+									<fileset dir="${project.basedir}/lib-boot">
+										<include name="*.jar" />
+										<exclude name="slf4j-log4j*" />
+									</fileset>
+								</copy>
+								<copy todir="${project.build.directory}/release/lib">
+									<fileset dir="${project.build.directory}">
+										<exclude name="slf4j-log4j*" />
+										<include name="*.jar" />
+									</fileset>
+								</copy>
+								<copy todir="${project.build.directory}/release/extensions"
+									failonerror="false">
+									<fileset dir="${project.basedir}/extensions" />
+								</copy>
+								<copy todir="${project.build.directory}/release">
+									<fileset dir="${project.basedir}/sbin" />
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -27,8 +78,8 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/lib</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
+							<outputDirectory>${project.build.directory}/release/lib</outputDirectory>
+							<overWriteReleases>true</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
 						</configuration>
@@ -40,24 +91,20 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>nhb.common</groupId>
-			<artifactId>nhb-common-core</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-
-
-
-
-
-
-		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 			<version>2.7</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
+			<version>2.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 			<version>2.7</version>
 		</dependency>
 
@@ -87,11 +134,13 @@
 			<artifactId>hazelcast-all</artifactId>
 			<version>3.7.2</version>
 		</dependency>
+
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>deadlockmonitor</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-messaging</artifactId>
@@ -107,11 +156,19 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-workflow</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>nhb.common</groupId>
+			<artifactId>nhb-common-core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-db</artifactId>
