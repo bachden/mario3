@@ -1,0 +1,68 @@
+<project name="TestHttpGateway" default="deploy" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<property file="build.properties" />
+	<property name="version">1.0.0</property>
+	<property name="jar.name">${ant.project.name}-${version}</property>
+	<property name="lib" value="lib" />
+	<property name="classes" value="bin" />
+	<property name="conf" value="conf" />
+	<property name="dist" value="dist" />
+	<property name="dist.jar" value="${dist}/jar" />
+	<property name="dist.ext" value="${dist}/ext" />
+
+	<!-- User when ivy.xml changed -->
+	<target name="resolve" description="retreive dependencies with ivy">
+		<delete dir="${lib.dir}">
+			<include name="*.jar" />
+			<exclude name="sqljdbc4*.jar" />
+		</delete>
+		<ivy:settings file="ivysettings.xml" />
+		<ivy:retrieve />
+	</target>
+
+	<target name="clear" description="delete dist folder">
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="prep" depends="clear" description="make dirs">
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist.jar}" />
+		<mkdir dir="${dist.ext}" />
+		<mkdir dir="${dist.ext}/${ant.project.name}" />
+		<mkdir dir="${dist.ext}/${ant.project.name}/lib" />
+		<mkdir dir="${dist.ext}/${ant.project.name}/conf" />
+	</target>
+
+	<target name="build" depends="prep" description="build jar file">
+		<jar jarfile="${dist.jar}/${jar.name}.jar">
+			<fileset dir="${classes}" />
+		</jar>
+	</target>
+
+	<target name="pack" depends="build" description="copy nessesary files to dist folder">
+		<copy todir="${dist.ext}/${ant.project.name}/lib" failonerror="false">
+			<fileset dir="${lib}">
+				<include name="*.jar" />
+				<include name="*.zip" />
+				<exclude name="jdbi*.jar" />
+			</fileset>
+			<fileset dir="${dist.jar}">
+				<include name="*.jar" />
+				<include name="*.zip" />
+			</fileset>
+		</copy>
+		<copy todir="${dist.ext}/${ant.project.name}/${conf}" failonerror="false">
+			<fileset dir="${conf}" />
+		</copy>
+		<copy todir="${dist.ext}/${ant.project.name}">
+			<fileset file="extension.xml" />
+		</copy>
+	</target>
+
+	<target name="deploy" depends="pack">
+		<copy todir="${deploy.path}">
+			<fileset dir="${dist.ext}" />
+		</copy>
+	</target>
+
+</project>

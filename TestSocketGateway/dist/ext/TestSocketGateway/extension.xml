@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mario>
+
+	<name>SocketEchoExtension</name>
+
+	<gateways>
+		<!-- <http> -->
+		<!-- <name>http-echo-gateway</name> -->
+		<!-- <port>8099</port> -->
+		<!-- <workerpool> -->
+		<!-- <poolsize>8</poolsize> -->
+		<!-- <ringbuffersize>2048</ringbuffersize> -->
+		<!-- <threadnamepattern>HTTP Echo Server Worker Pool #%d</threadnamepattern> -->
+		<!-- </workerpool> -->
+		<!-- </http> -->
+		<!-- <socket> -->
+		<!-- <name>udt-echo-gateway</name> -->
+		<!-- <protocol>UDT</protocol> -->
+		<!-- <port>9999</port> -->
+		<!-- <workerpool> -->
+		<!-- <poolsize>8</poolsize> -->
+		<!-- <ringbuffersize>2048</ringbuffersize> -->
+		<!-- <threadnamepattern>UDT Echo Server Worker Pool #%d</threadnamepattern> -->
+		<!-- </workerpool> -->
+		<!-- </socket> -->
+		<socket>
+			<name>tcp-echo-gateway</name>
+			<protocol>TCP</protocol>
+			<port>9999</port>
+			<uselengthprepender>
+				false
+			</uselengthprepender>
+			<workerpool>
+				<poolsize>64</poolsize>
+				<ringbuffersize>8192</ringbuffersize>
+				<threadnamepattern>TPC Echo Server Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</socket>
+		<!-- <socket> -->
+		<!-- <name>websocket-echo-gateway</name> -->
+		<!-- <protocol>WEBSOCKET</protocol> -->
+		<!-- <port>8888</port> -->
+		<!-- <workerpool> -->
+		<!-- <poolsize>8</poolsize> -->
+		<!-- <ringbuffersize>2048</ringbuffersize> -->
+		<!-- <threadnamepattern>WebSocket Echo Server Worker Pool #%d</threadnamepattern> -->
+		<!-- </workerpool> -->
+		<!-- </socket> -->
+	</gateways>
+
+	<lifecycles>
+		<handler>
+			<name>echo-server-handler</name>
+			<handle>com.mario.test.socket.echo.server.EchoSocketServerHandler</handle>
+			<bind>
+				<gateway>tcp-echo-gateway</gateway>
+				<!-- <gateway>udt-echo-gateway</gateway> -->
+				<!-- <gateway>websocket-echo-gateway</gateway> -->
+				<!-- <gateway>http-echo-gateway</gateway> -->
+			</bind>
+			<variables>
+			</variables>
+		</handler>
+	</lifecycles>
+</mario>

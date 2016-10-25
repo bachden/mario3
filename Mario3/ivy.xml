@@ -1,0 +1,78 @@
+<ivy-module version="2.0">
+	<info organisation="com.mario" module="mario-consumer" />
+	<configurations defaultconfmapping="default">
+		<conf name="default" />
+		<conf name="java7" extends="default" description="Java 7 dependencies" />
+		<conf name="eclipse" description="Special dependencies in Eclipse" />
+		<conf name="utest" extends="eclipse" description="Unit testing dependencies" />
+	</configurations>
+
+	<dependencies>
+		<!-- logging libs -->
+		<dependency org="org.slf4j" name="slf4j-api" rev="1.7.12" />
+		<dependency org="org.apache.logging.log4j" name="log4j-core" rev="2.1" />
+		<dependency org="org.apache.logging.log4j" name="log4j-api" rev="2.1" />
+		<dependency org="org.apache.logging.log4j" name="log4j-slf4j-impl" rev="2.1" />
+
+		<!-- disruptor -->
+		<dependency org="com.lmax" name="disruptor" rev="3.3.4" />
+
+		<!-- serialization -->
+		<dependency org="org.msgpack" name="msgpack" rev="0.6.12" />
+		<dependency org="net.minidev" name="json-smart" rev="2.1.1" />
+
+		<!-- embed http server -->
+		<dependency org="org.eclipse.jetty" name="jetty-server" rev="9.3.7.RC1" />
+		<dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.3.7.RC1" />
+		<dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.3.7.RC1" />
+
+		<!-- socket nio -->
+		<dependency org="io.netty" name="netty-all" rev="4.1.0.CR7" />
+		<dependency org="io.netty" name="netty-tcnative" rev="1.1.33.Fork16" />
+		<dependency org="com.barchart.udt" name="barchart-udt-bundle" rev="2.3.0" />
+
+		<!-- http clients -->
+		<dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.1" />
+		<dependency org="org.apache.httpcomponents" name="httpasyncclient" rev="4.1.1" />
+
+		<!-- rabbitmq -->
+		<dependency org="com.rabbitmq" name="amqp-client" rev="3.6.0" />
+		<dependency org="net.jodah" name="lyra" rev="0.5.2" />
+
+		<!-- Kafka: https://mvnrepository.com/artifact/org.apache.kafka/kafka_2.10 -->
+		<dependency org="org.apache.kafka" name="kafka_2.11" rev="0.10.0.1" />
+
+		<!-- database --><!-- https://mvnrepository.com/artifact/org.jdbi/jdbi -->
+		<dependency org="org.jdbi" name="jdbi" rev="2.77" />
+		<dependency org="net.snaq" name="dbpool" rev="7.0-jdk7" />
+		<dependency org="com.hazelcast" name="hazelcast-all" rev="3.7.1" />
+
+		<dependency org="redis.clients" name="jedis" rev="2.8.0" />
+		<dependency org="org.mongodb" name="mongo-java-driver" rev="3.2.2" />
+
+		<dependency org="mysql" name="mysql-connector-java" rev="5.1.35" />
+		<!-- <dependency org="org.redisson" name="redisson" rev="2.1.3" /> -->
+		<!-- <dependency org="org.elasticsearch" name="elasticsearch" rev="2.2.0"/> -->
+
+		<dependency org="com.couchbase.client" name="java-client" rev="2.2.6" />
+
+		<dependency org="com.datastax.cassandra" name="cassandra-driver-core" rev="3.0.0" />
+
+		<!-- utilities -->
+		<dependency org="com.fasterxml.uuid" name="java-uuid-generator" rev="3.1.4" />
+
+		<dependency org="net.sf.trove4j" name="trove4j" rev="2.0.2" />
+		<dependency org="com.google.guava" name="guava" rev="19.0" />
+		<dependency org="com.google.code.gson" name="gson" rev="2.6.2" />
+		<dependency org="commons-lang" name="commons-lang" rev="2.6" />
+		<dependency org="javax.mail" name="mail" rev="1.5.0-b01" />
+
+		<dependency org="commons-codec" name="commons-codec" rev="1.9" />
+		<dependency org="org.apache.commons" name="commons-math3" rev="3.5" />
+		<dependency org="commons-io" name="commons-io" rev="2.4" />
+		<dependency org="commons-logging" name="commons-logging" rev="1.1.1" />
+
+		<dependency org="org.antlr" name="stringtemplate" rev="3.2" />
+		<!-- <dependency org="org.antlr" name="stringtemplate" rev="4.0.2" /> -->
+	</dependencies>
+</ivy-module>

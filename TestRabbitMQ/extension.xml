@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mario>
+
+	<name>TestRabbitMQ</name>
+
+	<servers>
+		<rabbitmq>
+			<name>rabbitmq_localhost</name>
+			<endpoint>
+				<entry>localhost:5672</entry>
+			</endpoint>
+			<credential>
+				<username>root</username>
+				<password>123456</password>
+			</credential>
+			<autoreconnect>true</autoreconnect>
+		</rabbitmq>
+	</servers>
+
+	<gateways>
+		<rabbitmq>
+			<name>rabbitmq_task_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<name>tasks</name>
+				<type>task_queue</type>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Task Queue Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+		<rabbitmq>
+			<name>rabbitmq_rpc_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<name>rpc</name>
+				<type>rpc</type>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>RPC Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+		<rabbitmq>
+			<name>rabbitmq_forward_rpc_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<name>forwarding_rpc</name>
+				<type>rpc</type>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Forward RPC Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+		<rabbitmq>
+			<name>rabbitmq_routing_key_a_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<name>routing</name>
+				<exchangeName>testRoutingExchange</exchangeName>
+				<exchangeType>direct</exchangeType>
+				<routingKey>a</routingKey>
+				<type>routing</type>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Routing Key A Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+		<rabbitmq>
+			<name>rabbitmq_routing_key_b_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<exchangeName>testRoutingExchange</exchangeName>
+				<exchangeType>direct</exchangeType>
+				<routingKey>b</routingKey>
+				<type>routing</type>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Routing Key B Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+
+		<rabbitmq>
+			<name>rabbitmq_routing_rpc_a_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<exchangeName>testRoutingRPCExchange</exchangeName>
+				<exchangeType>direct</exchangeType>
+				<routingKey>a</routingKey>
+				<type>routing_rpc</type>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Routing RPC Key A Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+		<rabbitmq>
+			<name>rabbitmq_routing_rpc_b_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<exchangeName>testRoutingRPCExchange</exchangeName>
+				<exchangeType>direct</exchangeType>
+				<routingKey>b</routingKey>
+				<type>routing_rpc</type>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Routing RPC Key B Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+	</gateways>
+
+	<producers>
+		<rabbitmq>
+			<name>routing_exchange</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<exchangeName>testRoutingRPCExchange</exchangeName>
+				<exchangeType>direct</exchangeType>
+				<type>routing_rpc</type>
+			</queue>
+		</rabbitmq>
+	</producers>
+
+	<lifecycles>
+		<!-- TASK QUEUE -->
+		<handler>
+			<name>test_task_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.TaskHandler</handle>
+			<bind>
+				<gateway>rabbitmq_task_gateway</gateway>
+			</bind>
+			<variables>
+			</variables>
+		</handler>
+
+		<!-- RPC -->
+		<handler>
+			<name>test_rpc_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.RPCHandler</handle>
+			<bind>
+				<gateway>rabbitmq_rpc_gateway</gateway>
+			</bind>
+			<variables>
+			</variables>
+		</handler>
+
+		<handler>
+			<name>test_forwarding_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.ForwardHandler</handle>
+			<bind>
+				<gateway>rabbitmq_forward_rpc_gateway</gateway>
+			</bind>
+			<variables>
+				<variable type="String" name="producerName">routing_exchange</variable>
+				<variable type="String" name="routingKey">a</variable>
+			</variables>
+		</handler>
+
+		<!-- ROUTING KEY -->
+		<handler>
+			<name>test_routing_key_a_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.RoutingHandler</handle>
+			<bind>
+				<gateway>rabbitmq_routing_key_a_gateway</gateway>
+			</bind>
+			<variables>
+				<variable name="routingKey" type="String">a</variable>
+			</variables>
+		</handler>
+
+		<handler>
+			<name>test_routing_key_b_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.RoutingHandler</handle>
+			<bind>
+				<gateway>rabbitmq_routing_key_b_gateway</gateway>
+			</bind>
+			<variables>
+				<variable name="routingKey" type="String">b</variable>
+			</variables>
+		</handler>
+
+		<!-- ROUTING RPC -->
+		<handler>
+			<name>test_routing_key_rpc_a_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.RoutingRPCHandler</handle>
+			<bind>
+				<gateway>rabbitmq_routing_rpc_a_gateway</gateway>
+			</bind>
+			<variables>
+				<variable name="routingKey" type="String">a</variable>
+			</variables>
+		</handler>
+
+		<handler>
+			<name>test_routing_key_rpc_b_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.RoutingRPCHandler</handle>
+			<bind>
+				<gateway>rabbitmq_routing_rpc_b_gateway</gateway>
+			</bind>
+			<variables>
+				<variable name="routingKey" type="String">b</variable>
+			</variables>
+		</handler>
+	</lifecycles>
+</mario>

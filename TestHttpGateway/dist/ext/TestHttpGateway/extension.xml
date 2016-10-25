@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mario>
+	<name>TestHttpGateway</name>
+
+	<servers>
+		<http>
+			<name>http_server_at_8880</name>
+			<port>8880</port>
+			<!-- <options>sessions</options> -->
+			<!-- <sessiontimeout>60</sessiontimeout> -->
+		</http>
+	</servers>
+
+	<gateways>
+		<http>
+			<name>test_http_gateway</name>
+			<server>http_server_at_8880</server>
+			<path>/okman</path>
+			<usemultipath>true</usemultipath>
+			<deserializer>com.mario.test.http.HttpGatewayDeserialier</deserializer>
+			<workerpool>
+				<poolsize>128</poolsize>
+				<ringbuffersize>16384</ringbuffersize>
+				<threadnamepattern>Test Http Gateway Worker #%d</threadnamepattern>
+			</workerpool>
+		</http>
+	</gateways>
+
+	<lifecycles>
+		<handler>
+			<name>test_http_gateway_handler</name>
+			<handle>com.mario.test.http.TestHttpGatewayHandler</handle>
+			<bind>
+				<gateway>test_http_gateway</gateway>
+			</bind>
+		</handler>
+	</lifecycles>
+</mario>

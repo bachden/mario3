@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mario>
+
+	<name>TestKafkaGateway</name>
+
+	<gateways>
+		<kafka>
+			<name>test_kafka_gateway</name>
+			<config>conf/consumer.properties</config>
+			<pollTimeout>100</pollTimeout>
+			<topics>test.topic1,test.topic2</topics>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</kafka>
+	</gateways>
+
+	<lifecycles>
+		<handler>
+			<name>test_kafka_handler</name>
+			<handle>com.mario.test.gateway.kafka.TestKafkaHandler</handle>
+			<bind>
+				<gateway>test_kafka_gateway</gateway>
+			</bind>
+			<variables>
+			</variables>
+		</handler>
+	</lifecycles>
+</mario>

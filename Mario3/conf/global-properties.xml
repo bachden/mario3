@@ -1,0 +1,5 @@
+<variables>
+	<variable name="default_property" type="puobject">
+		<variable name="default_property_field1" type="string">this is test text</variable>
+	</variable>
+</variables>

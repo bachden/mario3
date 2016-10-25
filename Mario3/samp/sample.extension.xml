@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mario>
+	<name>[the extension name, must equals to folder name under ./extensions folder]</name>
+
+	<properties>
+		<!-- each entry hold a PuElement's xml format -->
+		<entry name="[the property name, must be unique in each extension.xml]" ref="[globalProperties's child]" file="[first data to load and read]">
+			<!-- the content will replace recursively the data loaded in file -->
+			<variables>[the PuElement's xml format, using variable and entry tags]</variables>
+		</entry>
+	</properties>
+
+	<datasources>
+		<sql ref="[the property which hold the config, optional]">
+			<name>[sql-source-name]</name>
+			<propertiesFile>[file config path, relative to this file, optional]</propertiesFile>
+			<variables ref="[the property name]">
+				<!-- everything in this block will override config in file spec by properties file tag -->
+				<!-- the content will replace recursively the data in the ref property -->
+				<variable name="url" type="string">jdbc:mysql://[host]:[port|3306]/[db_name]</variable>
+				<variable name="driverClassName" type="string">com.mysql.jdbc.Driver</variable>
+				<variable name="username" type="string">[user]</variable>
+				<variable name="password" type="string">[password]</variable>
+				<!-- <variable name="validatorClassName" type="string"></variable> -->
+				<variable name="minPool" type="integer">4</variable>
+				<variable name="maxPool" type="integer">32</variable>
+				<!-- <variable name="maxSize" type="integer"></variable> -->
+				<variable name="idleTimeout" type="integer">10000</variable>
+				<variable name="loginTimeout" type="integer">10000</variable>
+			</variables>
+		</sql>
+		<cassandra ref="[the property which hold the config, optional]">
+			<name>[cassandra_datasource_name]</name>
+			<keyspace>[keyspace_name_to_connect]</keyspace>
+			<endpoint>
+				<entry>[my.domain1.com:port]</entry>
+				<entry>[my.domain2.com:port]</entry>
+			</endpoint>
+			<credential>
+				<username>[username]</username>
+				<password>[password]</password>
+			</credential>
+		</cassandra>
+		<mongodb ref="[the property which hold the config, optional]">
+			<name>[mongodb-name]</name>
+			<endpoint>
+				<entry>127.0.0.1:27017</entry>
+			</endpoint>
+			<credentials>
+				<entry>
+					<username>[userName]</username>
+					<password>[password]</password>
+					<authdb>[authdb]</authdb>
+				</entry>
+			</credentials>
+			<!-- optional read preference config, null by default -->
+			<readpreference>
+				<name>[NEAREST | PRIMARY | SECONDARY | SECONDARY_PREFERRED |
+					PRIMARY_PREFERRED, default is primary, case insensitive]
+				</name>
+				<!-- tag set list is optional, default by null -->
+				<tagSetList>
+					<!-- multi tag set can be configured here -->
+					<tagSet>
+						<!-- multi tag can be configured here -->
+						<tag name="[tagName_1]">[tagValue_1]</tag>
+						<tag name="[tagName_2]">[tagValue_2]</tag>
+						<tag name="[tagName_n]">[tagValue_n]</tag>
+					</tagSet>
+				</tagSetList>
+			</readpreference>
+		</mongodb>
+
+		<hazelcast ref="[the property which hold the config, optional]">
+			<name>default-hazelcast</name>
+			<member>[ true | false ]</member>
+			<config>[/relative/path/to/configfile]</config>
+			<lazyinit>[true | false : default is false ]</lazyinit>
+			<autoinit>[used if lazyinit == true, auto init on extension ready]</autoinit>
+			<initializers>
+				<entry>[lifecycle_name_1]</entry>
+				<entry>[lifecycle_name_2]</entry>
+			</initializers>
+		</hazelcast>
+
+		<redis ref="[the property which hold the config, optional]">
+			<name>default-redis</name>
+			<!-- support 4 types: single, master_slave, cluster, sentinel -->
+			<type>cluster</type>
+			<mastername>mymaster</mastername>
+			<!-- if type == sentinel, endpoint entries must be sentinel's endpoints -->
+			<endpoint>
+				<entry>
+					<!-- master tag use for servers type master_slave -->
+					<master>true</master>
+					<host>localhost</host>
+					<port>7000</port>
+				</entry>
+				<entry>
+					<host>localhost</host>
+					<port>7001</port>
+				</entry>
+				<entry>
+					<host>localhost</host>
+					<port>7002</port>
+				</entry>
+			</endpoint>
+		</redis>
+	</datasources>
+
+	<servers>
+		<rabbitmq ref="[the property which hold the config, optional]">
+			<name>[rabbitmq_connection_pool]</name>
+			<endpoint>
+				<entry>
+					<host>host1</host>
+					<port>5672</port>
+				</entry>
+				<entry>
+					<host>host2</host>
+					<port>5672</port>
+				</entry>
+			</endpoint>
+			<credential>
+				<username>[userName]</username>
+				<password>[password]</password>
+			</credential>
+			<autoreconnect>true</autoreconnect>
+		</rabbitmq>
+		<http ref="[the property which hold the config, optional]">
+			<name>[http_context_name]</name>
+			<port>[http_port]</port>
+			<threadpool>
+				<minsize>[the minimum thread, default is 2]</minsize>
+				<maxsize>[the maximum thread, default is 16]</maxsize>
+				<taskqueue>
+					<initsize>[init BlockingArrayQueue with a backed elements Object[].length == this size configuration, default is 8]
+					</initsize>
+					<growby>[the backed elements array will be grown by this configuration, default is 8]</growby>
+					<maxsize>[maximum size of the backed task queue, default is Integer.MAX_VALUE]</maxsize>
+				</taskqueue>
+			</threadpool>
+			<options>[no_sessions | sessions | security | gzip]</options>
+			<sessiontimeout>[timeout_in_second (default = -1 mean forever)] (this
+				will be ignored if options != sessions)
+			</sessiontimeout>
+		</http>
+		<kafka ref="[the property which hold the config, optional]">
+			<name>[kafka_server_wrapper_name]</name>
+			<zookeeper>
+				<endpoint>
+					<entry>[my.domain1.com:port]</entry>
+					<entry>[my.domain2.com:port]</entry>
+				</endpoint>
+				<connectiontimeout>[connection_timeout]</connectiontimeout>
+				<synctime>[connection_timeout]</synctime>
+			</zookeeper>
+		</kafka>
+	</servers>
+
+	<producers>
+		<rabbitmq ref="[the property which hold the config, optional]">
+			<name>[producer_name, used for getApi to locate]</name>
+			<server>[name of connection]</server>
+			<timeout>[timeout]</timeout>
+			<queue>
+				<name>[queueName]</name>
+				<type>[task_queue | pub_sub | rpc | rounting | topic]</type>
+				<routingKey>[rountingKey, default will be queueName if exchangeName == null or emplty]</routingKey>
+				<exchangeName>[exchangeName]</exchangeName>
+				<exchangeType>[exchangeType]</exchangeType>
+			</queue>
+		</rabbitmq>
+		<http ref="[the property which hold the config, optional]">
+			<name>[producer_name]</name>
+			<endpoint>[http_endpoint]</endpoint>
+			<method>[get (default) | post]</method>
+			<async>[false (default) | true]</async>
+			<usemultipart>[true (default) | false]</usemultipart>
+		</http>
+		<kafka ref="[the property which hold the config, optional]">
+			<name>[producer_name]</name>
+			<config>[relative/to/config/file]</config>
+			<topic>[topic_name]</topic>
+		</kafka>
+	</producers>
+
+	<gateways>
+		<http ref="[the property which hold the config, optional]">
+			<name>[http_gateway_name]</name>
+			<server>[http_server_name]</server>
+			<path>[the_uri_location (default is /*)]</path>
+			<usemultipart>[true | false (default)]</usemultipart>
+			<deserializer>[deserializer-class]</deserializer>
+			<encoding>[utf-8]</encoding>
+			<header name="[header-name1]">[header-value1]</header>
+			<header name="[header-name2]">[header-value2]</header>
+			<async>[true | false]</async>
+			<!-- worker pool ignored if async == false -->
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</http>
+		<rabbitmq ref="[the property which hold the config, optional]">
+			<name>[rabbitmq_gateway_name]</name>
+			<deserializer>[deserializer-class]</deserializer>
+			<server>[rabbitmq_connection_pool_name]</server>
+			<queue>
+				<type>taskQueue</type>
+				<name>[queueName]</name>
+				<autoack>true</autoack>
+				<routingKey>[rountingKey, default will be queueName if exchangeName
+					== null or empty]
+				</routingKey>
+				<exchangeName>[exchangeName]</exchangeName>
+				<exchangeType>[fanout | direct | topic | headers]</exchangeType>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+		<socket ref="[the property which hold the config, optional]">
+			<name>default-tcp</name>
+			<deserializer>[deserializer-class]</deserializer>
+			<protocol>[ TCP | UDT | UDP]</protocol>
+			<host>127.0.0.1</host>
+			<port>9999</port>
+			<uselengthprepender>[true | false]</uselengthprepender>
+			<bootGroupThreads>[number of thread use for boot event loop group, default 2]</bootGroupThreads>
+			<workerGroupThreads>[number of threads use for worker event loop group, default 4]</workerGroupThreads>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</socket>
+		<kafka ref="[the property which hold the config, optional]">
+			<name>[name]</name>
+			<deserializer>[deserializer_class | shouldn't set this if you don't
+				know what are you doing]
+			</deserializer>
+			<config>[relative_path_to_config_file]</config>
+			<pollTimeout>[poll_timeout]</pollTimeout>
+			<topics>[the_topics_seperate_by_comma(,)]</topics>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</kafka>
+	</gateways>
+
+	<lifecycles>
+		<entry>
+			<name>[lifecycle-name]</name>
+			<handle>[handle-class-name]</handle>
+			<variables ref="[property name]"></variables>
+		</entry>
+		<handler>
+			<name>[handle-name]</name>
+			<handle>[handle-class-name]</handle>
+			<bind>
+				<gateway>[gateway-name-1]</gateway>
+				<gateway>[gateway-name-2]</gateway>
+			</bind>
+			<variables ref="[property name]"></variables>
+		</handler>
+		<managedobject>
+			<name>[managed-object-name]</name>
+			<handle>[handle-class-name]</handle>
+			<variables ref="[property name]"></variables>
+		</managedobject>
+	</lifecycles>
+
+	<cooperations>
+		<zookeeper ref="[the property which hold the config, optional]">
+			<name>[zkclient_name]</name>
+			<servers>[the endpoints separated by comma, e.g host1:port1,host2:port2]</servers>
+			<sessionTimeout>[default is 30000ms]</sessionTimeout>
+			<connectionTimeout>[default is Integer.MAX_VALUE]</connectionTimeout>
+			<serializerClass>
+				[the serializer class implement org.I0Itec.zkclient.serialize.ZkSerializer,
+				default is
+				org.I0Itec.zkclient.serialize.SerializableSerializer]
+			</serializerClass>
+			<operationRetryTimeout>[default is -1L, mean forever]</operationRetryTimeout>
+		</zookeeper>
+	</cooperations>
+
+	<monitor>
+		<agent ref="[the property which hold the config, optional]">
+			<name>[agent-name]</name>
+			<interval>[checking-interval-time]</interval>
+			<handle>[handler-class-name -> must implement MonitorAgent interface]</handle>
+		</agent>
+	</monitor>
+</mario>
