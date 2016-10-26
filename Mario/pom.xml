@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>nhb.mario</groupId>
-	<artifactId>mario3</artifactId>
+	<groupId>nhb</groupId>
+	<artifactId>mario</artifactId>
 	<version>3.9.12</version>
 
 	<build>
@@ -14,6 +14,46 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<executions>
+					<execution>
+						<id>javadoc-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<!-- Turn off docklint -->
+							<additionalparam>-Xdoclint:none</additionalparam>
+
+							<!-- switch on dependency-driven aggregation -->
+							<!-- <includeDependencySources>true</includeDependencySources> -->
+
+							<!-- <dependencySourceExcludes> -->
+							<!-- exclude ONLY commons-cli artifacts -->
+							<!-- <dependencySourceExclude>commons-cli:*</dependencySourceExclude> -->
+							<!-- </dependencySourceExcludes> -->
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 			<plugin>
@@ -197,5 +237,13 @@
 			</exclusions>
 		</dependency>
 	</dependencies>
+
+	<distributionManagement>
+		<repository>
+			<id>central</id>
+			<name>puppet-releases</name>
+			<url>http://artifactory.puppetserver.com/libs-release-local</url>
+		</repository>
+	</distributionManagement>
 </project>
 
