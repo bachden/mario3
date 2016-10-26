@@ -75,18 +75,17 @@
 								<copy todir="${project.build.directory}/release/lib">
 									<fileset dir="${project.basedir}/lib-local">
 										<include name="*.jar" />
-										<exclude name="slf4j-log4j*" />
 									</fileset>
 								</copy>
 								<copy todir="${project.build.directory}/release/lib-boot">
 									<fileset dir="${project.basedir}/lib-boot">
 										<include name="*.jar" />
-										<exclude name="slf4j-log4j*" />
 									</fileset>
 								</copy>
 								<copy todir="${project.build.directory}/release/lib">
 									<fileset dir="${project.build.directory}">
-										<exclude name="slf4j-log4j*" />
+										<exclude name="*-sources.jar" />
+										<exclude name="*-javadoc.jar" />
 										<include name="*.jar" />
 									</fileset>
 								</copy>
