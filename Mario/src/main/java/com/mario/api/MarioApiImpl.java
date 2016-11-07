@@ -10,7 +10,9 @@ import com.mario.cache.hazelcast.HazelcastInitializer;
 import com.mario.entity.EntityManager;
 import com.mario.entity.ManagedObject;
 import com.mario.entity.MessageHandler;
+import com.mario.entity.message.DecodingErrorMessage;
 import com.mario.entity.message.Message;
+import com.mario.entity.message.MessageRW;
 import com.mario.exceptions.ManagedObjectNotFoundException;
 import com.mario.exceptions.MessageHandlerNotFoundException;
 import com.mario.extension.ExtensionManager;
@@ -105,7 +107,35 @@ class MarioApiImpl implements MarioApi {
 	public void request(String handlerName, Message message) {
 		MessageHandler handler = this.entityManager.getMessageHandler(handlerName);
 		if (handler != null) {
-			handler.handle(message);
+
+			try {
+				PuElement result = null;
+				boolean hasError = false;
+				if (message instanceof DecodingErrorMessage
+						&& ((DecodingErrorMessage) message).getDecodingFailedCause() != null) {
+					if (message.getCallback() != null) {
+						message.getCallback().onHandleError(message,
+								((DecodingErrorMessage) message).getDecodingFailedCause());
+					}
+					hasError = true;
+				} else {
+					try {
+						result = handler.handle(message);
+					} catch (Exception e) {
+						if (message.getCallback() != null) {
+							message.getCallback().onHandleError(message, e);
+						}
+						hasError = true;
+					}
+				}
+				if (!hasError && message.getCallback() != null) {
+					message.getCallback().onHandleComplete(message, result);
+				}
+			} finally {
+				if (message instanceof MessageRW) {
+					((MessageRW) message).clear();
+				}
+			}
 		} else {
 			throw new MessageHandlerNotFoundException("Message handler not found for name: " + handlerName);
 		}
