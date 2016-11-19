@@ -111,7 +111,7 @@
 								</scp>
 								<sshexec host="${remote.host}" username="${remote.user}"
 									password="${remote.password}" trust="true"
-									command="ln -sfn ~/${extension.name}s/${extension.dir} ~/${extension.name}" />
+									command="ln -sfn ~/${extension.name}s/${extension.dir} ~/${extension.name}; cd ~/${extension.name}; chmod +x *.sh" />
 							</target>
 						</configuration>
 						<goals>
