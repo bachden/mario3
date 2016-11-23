@@ -113,6 +113,10 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 
 				message = httpMessage;
 				PuElement puResponse = this.getHandler().handle(message);
+				if (puResponse == PuNull.IGNORE_ME) {
+					getLogger().warn("IGNORE_ME cannot be used in sync mode, sending EMPTY value as response");
+					puResponse = PuNull.EMPTY;
+				}
 				this.onHandleComplete(message, puResponse);
 			}
 		} catch (MessageDecodingException e) {
