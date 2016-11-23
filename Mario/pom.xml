@@ -180,20 +180,21 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>9.4.0.RC0</version>
+			<version>9.3.14.v20161028</version>
 		</dependency>
+		
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>9.4.0.RC0</version>
+			<version>9.3.14.v20161028</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlets -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
-			<version>9.4.0.RC0</version>
+			<version>9.3.14.v20161028</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast-all -->
