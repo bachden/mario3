@@ -58,7 +58,8 @@ public class JettyHttpServerWrapper extends BaseServerWrapper {
 			HttpServerWrapperConfig config = (HttpServerWrapperConfig) this.getConfig();
 			ServletContextHandler handler = new ServletContextHandler(config.getOptions());
 			if (config.getOptions() > 0 && config.getSessionTimeout() > 0) {
-				handler.getSessionHandler().setMaxInactiveInterval(config.getSessionTimeout());
+				getLogger().warn("Session timeout config is not supported right now");
+				// handler.getSessionHandler().setMaxInactiveInterval(config.getSessionTimeout());
 			}
 			this.handler = handler;
 		}
