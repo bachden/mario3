@@ -112,7 +112,8 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 				getDeserializer().decode(request, (MessageRW) httpMessage);
 
 				message = httpMessage;
-				this.getHandler().handle(message);
+				PuElement puResponse = this.getHandler().handle(message);
+				this.onHandleComplete(message, puResponse);
 			}
 		} catch (MessageDecodingException e) {
 			this.onHandleError(e.getTarget(), e.getCause());
