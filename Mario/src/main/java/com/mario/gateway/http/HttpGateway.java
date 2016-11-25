@@ -216,6 +216,12 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 				} finally {
 					closeAsyncContext(message);
 				}
+			} else {
+				try {
+					responser.getWriter().flush();
+				} catch (IOException e) {
+					getLogger().error("Error while writing response", e);
+				}
 			}
 		}
 	}
