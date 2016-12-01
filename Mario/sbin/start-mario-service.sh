@@ -29,7 +29,6 @@ read_vmoptions() {
 
 JVM_OPTS=""
 read_vmoptions $WORKING_DIR/mario.vmoptions
-echo "JVM_OPTS: "$JVM_OPTS
 
 MAIN_CLASS=com.mario.Mario
 LOCAL_CLASSPATH="./lib/*:./extensions/__lib__/*"
