@@ -1,0 +1,45 @@
+-server
+-d64
+-Xms1g
+-Xmx1g
+
+-Dfile.encoding=UTF-8
+
+-XX:+UseParNewGC
+-XX:NewRatio=3
+-XX:SurvivorRatio=4
+-XX:TargetSurvivorRatio=90
+-XX:MaxTenuringThreshold=8
+-XX:+UseConcMarkSweepGC
+-XX:+UseParNewGC
+-XX:ConcGCThreads=4 -XX:ParallelGCThreads=4
+-XX:+CMSScavengeBeforeRemark
+-XX:PretenureSizeThreshold=64m
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:CMSInitiatingOccupancyFraction=50
+-XX:CMSMaxAbortablePrecleanTime=6000
+-XX:+CMSParallelRemarkEnabled
+-XX:+ParallelRefProcEnabled
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath="logs/heap-dump.hprof"
+
+# log4j config
+-DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+-DAsyncLoggerConfig.RingBufferSize=1024*1024
+-Dlog4j.configurationFile=conf/log4j2.xml
+
+# uncomment following lines to enable remote debugging 
+#-Dcom.sun.management.jmxremote
+#-Dcom.sun.management.jmxremote.port=9001
+#-Dcom.sun.management.jmxremote.local.only=false
+#-Dcom.sun.management.jmxremote.authenticate=false
+#-Dcom.sun.management.jmxremote.ssl=false
+
+# uncomment following lines to enable boot classpath including alpn (http 2 support)
+# -Xbootclasspath/p:./lib-boot/alpn-boot-8.1.8.v20160420.jar
+
+# uncomment to enable perfino agent, 
+# edit server, name and group to identify the monitored process in perfino dashboard
+# -javaagent:./lib-agents/perfino/perfino.jar=server=localhost,name=mario,group=mario-group
+
+# ******* REMEMBER TO KEEP THE LAST EMPTY LINE *******
