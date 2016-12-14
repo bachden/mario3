@@ -20,6 +20,10 @@ public class RabbitMQServerWrapper extends BaseServerWrapper {
 		}
 	}
 
+	public RabbitMQConnectionPool getConnectionPool() {
+		return this.connectionPool;
+	}
+
 	public RabbitMQConnection getConnection() {
 		return this.connectionPool != null ? this.connectionPool.getConnection() : null;
 	}

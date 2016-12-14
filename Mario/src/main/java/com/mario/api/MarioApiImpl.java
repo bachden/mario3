@@ -18,6 +18,8 @@ import com.mario.exceptions.MessageHandlerNotFoundException;
 import com.mario.extension.ExtensionManager;
 import com.mario.gateway.Gateway;
 import com.mario.gateway.GatewayManager;
+import com.mario.gateway.serverwrapper.ServerWrapper;
+import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.gateway.socket.SocketSession;
 import com.mario.gateway.socket.SocketSessionManager;
 import com.mario.monitor.MonitorAgent;
@@ -54,12 +56,14 @@ class MarioApiImpl implements MarioApi {
 	private ExtensionManager extensionManager;
 
 	private PuObjectRO globalProperties;
+	private ServerWrapperManager serverWrapperManager;
 
 	MarioApiImpl(SQLDataSourceManager dataSourceManager, CassandraDatasourceManager cassandraDatasourceManager,
 			Scheduler scheduler, CacheManager cacheManager, MongoDBSourceManager mongoDBSourceManager,
 			EntityManager entityManager, SocketSessionManager sessionManager, MonitorAgentManager monitorAgentManager,
 			MessageProducerManager producerManager, GatewayManager gatewayManager,
-			ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager, PuObjectRO globalProperties) {
+			ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
+			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties) {
 
 		this.sqlDatasourceManager = dataSourceManager;
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
@@ -73,6 +77,7 @@ class MarioApiImpl implements MarioApi {
 		this.gatewayManager = gatewayManager;
 		this.zkClientManager = zkClientManager;
 		this.extensionManager = extensionManager;
+		this.serverWrapperManager = serverWrapperManager;
 
 		this.globalProperties = globalProperties;
 	}
@@ -237,6 +242,11 @@ class MarioApiImpl implements MarioApi {
 	@Override
 	public PuObjectRO getExtensionProperty(String extensionName, String propertyName) {
 		return this.extensionManager.getExtensionProperty(extensionName, propertyName);
+	}
+
+	@Override
+	public <T extends ServerWrapper> T getServerWrapper(String name) {
+		return this.serverWrapperManager.getServerWrapper(name);
 	}
 
 	@Override
