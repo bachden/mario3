@@ -5,8 +5,8 @@
 	<artifactId>mario</artifactId>
 	<version>3.10.1</version>
 	<properties>
-		<extension.name>${project.artifactId}</extension.name>
-		<extension.dir>${extension.name}-${project.version}</extension.dir>
+		<project.name>${project.artifactId}</project.name>
+		<project.dir>${project.name}-${project.version}</project.dir>
 	</properties>
 
 	<build>
@@ -60,38 +60,38 @@
 						<configuration>
 							<target>
 								<delete failonerror="false">
-									<fileset dir="${project.build.directory}/${extension.dir}" />
+									<fileset dir="${project.build.directory}/${project.dir}" />
 								</delete>
-								<mkdir dir="${project.build.directory}/${extension.dir}" />
-								<copy todir="${project.build.directory}/${extension.dir}/conf"
+								<mkdir dir="${project.build.directory}/${project.dir}" />
+								<copy todir="${project.build.directory}/${project.dir}/conf"
 									failonerror="false">
 									<fileset dir="${project.basedir}/conf" />
 								</copy>
-								<copy todir="${project.build.directory}/${extension.dir}/lib">
+								<copy todir="${project.build.directory}/${project.dir}/lib">
 									<fileset dir="${project.basedir}/lib-local">
 										<include name="*.jar" />
 									</fileset>
 								</copy>
-								<copy todir="${project.build.directory}/${extension.dir}/lib-boot">
+								<copy todir="${project.build.directory}/${project.dir}/lib-boot">
 									<fileset dir="${project.basedir}/lib-boot">
 										<include name="*.jar" />
 									</fileset>
 								</copy>
-								<copy todir="${project.build.directory}/${extension.dir}/lib-agents">
+								<copy todir="${project.build.directory}/${project.dir}/lib-agents">
 									<fileset dir="${project.basedir}/lib-agents" />
 								</copy>
-								<copy todir="${project.build.directory}/${extension.dir}/lib">
+								<copy todir="${project.build.directory}/${project.dir}/lib">
 									<fileset dir="${project.build.directory}">
 										<exclude name="*-sources.jar" />
 										<exclude name="*-javadoc.jar" />
 										<include name="*.jar" />
 									</fileset>
 								</copy>
-								<copy todir="${project.build.directory}/${extension.dir}/extensions"
+								<copy todir="${project.build.directory}/${project.dir}/extensions"
 									failonerror="false">
 									<fileset dir="${project.basedir}/extensions" />
 								</copy>
-								<copy todir="${project.build.directory}/${extension.dir}">
+								<copy todir="${project.build.directory}/${project.dir}">
 									<fileset dir="${project.basedir}/sbin" />
 								</copy>
 							</target>
@@ -107,14 +107,14 @@
 							<target>
 								<sshexec host="${remote.host}" username="${remote.user}"
 									password="${remote.password}" trust="true"
-									command="cd ~; mkdir -p ~/${extension.name}s/${extension.dir}" />
+									command="cd ~; mkdir -p ~/${project.name}s/${project.dir}" />
 								<scp trust="true"
-									todir="${remote.user}:${remote.password}@${remote.host}:~/${extension.name}s/${extension.dir}">
-									<fileset dir="${project.build.directory}/${extension.dir}" />
+									todir="${remote.user}:${remote.password}@${remote.host}:~/${project.name}s/${project.dir}">
+									<fileset dir="${project.build.directory}/${project.dir}" />
 								</scp>
 								<sshexec host="${remote.host}" username="${remote.user}"
 									password="${remote.password}" trust="true"
-									command="ln -sfn ~/${extension.name}s/${extension.dir} ~/${extension.name}; cd ~/${extension.name}; chmod +x *.sh; mkdir -p extensions; mkdir -p extensions/__lib__" />
+									command="ln -sfn ~/${project.name}s/${project.dir} ~/${project.name}; cd ~/${project.name}; chmod +x *.sh; mkdir -p extensions; mkdir -p extensions/__lib__" />
 							</target>
 						</configuration>
 						<goals>
@@ -149,7 +149,7 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/${extension.dir}/lib</outputDirectory>
+							<outputDirectory>${project.build.directory}/${project.dir}/lib</outputDirectory>
 							<overWriteReleases>true</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
