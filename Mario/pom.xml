@@ -107,13 +107,14 @@
 							<target>
 								<sshexec host="${remote.host}" username="${remote.user}"
 									password="${remote.password}" trust="true"
-									command="cd ~; mkdir -p ~/${project.name}s/${project.dir}" />
-								<scp trust="true"
+									command="cd ~; mkdir -p ~/${project.name}s/${project.dir}"
+									failonerror="false" />
+								<scp failonerror="false" trust="true"
 									todir="${remote.user}:${remote.password}@${remote.host}:~/${project.name}s/${project.dir}">
 									<fileset dir="${project.build.directory}/${project.dir}" />
 								</scp>
-								<sshexec host="${remote.host}" username="${remote.user}"
-									password="${remote.password}" trust="true"
+								<sshexec failonerror="false" host="${remote.host}"
+									username="${remote.user}" password="${remote.password}" trust="true"
 									command="ln -sfn ~/${project.name}s/${project.dir} ~/${project.name}; cd ~/${project.name}; chmod +x *.sh; mkdir -p extensions; mkdir -p extensions/__lib__" />
 							</target>
 						</configuration>
