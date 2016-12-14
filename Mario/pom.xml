@@ -202,16 +202,17 @@
 			</exclusions>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
 		<dependency>
-			<groupId>nhb.common</groupId>
-			<artifactId>nhb-common-workflow</artifactId>
-			<version>1.0.0</version>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+			<version>3.3.6</version>
 		</dependency>
 
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-core</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.3</version>
 		</dependency>
 
 		<dependency>

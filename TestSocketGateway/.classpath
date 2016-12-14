@@ -3,8 +3,8 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Mario3"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/NHBCommonMessaging"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/NHBCommon"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Mario"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/NHBCommonCore"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
