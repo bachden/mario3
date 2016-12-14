@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 
-import nhb.common.data.MapTuple;
-import nhb.common.data.PuElement;
-import nhb.common.data.PuObject;
-import nhb.common.utils.Initializer;
-import nhb.eventdriven.Event;
-import nhb.eventdriven.EventHandler;
-import nhb.eventdriven.impl.BaseEventHandler;
-import nhb.messaging.TransportProtocol;
-import nhb.messaging.socket.SocketEvent;
-import nhb.messaging.socket.netty.NettySocketClient;
+import com.nhb.common.data.MapTuple;
+import com.nhb.common.data.PuElement;
+import com.nhb.common.data.PuObject;
+import com.nhb.common.utils.Initializer;
+import com.nhb.eventdriven.Event;
+import com.nhb.eventdriven.EventHandler;
+import com.nhb.eventdriven.impl.BaseEventHandler;
+import com.nhb.messaging.TransportProtocol;
+import com.nhb.messaging.socket.SocketEvent;
+import com.nhb.messaging.socket.netty.NettySocketClient;
 
 public class EchoSocketClient extends NettySocketClient {
 
@@ -81,8 +81,9 @@ public class EchoSocketClient extends NettySocketClient {
 					e.printStackTrace();
 				}
 				while (true) {
-					getLogger().debug("Remaining: {} on total {}, complete {}%", doneSignal.getCount(), numMessages,
-							df.format(Double.valueOf(numMessages - doneSignal.getCount()) * 100 / numMessages));
+					System.out.println(String.format("Remaining: %d on total %d, complete %s%%", doneSignal.getCount(),
+							numMessages,
+							df.format(Double.valueOf(numMessages - doneSignal.getCount()) * 100 / numMessages)));
 					if (doneSignal.getCount() == 0) {
 						return;
 					}
@@ -139,7 +140,8 @@ public class EchoSocketClient extends NettySocketClient {
 			@Override
 			public void onEvent(Event event) throws Exception {
 				// SocketEvent socketEvent = (SocketEvent) event;
-				// getLogger().debug("Client got message: " + socketEvent.getData());
+				// System.out.println("Client got message: " +
+				// socketEvent.getData());
 				doneSignal.countDown();
 			}
 		});
@@ -169,22 +171,22 @@ public class EchoSocketClient extends NettySocketClient {
 						+ "calhost:9999 --> start ping"))
 				.toBytes().length;
 
-		getLogger("pureLogger").info("************ REPORT ************");
-		getLogger("pureLogger").info("Num message: {}", numMessages);
-		getLogger("pureLogger").info("Executing time: {}s", df.format(Double.valueOf(time / 1e9)));
-		getLogger("pureLogger").info("Number of threads: {}", numThreads);
-		getLogger("pureLogger").info("Message size: {}byte = {}kb", messageSize,
-				df.format(Double.valueOf(messageSize) / 1024));
-		getLogger("pureLogger").info("Throughput: {}Mb/s",
-				df.format(Double.valueOf(messageSize) / Double.valueOf(time / 1e9)));
-		getLogger("pureLogger").info("Message per second: {}",
-				df.format(Double.valueOf(numMessages) / Double.valueOf(time / 1e9)));
+		System.out.println(String.format("************ REPORT ************"));
+		System.out.println(String.format("Num message: %d", numMessages));
+		System.out.println(String.format("Executing time: %s sec", df.format(Double.valueOf(time / 1e9))));
+		System.out.println(String.format("Number of threads: %d", numThreads));
+		System.out.println(String.format("Message size: %dbyte = %skb", messageSize,
+				df.format(Double.valueOf(messageSize) / 1024)));
+		System.out.println(String.format("Throughput: %sMb/s",
+				df.format(Double.valueOf(messageSize) / Double.valueOf(time / 1e9))));
+		System.out.println(String.format("Message per second: %s",
+				df.format(Double.valueOf(numMessages) / Double.valueOf(time / 1e9))));
 
 		System.exit(0);
 	}
 
 	public void onConnectedHandler(Event event) {
-		getLogger().debug("Connected to server at " + this.getServerAddress() + " --> start ping");
+		System.out.println("Connected to server at " + this.getServerAddress() + " --> start ping");
 		new Thread() {
 			public void run() {
 				try {
@@ -198,7 +200,7 @@ public class EchoSocketClient extends NettySocketClient {
 	}
 
 	public void onDisconnectedHandler(Event event) {
-		getLogger().debug("Disconnected to server at " + this.getServerAddress());
+		System.out.println("Disconnected to server at " + this.getServerAddress());
 		System.exit(0);
 	}
 }

@@ -4,6 +4,7 @@ import com.mario.cache.CacheManager;
 import com.mario.entity.EntityManager;
 import com.mario.extension.ExtensionManager;
 import com.mario.gateway.GatewayManager;
+import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.monitor.MonitorAgentManager;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.impl.SchedulerFactory;
@@ -29,13 +30,14 @@ public final class MarioApiFactory {
 	private ExtensionManager extensionManager;
 
 	private PuObjectRO globalProperties;
+	private ServerWrapperManager serverWrapperManager;
 
 	public MarioApiFactory(SQLDataSourceManager sqlDataSourceManager,
 			CassandraDatasourceManager cassandraDatasourceManager, SchedulerFactory schedulerFactory,
 			MongoDBSourceManager mongoDBSourceManager, CacheManager cacheManager,
 			MonitorAgentManager monitorAgentManager, MessageProducerManager producerManager,
 			GatewayManager gatewayManager, ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
-			PuObjectRO globalProperties) {
+			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties) {
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
 		this.sqlDataSourceManager = sqlDataSourceManager;
 		this.schedulerFactory = schedulerFactory;
@@ -46,6 +48,7 @@ public final class MarioApiFactory {
 		this.gatewayManager = gatewayManager;
 		this.zkClientManager = zkClientManager;
 		this.extensionManager = extensionManager;
+		this.serverWrapperManager = serverWrapperManager;
 
 		this.globalProperties = globalProperties;
 	}
@@ -55,7 +58,7 @@ public final class MarioApiFactory {
 				this.schedulerFactory.newSchedulerInstance(), this.cacheManager, this.mongoDBSourceManager,
 				this.entityManager, this.gatewayManager.getSocketSessionManager(), this.monitorAgentManager,
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
-				this.globalProperties.deepClone());
+				this.serverWrapperManager, this.globalProperties.deepClone());
 	}
 
 	public void setEntityManager(EntityManager entityManager) {

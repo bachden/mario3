@@ -8,6 +8,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.mario.cache.hazelcast.HazelcastInitializer;
 import com.mario.entity.message.Message;
 import com.mario.gateway.Gateway;
+import com.mario.gateway.serverwrapper.ServerWrapper;
 import com.mario.gateway.socket.SocketSession;
 import com.mario.monitor.MonitorAgent;
 import com.mario.schedule.Scheduler;
@@ -71,4 +72,6 @@ public interface MarioApi {
 	PuObjectRO getExtensionProperty(String extensionName, String propertyName);
 
 	PuObjectRO getGlobalProperty(String name);
+
+	<T extends ServerWrapper> T getServerWrapper(String name);
 }

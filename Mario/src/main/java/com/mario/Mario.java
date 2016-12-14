@@ -156,7 +156,7 @@ public final class Mario extends BaseLoggable {
 		this.apiFactory = new MarioApiFactory(this.sqlDataSourceManager, this.cassandraDatasourceManager,
 				this.schedulerFactory, this.mongoDBSourceManager, this.cacheManager, this.monitorAgentManager,
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
-				this.globalProperties);
+				this.serverWrapperManager, this.globalProperties);
 
 		System.out.println("create monitor agent");
 		this.monitorAgentManager = new MonitorAgentManager(apiFactory);

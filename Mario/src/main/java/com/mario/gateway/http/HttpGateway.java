@@ -112,7 +112,12 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 				getDeserializer().decode(request, (MessageRW) httpMessage);
 
 				message = httpMessage;
-				this.getHandler().handle(message);
+				PuElement puResponse = this.getHandler().handle(message);
+				if (puResponse == PuNull.IGNORE_ME) {
+					getLogger().warn("IGNORE_ME cannot be used in sync mode, sending EMPTY value as response");
+					puResponse = PuNull.EMPTY;
+				}
+				this.onHandleComplete(message, puResponse);
 			}
 		} catch (MessageDecodingException e) {
 			this.onHandleError(e.getTarget(), e.getCause());
@@ -210,6 +215,12 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 					getLogger().error("Cannot write response", e);
 				} finally {
 					closeAsyncContext(message);
+				}
+			} else {
+				try {
+					responser.getWriter().flush();
+				} catch (IOException e) {
+					getLogger().error("Error while writing response", e);
 				}
 			}
 		}

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.9.13</version>
+	<version>3.10.1</version>
 	<properties>
 		<extension.name>${project.artifactId}</extension.name>
 		<extension.dir>${extension.name}-${project.version}</extension.dir>
@@ -76,6 +76,9 @@
 									<fileset dir="${project.basedir}/lib-boot">
 										<include name="*.jar" />
 									</fileset>
+								</copy>
+								<copy todir="${project.build.directory}/${extension.dir}/lib-agents">
+									<fileset dir="${project.basedir}/lib-agents" />
 								</copy>
 								<copy todir="${project.build.directory}/${extension.dir}/lib">
 									<fileset dir="${project.build.directory}">
@@ -182,7 +185,7 @@
 			<artifactId>jetty-server</artifactId>
 			<version>9.3.14.v20161028</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -226,16 +229,17 @@
 			</exclusions>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
 		<dependency>
-			<groupId>nhb.common</groupId>
-			<artifactId>nhb-common-workflow</artifactId>
-			<version>1.0.0</version>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+			<version>3.3.6</version>
 		</dependency>
 
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-core</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.3</version>
 		</dependency>
 
 		<dependency>

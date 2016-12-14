@@ -1,10 +1,10 @@
 package com.mario.test.socket.echo.server;
 
-import nhb.common.data.PuElement;
-import nhb.mario3.entity.impl.BaseMessageHandler;
-import nhb.mario3.entity.message.Message;
-import nhb.mario3.entity.message.SocketMessage;
-import nhb.mario3.gateway.socket.SocketSession;
+import com.mario.entity.impl.BaseMessageHandler;
+import com.mario.entity.message.Message;
+import com.mario.entity.message.SocketMessage;
+import com.mario.gateway.socket.SocketSession;
+import com.nhb.common.data.PuElement;
 
 public class EchoSocketServerHandler extends BaseMessageHandler {
 
