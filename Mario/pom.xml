@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.10.2</version>
+	<version>3.10.3</version>
 	<properties>
 		<project.name>${project.artifactId}</project.name>
 		<project.dir>${project.name}-${project.version}</project.dir>
@@ -245,7 +245,7 @@
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-db</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>io.netty</groupId>
