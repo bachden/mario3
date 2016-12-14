@@ -4,9 +4,9 @@
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
 	<version>3.10.1</version>
-
 	<properties>
-		<app-dist>${project.build.directory}/release/Mario-v${project.version}</app-dist>
+		<project.name>${project.artifactId}</project.name>
+		<project.dir>${project.name}-${project.version}</project.dir>
 	</properties>
 
 	<build>
@@ -45,16 +45,7 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-							<!-- Turn off docklint -->
 							<additionalparam>-Xdoclint:none</additionalparam>
-
-							<!-- switch on dependency-driven aggregation -->
-							<!-- <includeDependencySources>true</includeDependencySources> -->
-
-							<!-- <dependencySourceExcludes> -->
-							<!-- exclude ONLY commons-cli artifacts -->
-							<!-- <dependencySourceExclude>commons-cli:*</dependencySourceExclude> -->
-							<!-- </dependencySourceExcludes> -->
 						</configuration>
 					</execution>
 				</executions>
@@ -69,36 +60,38 @@
 						<configuration>
 							<target>
 								<delete failonerror="false">
-									<fileset dir="${app-dist}" />
+									<fileset dir="${project.build.directory}/${project.dir}" />
 								</delete>
-								<mkdir dir="${app-dist}" />
-								<copy todir="${app-dist}/conf" failonerror="false">
+								<mkdir dir="${project.build.directory}/${project.dir}" />
+								<copy todir="${project.build.directory}/${project.dir}/conf"
+									failonerror="false">
 									<fileset dir="${project.basedir}/conf" />
 								</copy>
-								<copy todir="${app-dist}/lib">
+								<copy todir="${project.build.directory}/${project.dir}/lib">
 									<fileset dir="${project.basedir}/lib-local">
 										<include name="*.jar" />
 									</fileset>
 								</copy>
-								<copy todir="${app-dist}/lib-boot">
+								<copy todir="${project.build.directory}/${project.dir}/lib-boot">
 									<fileset dir="${project.basedir}/lib-boot">
 										<include name="*.jar" />
 									</fileset>
 								</copy>
-								<copy todir="${app-dist}/lib-agents">
+								<copy todir="${project.build.directory}/${project.dir}/lib-agents">
 									<fileset dir="${project.basedir}/lib-agents" />
 								</copy>
-								<copy todir="${app-dist}/lib">
+								<copy todir="${project.build.directory}/${project.dir}/lib">
 									<fileset dir="${project.build.directory}">
 										<exclude name="*-sources.jar" />
 										<exclude name="*-javadoc.jar" />
 										<include name="*.jar" />
 									</fileset>
 								</copy>
-								<copy todir="${app-dist}/extensions" failonerror="false">
+								<copy todir="${project.build.directory}/${project.dir}/extensions"
+									failonerror="false">
 									<fileset dir="${project.basedir}/extensions" />
 								</copy>
-								<copy todir="${app-dist}">
+								<copy todir="${project.build.directory}/${project.dir}">
 									<fileset dir="${project.basedir}/sbin" />
 								</copy>
 							</target>
@@ -107,7 +100,41 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>copy-to-server</id>
+						<phase>install</phase>
+						<configuration>
+							<target>
+								<sshexec host="${remote.host}" username="${remote.user}"
+									password="${remote.password}" trust="true"
+									command="cd ~; mkdir -p ~/${project.name}s/${project.dir}" />
+								<scp trust="true"
+									todir="${remote.user}:${remote.password}@${remote.host}:~/${project.name}s/${project.dir}">
+									<fileset dir="${project.build.directory}/${project.dir}" />
+								</scp>
+								<sshexec host="${remote.host}" username="${remote.user}"
+									password="${remote.password}" trust="true"
+									command="ln -sfn ~/${project.name}s/${project.dir} ~/${project.name}; cd ~/${project.name}; chmod +x *.sh; mkdir -p extensions; mkdir -p extensions/__lib__" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>com.jcraft</groupId>
+						<artifactId>jsch</artifactId>
+						<version>0.1.54</version>
+					</dependency>
+
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-jsch</artifactId>
+						<version>1.9.7</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 
 			<plugin>
@@ -122,7 +149,7 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${app-dist}/lib</outputDirectory>
+							<outputDirectory>${project.build.directory}/${project.dir}/lib</outputDirectory>
 							<overWriteReleases>true</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
