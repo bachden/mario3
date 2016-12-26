@@ -54,7 +54,7 @@ public final class SSLContextManager implements Loggable {
 
 	public SSLContext getSSLContext(String name) {
 		if (name == null) {
-			getLogger().error("SSL Context Name cannot be null", new NullPointerException());
+			// getLogger().error("SSL Context Name cannot be null", new NullPointerException());
 			return null;
 		}
 		return this.contexts.get(name);

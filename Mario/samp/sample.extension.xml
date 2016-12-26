@@ -242,6 +242,8 @@
 			<name>default-tcp</name>
 			<deserializer>[deserializer-class]</deserializer>
 			<protocol>[ TCP | UDT | UDP]</protocol>
+			<path>[for websocket only, default /]</path>
+			<proxy>[for websocket only, default null]</proxy>
 			<host>127.0.0.1</host>
 			<port>9999</port>
 			<uselengthprepender>[true | false]</uselengthprepender>

@@ -43,6 +43,7 @@ import com.mario.config.gateway.HttpGatewayConfig;
 import com.mario.config.gateway.KafkaGatewayConfig;
 import com.mario.config.gateway.RabbitMQGatewayConfig;
 import com.mario.config.gateway.SocketGatewayConfig;
+import com.mario.config.gateway.WebsocketGatewayConfig;
 import com.mario.config.serverwrapper.HttpServerWrapperConfig;
 import com.mario.config.serverwrapper.RabbitMQServerWrapperConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig;
@@ -800,7 +801,67 @@ class ExtensionConfigReader extends XmlConfigReader {
 					break;
 				}
 				case SOCKET: {
-					SocketGatewayConfig socketGatewayConfig = new SocketGatewayConfig();
+					ele = item.getFirstChild();
+					SocketProtocol protocol = null;
+					String host = null;
+					int port = -1;
+					String path = null;
+					String proxy = null;
+					String deserializer = null;
+					String serializer = null;
+					boolean ssl = false;
+					String sslContextName = null;
+					String name = null;
+					WorkerPoolConfig workerPoolConfig = null;
+					boolean isUserLengprepender = false;
+					int bootGroupThreads = -1;
+					int workerGroupThreads = -1;
+					while (ele != null) {
+						if (ele.getNodeType() == 1) {
+							String nodeName = ele.getNodeName();
+							String value = ele.getTextContent().trim();
+							if (nodeName.equalsIgnoreCase("protocol")) {
+								protocol = SocketProtocol.fromName(value);
+							} else if (nodeName.equalsIgnoreCase("host")) {
+								host = value;
+							} else if (nodeName.equalsIgnoreCase("port")) {
+								port = Integer.valueOf(value);
+							} else if (nodeName.equalsIgnoreCase("path")) {
+								path = value;
+							} else if (nodeName.equalsIgnoreCase("proxy")) {
+								proxy = value;
+							} else if (nodeName.equalsIgnoreCase("deserializer")) {
+								deserializer = value;
+							} else if (nodeName.equalsIgnoreCase("serializer")) {
+								serializer = value;
+							} else if (nodeName.equalsIgnoreCase("ssl")) {
+								ssl = Boolean.valueOf(value);
+							} else if (nodeName.equalsIgnoreCase("sslcontextname")) {
+								sslContextName = value;
+							} else if (nodeName.equalsIgnoreCase("name")) {
+								name = value;
+							} else if (nodeName.equalsIgnoreCase("workerpool")) {
+								workerPoolConfig = readWorkerPoolConfig(ele);
+							} else if (nodeName.equalsIgnoreCase("uselengthprepender")
+									|| nodeName.equalsIgnoreCase("usinglengthprepender")
+									|| nodeName.equalsIgnoreCase("prependlength")) {
+								isUserLengprepender = Boolean.valueOf(value);
+							} else if (nodeName.equalsIgnoreCase("bootGroupThreads")) {
+								bootGroupThreads = Integer.valueOf(value);
+							} else if (nodeName.equalsIgnoreCase("workerGroupThreads")) {
+								workerGroupThreads = Integer.valueOf(value);
+							}
+						}
+						ele = ele.getNextSibling();
+					}
+					SocketGatewayConfig socketGatewayConfig;
+					if (protocol == SocketProtocol.WEBSOCKET) {
+						WebsocketGatewayConfig websocketGatewayConfig = new WebsocketGatewayConfig();
+						socketGatewayConfig = websocketGatewayConfig;
+					} else {
+						socketGatewayConfig = new SocketGatewayConfig();
+					}
+
 					Node refAttr = item.getAttributes().getNamedItem("ref");
 					if (refAttr != null) {
 						String ref = refAttr.getNodeValue();
@@ -809,42 +870,39 @@ class ExtensionConfigReader extends XmlConfigReader {
 							socketGatewayConfig.readPuObject(refObj);
 						}
 					}
-					ele = item.getFirstChild();
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String nodeName = ele.getNodeName();
-							String value = ele.getTextContent().trim();
-							if (nodeName.equalsIgnoreCase("protocol")) {
-								socketGatewayConfig.setProtocol(SocketProtocol.fromName(value));
-							} else if (nodeName.equalsIgnoreCase("host")) {
-								socketGatewayConfig.setHost(value);
-							} else if (nodeName.equalsIgnoreCase("port")) {
-								socketGatewayConfig.setPort(Integer.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("deserializer")) {
-								socketGatewayConfig.setDeserializerClassName(value);
-							} else if (nodeName.equalsIgnoreCase("serializer")) {
-								socketGatewayConfig.setSerializerClassName(value);
-							} else if (nodeName.equalsIgnoreCase("ssl")) {
-								socketGatewayConfig.setSsl(Boolean.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("sslcontextname")) {
-								socketGatewayConfig.setSslContextName(value);
-							} else if (nodeName.equalsIgnoreCase("name")) {
-								socketGatewayConfig.setName(value);
-							} else if (nodeName.equalsIgnoreCase("workerpool")) {
-								socketGatewayConfig.setWorkerPoolConfig(readWorkerPoolConfig(ele));
-							} else if (nodeName.equalsIgnoreCase("uselengthprepender")
-									|| nodeName.equalsIgnoreCase("usinglengthprepender")
-									|| nodeName.equalsIgnoreCase("prependlength")) {
-								socketGatewayConfig.setUseLengthPrepender(Boolean.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("bootGroupThreads")) {
-								socketGatewayConfig.setBootEventLoopGroupThreads(Integer.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("workerGroupThreads")) {
-								socketGatewayConfig.setWorkerEventLoopGroupThreads(Integer.valueOf(value));
-							}
-						}
-						ele = ele.getNextSibling();
+
+					if (port > 0) {
+						socketGatewayConfig.setPort(port);
+					} else {
+						throw new IllegalArgumentException("Socket gateway's port cannot be <= 0");
 					}
+
+					if (path != null && socketGatewayConfig instanceof WebsocketGatewayConfig) {
+						((WebsocketGatewayConfig) socketGatewayConfig).setPath(path);
+					}
+
+					if (proxy != null && socketGatewayConfig instanceof WebsocketGatewayConfig) {
+						((WebsocketGatewayConfig) socketGatewayConfig).setProxy(proxy);
+					}
+
+					socketGatewayConfig.setName(name);
+					socketGatewayConfig.setHost(host);
+					socketGatewayConfig.setProtocol(protocol);
+					socketGatewayConfig.setSsl(ssl);
+					socketGatewayConfig.setSslContextName(sslContextName);
+					socketGatewayConfig.setSerializerClassName(serializer);
+					socketGatewayConfig.setDeserializerClassName(deserializer);
+					socketGatewayConfig.setUseLengthPrepender(isUserLengprepender);
+					socketGatewayConfig.setWorkerPoolConfig(workerPoolConfig);
+					if (workerGroupThreads > 0) {
+						socketGatewayConfig.setWorkerEventLoopGroupThreads(workerGroupThreads);
+					}
+					if (bootGroupThreads > 0) {
+						socketGatewayConfig.setBootEventLoopGroupThreads(bootGroupThreads);
+					}
+
 					config = socketGatewayConfig;
+
 					break;
 				}
 				default:
