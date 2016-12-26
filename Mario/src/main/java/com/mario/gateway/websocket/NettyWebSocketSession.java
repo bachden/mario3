@@ -10,7 +10,9 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 import com.mario.entity.message.transcoder.MessageEncoder;
 import com.mario.gateway.socket.SocketReceiver;
@@ -44,6 +46,7 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	private String proxy = null;
 
 	private boolean ssl = false;
+	private InetSocketAddress remoteAddress;
 
 	public NettyWebSocketSession(String gatewayName, boolean ssl, String path, String proxy,
 			InetSocketAddress inetSocketAddress, SocketSessionManager sessionManager, SocketReceiver receiver,
@@ -66,7 +69,8 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
 		if (msg instanceof FullHttpRequest) {
-			handleHttpRequest(ctx, (FullHttpRequest) msg);
+			FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
+			handleHttpRequest(ctx, fullHttpRequest);
 		} else if (msg instanceof WebSocketFrame) {
 			if (this.getId() == null) {
 				this.setChannelHandlerContext(ctx);
@@ -99,6 +103,28 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 
 		// Send the demo page and favicon.ico
 		if ("/".equals(req.getUri())) {
+			if (this.proxy != null) {
+				String realIp = req.headers().get("X-Real-IP");
+				int realPort = 0;
+
+				String realPortStr = req.headers().get("X-Real-Port");
+
+				if (realPortStr != null) {
+					try {
+						realPort = Integer.valueOf(realPortStr);
+					} catch (Exception e) {
+						getLogger().warn("Error while pasing X-Real-Port header", e);
+					}
+				}
+
+				getLogger().debug("Real remote address: {}:{}", realIp, realPort);
+				try {
+					this.remoteAddress = new InetSocketAddress(InetAddress.getByName(realIp), realPort);
+				} catch (UnknownHostException e) {
+					getLogger().error("Error while create real ip", e);
+				}
+			}
+
 			ByteBuf content = WebSocketServerIndexPage.getContent(getWebSocketLocation(req));
 			FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, OK, content);
 
@@ -209,5 +235,13 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 
 	public void send(String msg) throws IOException {
 		this.getChannelHandlerContext().writeAndFlush(new TextWebSocketFrame(msg));
+	}
+
+	@Override
+	public InetSocketAddress getRemoteAddress() {
+		if (this.proxy != null) {
+			return this.remoteAddress;
+		}
+		return super.getRemoteAddress();
 	}
 }
