@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -33,6 +34,7 @@ import com.mario.config.MessageProducerConfig;
 import com.mario.config.MonitorAgentConfig;
 import com.mario.config.RabbitMQProducerConfig;
 import com.mario.config.RedisConfig;
+import com.mario.config.SSLContextConfig;
 import com.mario.config.WorkerPoolConfig;
 import com.mario.config.ZkClientConfig;
 import com.mario.config.gateway.GatewayConfig;
@@ -79,6 +81,8 @@ class ExtensionConfigReader extends XmlConfigReader {
 	private List<MonitorAgentConfig> monitorAgentConfigs;
 	private List<MessageProducerConfig> producerConfigs;
 
+	private List<SSLContextConfig> sslContextConfigs;
+
 	private final Map<String, PuObjectRO> properties = new HashMap<>();
 
 	private List<ZkClientConfig> zkClientConfigs;
@@ -104,6 +108,15 @@ class ExtensionConfigReader extends XmlConfigReader {
 		try {
 			System.out.println("\t\t\t- Reading properties");
 			this.readProperties((Node) xPath.compile("/mario/properties").evaluate(document, XPathConstants.NODE));
+		} catch (Exception ex) {
+			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
+				getLogger().error("Error", ex);
+			}
+		}
+
+		try {
+			System.out.println("\t\t\t- Reading SSL Context Config");
+			this.readSSLContextConfigs((Node) xPath.compile("/mario/ssl").evaluate(document, XPathConstants.NODE));
 		} catch (Exception ex) {
 			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
 				getLogger().error("Error", ex);
@@ -179,6 +192,61 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 
 		System.out.println("\t\t\t- *** Reading configs done ***");
+	}
+
+	private SSLContextConfig _readSSLContextConfig(Node node) {
+		if (node != null) {
+			Node curr = node.getFirstChild();
+			SSLContextConfig result = new SSLContextConfig();
+			result.setExtensionName(extensionName);
+			while (curr != null) {
+				if (curr.getNodeType() == Node.ELEMENT_NODE) {
+					String nodeName = curr.getNodeName();
+					String nodeValue = curr.getTextContent().trim();
+					switch (nodeName.toLowerCase()) {
+					case "name":
+						result.setName(nodeValue);
+						break;
+					case "format":
+						result.setFormat(nodeValue);
+						break;
+					case "protocol":
+						result.setProtocol(nodeValue);
+						break;
+					case "algorithm":
+						result.setAlgorithm(nodeValue);
+						break;
+					case "filepath":
+						result.setFilePath(nodeValue);
+						break;
+					case "password":
+						result.setPassword(nodeValue);
+						break;
+					}
+				}
+				curr = curr.getNextSibling();
+			}
+			return result;
+		}
+		return null;
+	}
+
+	private void readSSLContextConfigs(Node evaluate) {
+		this.sslContextConfigs = new LinkedList<>();
+		if (evaluate == null) {
+			return;
+		}
+		Node curr = evaluate.getFirstChild();
+		while (curr != null) {
+			if (curr.getNodeType() == Node.ELEMENT_NODE) {
+				if (curr.getNodeName().equals("context")) {
+					sslContextConfigs.add(this._readSSLContextConfig(curr));
+				} else {
+					throw new Error("ssl context config must under path /mario/ssl/context");
+				}
+			}
+			curr = curr.getNextSibling();
+		}
 	}
 
 	private String extractNodeContent(Node node) {
@@ -756,6 +824,10 @@ class ExtensionConfigReader extends XmlConfigReader {
 								socketGatewayConfig.setDeserializerClassName(value);
 							} else if (nodeName.equalsIgnoreCase("serializer")) {
 								socketGatewayConfig.setSerializerClassName(value);
+							} else if (nodeName.equalsIgnoreCase("ssl")) {
+								socketGatewayConfig.setSsl(Boolean.valueOf(value));
+							} else if (nodeName.equalsIgnoreCase("sslcontextname")) {
+								socketGatewayConfig.setSslContextName(value);
 							} else if (nodeName.equalsIgnoreCase("name")) {
 								socketGatewayConfig.setName(value);
 							} else if (nodeName.equalsIgnoreCase("workerpool")) {
@@ -1344,6 +1416,10 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	public Collection<? extends ZkClientConfig> getZkClientConfigs() {
 		return this.zkClientConfigs;
+	}
+
+	public Collection<? extends SSLContextConfig> getSSLContextConfigs() {
+		return this.sslContextConfigs;
 	}
 
 	public PuObjectRO getProperty(String name) {

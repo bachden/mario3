@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import com.mario.entity.message.MessageRW;
-import com.mario.entity.message.transcoder.http.HttpMessageDeserializer;
 import com.nhb.common.data.PuObject;
 
 public class HttpMultipartDeserializer extends HttpMessageDeserializer {

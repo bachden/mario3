@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
 import com.mario.entity.message.Message;
 import com.mario.entity.message.MessageForwardable;
 import com.mario.entity.message.RabbitMQDeliveredMessage;
@@ -16,6 +15,7 @@ import com.nhb.common.data.PuElement;
 import com.nhb.messaging.MessageForwarder;
 import com.nhb.messaging.MessageProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQProducer;
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Envelope;
 
 public class RabbitMQWorkerGateway extends RabbitMQGateway {

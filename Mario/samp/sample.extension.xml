@@ -10,6 +10,17 @@
 		</entry>
 	</properties>
 
+	<ssl>
+		<context>
+			<name>[ssl context name]</name>
+			<format>[default JKS (optional)]</format>
+			<protocol>[default TLS (optional)]</protocol>
+			<algorithm>[default SunX509 (optional)]</algorithm>
+			<filepath>[relative path to keystore file (**required)]</filepath>
+			<password>[keystore password, default null)]</password>
+		</context>
+	</ssl>
+
 	<datasources>
 		<sql ref="[the property which hold the config, optional]">
 			<name>[sql-source-name]</name>

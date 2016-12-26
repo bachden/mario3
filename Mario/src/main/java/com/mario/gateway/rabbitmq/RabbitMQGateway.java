@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
 import com.mario.config.gateway.RabbitMQGatewayConfig;
 import com.mario.gateway.AbstractGateway;
 import com.mario.gateway.serverwrapper.HasServerWrapper;
 import com.nhb.messaging.rabbit.RabbitMQChannelHandleDelegate;
 import com.nhb.messaging.rabbit.RabbitMQChannelHandler;
 import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;

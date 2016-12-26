@@ -25,6 +25,7 @@ import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.monitor.MonitorAgentManager;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.impl.SchedulerFactory;
+import com.mario.ssl.SSLContextManager;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuDataType;
@@ -105,6 +106,7 @@ public final class Mario extends BaseLoggable {
 	private MonitorAgentManager monitorAgentManager;
 	private MessageProducerManager producerManager;
 	private ZooKeeperClientManager zkClientManager;
+	private SSLContextManager sslContextManager;
 
 	private final PuObject globalProperties = new PuObject();
 
@@ -125,30 +127,46 @@ public final class Mario extends BaseLoggable {
 
 		System.out.println("create scheduler factory");
 		this.schedulerFactory = SchedulerFactory.getInstance();
+
 		System.out.println("create mongodb source manager");
 		this.mongoDBSourceManager = new MongoDBSourceManager();
+
 		System.out.println("create server wrapper manager");
 		this.serverWrapperManager = new ServerWrapperManager();
+
 		System.out.println("create producer manager");
 		this.producerManager = new MessageProducerManager(this.serverWrapperManager);
+
 		System.out.println("create sql data source manager");
 		this.sqlDataSourceManager = new SQLDataSourceManager();
+
+		System.out.println("Create SSLContextManager");
+		this.sslContextManager = new SSLContextManager();
+
 		System.out.println("create extension manager");
 		this.extensionManager = new ExtensionManager();
+
 		System.out.println("create cache manager");
 		this.cacheManager = new CacheManager(this.extensionManager);
+
 		System.out.println("Loading extension...");
 		this.extensionManager.load(this.globalProperties);
 
+		System.out.println("Init SSLContexts");
+		this.sslContextManager.init(this.extensionManager.getSSLContextConfigs());
+
 		System.out.println("Create zkClientManager");
 		this.zkClientManager = new ZooKeeperClientManager(this.extensionManager);
+
 		System.out.println("Prepare zookeeper client config");
 		this.zkClientManager.prepareConfigs(extensionManager.getListZkClientConfig());
 
 		System.out.println("create cassandra datasource manager");
 		this.cassandraDatasourceManager = new CassandraDatasourceManager();
+
 		System.out.println("Create gateway manager");
-		this.gatewayManager = new GatewayManager(this.extensionManager, this.serverWrapperManager);
+		this.gatewayManager = new GatewayManager(this.extensionManager, this.serverWrapperManager, this.sslContextManager);
+
 		System.out.println("Add configs to mongoDB data source manager");
 		this.mongoDBSourceManager.addConfigs(this.extensionManager.getMongoDBConfigs());
 

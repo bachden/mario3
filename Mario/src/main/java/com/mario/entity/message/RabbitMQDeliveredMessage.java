@@ -1,7 +1,7 @@
 package com.mario.entity.message;
 
-import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.Envelope;
 
 public class RabbitMQDeliveredMessage {
 

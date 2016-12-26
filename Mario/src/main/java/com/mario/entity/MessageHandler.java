@@ -4,6 +4,7 @@ import com.mario.entity.message.Message;
 import com.mario.gateway.Gateway;
 import com.nhb.common.Loggable;
 import com.nhb.common.data.PuElement;
+import com.nhb.common.data.PuNull;
 
 public interface MessageHandler extends LifeCycle, Pluggable, Loggable {
 

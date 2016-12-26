@@ -28,6 +28,7 @@ import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.gateway.socket.SocketGateway;
 import com.mario.gateway.socket.SocketGatewayFactory;
 import com.mario.gateway.socket.SocketSessionManager;
+import com.mario.ssl.SSLContextManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.eventdriven.Event;
 import com.nhb.eventdriven.EventHandler;
@@ -68,10 +69,13 @@ public final class GatewayManager extends BaseEventDispatcher {
 	private ExtensionManager extensionManager;
 	private SocketSessionManager socketSessionManager;
 	private ServerWrapperManager serverWrapperManager;
+	private SSLContextManager sslContextManager;
 
-	public GatewayManager(ExtensionManager extensionManager, ServerWrapperManager serverWrapperManager) {
+	public GatewayManager(ExtensionManager extensionManager, ServerWrapperManager serverWrapperManager,
+			SSLContextManager sslContextManager) {
 		this.extensionManager = extensionManager;
 		this.serverWrapperManager = serverWrapperManager;
+		this.sslContextManager = sslContextManager;
 		this.socketSessionManager = new SocketSessionManager();
 	}
 
@@ -90,6 +94,12 @@ public final class GatewayManager extends BaseEventDispatcher {
 				continue;
 			}
 			Gateway gateway = this.gatewayFactory.newGateway(config);
+			if (gateway instanceof SSLContextAware) {
+				String sslContextName = config.getSSLContextName();
+				if (sslContextName != null) {
+					((SSLContextAware) gateway).setSSLContext(this.sslContextManager.getSSLContext(sslContextName));
+				}
+			}
 			if (gateway instanceof AbstractGateway) {
 				((AbstractGateway<?>) gateway).setExtensionName(config.getExtensionName());
 				if (config.getDeserializerClassName() != null) {

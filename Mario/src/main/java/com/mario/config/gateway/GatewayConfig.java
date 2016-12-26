@@ -4,13 +4,20 @@ import com.mario.config.MarioBaseConfig;
 import com.mario.config.WorkerPoolConfig;
 import com.nhb.common.data.PuObjectRO;
 
+import lombok.Setter;
+
 public abstract class GatewayConfig extends MarioBaseConfig {
 
 	private String serverWrapperName;
 	private String deserializerClassName;
 	private String serializerClassName;
 	private GatewayType type;
+
 	private boolean ssl = false;
+
+	@Setter
+	private String sslContextName;
+
 	private WorkerPoolConfig workerPoolConfig;
 
 	@Override
@@ -93,6 +100,13 @@ public abstract class GatewayConfig extends MarioBaseConfig {
 
 	public void setServerWrapperName(String serverWrapperName) {
 		this.serverWrapperName = serverWrapperName;
+	}
+
+	public String getSSLContextName() {
+		if (this.isSsl()) {
+			return this.sslContextName;
+		}
+		return null;
 	}
 
 }

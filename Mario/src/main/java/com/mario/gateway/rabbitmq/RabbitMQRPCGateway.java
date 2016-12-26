@@ -2,10 +2,10 @@ package com.mario.gateway.rabbitmq;
 
 import java.io.IOException;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AMQP.BasicProperties.Builder;
 import com.nhb.common.data.PuElement;
 import com.nhb.common.data.PuNull;
+import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.AMQP.BasicProperties.Builder;
 import com.rabbitmq.client.Envelope;
 
 public class RabbitMQRPCGateway extends RabbitMQWorkerGateway {

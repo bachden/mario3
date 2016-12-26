@@ -12,6 +12,7 @@ import com.mario.config.LifeCycleConfig;
 import com.mario.config.MessageProducerConfig;
 import com.mario.config.MonitorAgentConfig;
 import com.mario.config.RedisConfig;
+import com.mario.config.SSLContextConfig;
 import com.mario.config.ZkClientConfig;
 import com.mario.config.gateway.GatewayConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig;
@@ -211,6 +212,19 @@ public final class ExtensionManager extends BaseLoggable {
 			for (ExtensionLoader loader : this.extensionLoaderByName.values()) {
 				if (loader.getConfigReader().getZkClientConfigs() != null) {
 					results.addAll(loader.getConfigReader().getZkClientConfigs());
+				}
+			}
+			return results;
+		}
+		return null;
+	}
+
+	public Collection<SSLContextConfig> getSSLContextConfigs() {
+		if (this.isLoaded()) {
+			Collection<SSLContextConfig> results = new ArrayList<>();
+			for (ExtensionLoader loader : this.extensionLoaderByName.values()) {
+				if (loader.getConfigReader().getSSLContextConfigs() != null) {
+					results.addAll(loader.getConfigReader().getSSLContextConfigs());
 				}
 			}
 			return results;
