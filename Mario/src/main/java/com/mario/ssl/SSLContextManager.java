@@ -36,7 +36,9 @@ public final class SSLContextManager implements Loggable {
 					}
 				}
 
-				final KeyManagerFactory kmf = KeyManagerFactory.getInstance(config.getAlgorithm());
+				final KeyManagerFactory kmf = config.getAlgorithm().equalsIgnoreCase("RSA")
+						? KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
+						: KeyManagerFactory.getInstance(config.getAlgorithm());
 				kmf.init(ks, keyStoreFilePassword.toCharArray());
 
 				serverContext = SSLContext.getInstance(config.getProtocol());

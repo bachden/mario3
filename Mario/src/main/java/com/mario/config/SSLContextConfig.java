@@ -13,7 +13,7 @@ public class SSLContextConfig extends MarioBaseConfig {
 
 	private String format = "JKS";
 	private String protocol = "TLS";
-	private String algorithm = "SunX509";
+	private String algorithm = "RSA";
 
 	private String filePath;
 	private String password;

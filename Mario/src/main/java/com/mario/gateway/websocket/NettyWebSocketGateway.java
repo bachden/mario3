@@ -72,6 +72,18 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway implements SSLC
 		// Bind and start to accept incoming connections.
 		channelFuture = getConfig().getHost() != null ? bootstrap.bind(getConfig().getHost(), getConfig().getPort())
 				: bootstrap.bind(getConfig().getPort());
+		
+		try {
+			if (channelFuture.await().isSuccess()) {
+				getLogger().debug("Gateway " + this.getName() + " success binding to " + getConfig().getHost() + ":"
+						+ getConfig().getPort());
+			} else {
+				throw new RuntimeException("Start gateway " + this.getName() + " error, unable to bind to "
+						+ this.getConfig().getHost() + ":" + this.getConfig().getPort());
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 
 		getLogger().info(getName() + " gateway started...");
 	}

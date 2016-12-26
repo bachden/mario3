@@ -12,10 +12,14 @@
 
 	<ssl>
 		<context>
+			<!-- To generate keystore file, following bellow steps (using default algorithm RSA): -->
+			<!-- 1. make sure OpenSSL was installed on you machine -->
+			<!-- 2. run command and input your info: keytool -genkey -keystore keystore.jks -alias [your_alias] -keyalg RSA -->
+
 			<name>[ssl context name]</name>
 			<format>[default JKS (optional)]</format>
 			<protocol>[default TLS (optional)]</protocol>
-			<algorithm>[default SunX509 (optional)]</algorithm>
+			<algorithm>[default RSA (optional)]</algorithm>
 			<filepath>[relative path to keystore file (**required)]</filepath>
 			<password>[keystore password, default null)]</password>
 		</context>
