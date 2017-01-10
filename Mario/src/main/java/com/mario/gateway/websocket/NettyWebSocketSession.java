@@ -46,7 +46,7 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	private String proxy = null;
 
 	private boolean ssl = false;
-	private InetSocketAddress remoteAddress;
+	private InetSocketAddress proxiedRemoteAddress;
 
 	public NettyWebSocketSession(String gatewayName, boolean ssl, String path, String proxy,
 			InetSocketAddress inetSocketAddress, SocketSessionManager sessionManager, SocketReceiver receiver,
@@ -103,28 +103,6 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 
 		// Send the demo page and favicon.ico
 		if ("/".equals(req.getUri())) {
-			if (this.proxy != null) {
-				String realIp = req.headers().get("X-Real-IP");
-				int realPort = 0;
-
-				String realPortStr = req.headers().get("X-Real-Port");
-
-				if (realPortStr != null) {
-					try {
-						realPort = Integer.valueOf(realPortStr);
-					} catch (Exception e) {
-						getLogger().warn("Error while pasing X-Real-Port header", e);
-					}
-				}
-
-				getLogger().debug("Real remote address: {}:{}", realIp, realPort);
-				try {
-					this.remoteAddress = new InetSocketAddress(InetAddress.getByName(realIp), realPort);
-				} catch (UnknownHostException e) {
-					getLogger().error("Error while create real ip", e);
-				}
-			}
-
 			ByteBuf content = WebSocketServerIndexPage.getContent(getWebSocketLocation(req));
 			FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, OK, content);
 
@@ -139,6 +117,28 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 			FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND);
 			sendHttpResponse(ctx, req, res);
 			return;
+		}
+
+		if (this.proxy != null) {
+			String realIp = req.headers().get("X-Real-IP");
+			int realPort = 0;
+
+			String realPortStr = req.headers().get("X-Real-Port");
+
+			if (realPortStr != null) {
+				try {
+					realPort = Integer.valueOf(realPortStr);
+				} catch (Exception e) {
+					getLogger().warn("Error while pasing X-Real-Port header", e);
+				}
+			}
+
+			getLogger().debug("Real remote address: {}:{}", realIp, realPort);
+			try {
+				this.proxiedRemoteAddress = new InetSocketAddress(InetAddress.getByName(realIp), realPort);
+			} catch (UnknownHostException e) {
+				getLogger().error("Error while create real ip", e);
+			}
 		}
 
 		// Handshake
@@ -240,7 +240,7 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	@Override
 	public InetSocketAddress getRemoteAddress() {
 		if (this.proxy != null) {
-			return this.remoteAddress;
+			return this.proxiedRemoteAddress;
 		}
 		return super.getRemoteAddress();
 	}
