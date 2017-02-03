@@ -3,6 +3,9 @@
 -Xms1g
 -Xmx1g
 
+# print full stacktrace
+# -XX:-OmitStackTraceInFastThrow
+
 -Dfile.encoding=UTF-8
 
 -XX:+UseParNewGC
