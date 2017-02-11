@@ -20,11 +20,14 @@ import com.nhb.eventdriven.EventHandler;
 import com.nhb.messaging.kafka.consumer.KafkaMessageConsumer;
 import com.nhb.messaging.kafka.event.KafkaEvent;
 
+import lombok.Getter;
+
 public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 
 	private String defaultConfigFile = FileSystemUtils.createAbsolutePathFrom("conf",
 			"kafka-default-consumer.properties");
 
+	@Getter
 	private KafkaMessageConsumer consumer;
 
 	private EventHandler eventHandler = new EventHandler() {
