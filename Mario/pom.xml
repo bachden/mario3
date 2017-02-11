@@ -3,10 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.10.9</version>
+	<version>3.10.10</version>
 	<properties>
 		<project.name>${project.artifactId}</project.name>
 		<project.dir>${project.name}-${project.version}</project.dir>
+		<nhb.common.version>1.1.0</nhb.common.version>
 	</properties>
 
 	<build>
@@ -217,7 +218,7 @@
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-messaging</artifactId>
-			<version>1.0.2</version>
+			<version>${nhb.common.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -240,13 +241,13 @@
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-core</artifactId>
-			<version>1.0.7</version>
+			<version>${nhb.common.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-db</artifactId>
-			<version>1.0.1</version>
+			<version>${nhb.common.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>io.netty</groupId>
