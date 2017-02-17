@@ -130,7 +130,7 @@ public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 					}
 					return message;
 				} finally {
-					if (getConfig().getMaxRetentionTime() > 0) {
+					if (getConfig().getMinBatchingSize() > 0 && getConfig().getMaxRetentionTime() > 0) {
 						future = scheduledExecutorService.schedule(new Runnable() {
 
 							@Override
