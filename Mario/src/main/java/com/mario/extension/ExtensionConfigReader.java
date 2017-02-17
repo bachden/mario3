@@ -714,6 +714,10 @@ class ExtensionConfigReader extends XmlConfigReader {
 								}
 							} else if (nodeName.equalsIgnoreCase("pollTimeout")) {
 								kafkaGatewayConfig.setPollTimeout(Integer.valueOf(value));
+							} else if (nodeName.equalsIgnoreCase("minBatchingSize")) {
+								kafkaGatewayConfig.setMinBatchingSize(Integer.valueOf(value));
+							} else if (nodeName.equalsIgnoreCase("maxRetentionTime")) {
+								kafkaGatewayConfig.setMaxRetentionTime(Long.valueOf(value));
 							}
 						}
 						ele = ele.getNextSibling();

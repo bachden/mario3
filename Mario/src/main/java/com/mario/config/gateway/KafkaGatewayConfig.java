@@ -7,6 +7,11 @@ import java.util.List;
 import com.mario.entity.message.transcoder.kafka.KafkaDeserializer;
 import com.nhb.common.data.PuObjectRO;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class KafkaGatewayConfig extends GatewayConfig {
 
 	{
@@ -15,7 +20,9 @@ public class KafkaGatewayConfig extends GatewayConfig {
 	}
 
 	private String configFile;
-	private int pollTimeout = 100;
+	private int pollTimeout = 10;
+	private int minBatchingSize = 0;
+	private long maxRetentionTime = 100;
 	private final List<String> topics = new ArrayList<>();
 
 	@Override
@@ -36,26 +43,6 @@ public class KafkaGatewayConfig extends GatewayConfig {
 			String[] topics = topicsString.split(",");
 			this.topics.addAll(Arrays.asList(topics));
 		}
-	}
-
-	public String getConfigFile() {
-		return this.configFile;
-	}
-
-	public void setConfigFile(String configFile) {
-		this.configFile = configFile;
-	}
-
-	public List<String> getTopics() {
-		return topics;
-	}
-
-	public int getPollTimeout() {
-		return pollTimeout;
-	}
-
-	public void setPollTimeout(int pollTimeout) {
-		this.pollTimeout = pollTimeout;
 	}
 
 }
