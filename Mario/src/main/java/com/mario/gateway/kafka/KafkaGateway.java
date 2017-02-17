@@ -130,18 +130,20 @@ public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 					}
 					return message;
 				} finally {
-					future = scheduledExecutorService.schedule(new Runnable() {
+					if (getConfig().getMaxRetentionTime() > 0) {
+						future = scheduledExecutorService.schedule(new Runnable() {
 
-						@Override
-						public void run() {
-							Message message = null;
-							try {
-								message = publish();
-							} catch (MessageDecodingException e) {
-								onHandleError(message, e);
+							@Override
+							public void run() {
+								Message message = null;
+								try {
+									message = publish();
+								} catch (MessageDecodingException e) {
+									onHandleError(message, e);
+								}
 							}
-						}
-					}, getConfig().getMaxRetentionTime(), TimeUnit.MILLISECONDS);
+						}, getConfig().getMaxRetentionTime(), TimeUnit.MILLISECONDS);
+					}
 				}
 			}
 		};
