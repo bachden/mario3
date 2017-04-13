@@ -1,13 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.11.0</version>
+	<version>3.11.1</version>
+	
 	<properties>
 		<project.name>${project.artifactId}</project.name>
 		<project.dir>${project.name}-${project.version}</project.dir>
-		<nhb.common.version>1.2.0</nhb.common.version>
+		<nhb.common.version>1.2.1</nhb.common.version>
 	</properties>
 
 	<build>
@@ -64,8 +64,7 @@
 									<fileset dir="${project.build.directory}/${project.dir}" />
 								</delete>
 								<mkdir dir="${project.build.directory}/${project.dir}" />
-								<copy todir="${project.build.directory}/${project.dir}/conf"
-									failonerror="false">
+								<copy todir="${project.build.directory}/${project.dir}/conf" failonerror="false">
 									<fileset dir="${project.basedir}/conf" />
 								</copy>
 								<copy todir="${project.build.directory}/${project.dir}/lib">
@@ -88,8 +87,7 @@
 										<include name="*.jar" />
 									</fileset>
 								</copy>
-								<copy todir="${project.build.directory}/${project.dir}/extensions"
-									failonerror="false">
+								<copy todir="${project.build.directory}/${project.dir}/extensions" failonerror="false">
 									<fileset dir="${project.basedir}/extensions" />
 								</copy>
 								<copy todir="${project.build.directory}/${project.dir}">
@@ -106,16 +104,12 @@
 						<phase>install</phase>
 						<configuration>
 							<target>
-								<sshexec host="${remote.host}" username="${remote.user}"
-									password="${remote.password}" trust="true"
-									command="cd ~; mkdir -p ~/${project.name}s/${project.dir}"
+								<sshexec host="${remote.host}" username="${remote.user}" password="${remote.password}" trust="true" command="cd ~; mkdir -p ~/${project.name}s/${project.dir}"
 									failonerror="false" />
-								<scp failonerror="false" trust="true"
-									todir="${remote.user}:${remote.password}@${remote.host}:~/${project.name}s/${project.dir}">
+								<scp failonerror="false" trust="true" todir="${remote.user}:${remote.password}@${remote.host}:~/${project.name}s/${project.dir}">
 									<fileset dir="${project.build.directory}/${project.dir}" />
 								</scp>
-								<sshexec failonerror="false" host="${remote.host}"
-									username="${remote.user}" password="${remote.password}" trust="true"
+								<sshexec failonerror="false" host="${remote.host}" username="${remote.user}" password="${remote.password}" trust="true"
 									command="ln -sfn ~/${project.name}s/${project.dir} ~/${project.name}; cd ~/${project.name}; chmod +x *.sh; mkdir -p extensions; mkdir -p extensions/__lib__" />
 							</target>
 						</configuration>
@@ -201,12 +195,12 @@
 			<artifactId>jetty-servlets</artifactId>
 			<version>9.3.14.v20161028</version>
 		</dependency>
-
+		
 		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast-all -->
 		<dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast-all</artifactId>
-			<version>3.7.2</version>
+			<version>3.8</version>
 		</dependency>
 
 		<dependency>
@@ -271,7 +265,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
