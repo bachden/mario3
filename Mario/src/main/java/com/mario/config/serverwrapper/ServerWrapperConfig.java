@@ -20,7 +20,7 @@ public abstract class ServerWrapperConfig extends MarioBaseConfig {
 			return null;
 		}
 	}
-	
+
 	public ServerWrapperType getType() {
 		return type;
 	}

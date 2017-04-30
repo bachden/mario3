@@ -56,7 +56,7 @@ public class ContactBook implements Loggable {
 					String eleValue = ele.getTextContent().trim();
 					group.setName(eleValue);
 					break;
-				case "list":
+				case "members":
 					Node entry = ele.getFirstChild();
 					while (entry != null) {
 						if (entry.getNodeType() == Element.ELEMENT_NODE

@@ -5,9 +5,8 @@ import java.util.Set;
 
 import javax.mail.Multipart;
 
-import lombok.Setter;
-
 import lombok.Getter;
+import lombok.Setter;
 
 @Setter
 @Getter

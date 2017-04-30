@@ -56,7 +56,7 @@ public abstract class BaseLifeCycle extends BaseLoggable implements LifeCycle, P
 	public void onExtensionReady() {
 		// do nothing
 	}
-	
+
 	@Override
 	public void onServerReady() {
 		// do nothing
