@@ -6,12 +6,15 @@ import org.apache.zookeeper.ZooKeeper;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.mario.cache.hazelcast.HazelcastInitializer;
+import com.mario.contact.ContactBook;
 import com.mario.entity.message.Message;
 import com.mario.gateway.Gateway;
 import com.mario.gateway.serverwrapper.ServerWrapper;
 import com.mario.gateway.socket.SocketSession;
 import com.mario.monitor.MonitorAgent;
 import com.mario.schedule.Scheduler;
+import com.mario.services.email.EmailService;
+import com.mario.services.sms.SmsService;
 import com.mongodb.MongoClient;
 import com.nhb.common.cache.jedis.JedisService;
 import com.nhb.common.data.PuElement;
@@ -74,4 +77,10 @@ public interface MarioApi {
 	PuObjectRO getGlobalProperty(String name);
 
 	<T extends ServerWrapper> T getServerWrapper(String name);
+
+	ContactBook getContactBook();
+
+	SmsService getSmsService(String name);
+
+	EmailService getEmailService(String name);
 }

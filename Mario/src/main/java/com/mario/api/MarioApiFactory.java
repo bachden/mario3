@@ -1,6 +1,7 @@
 package com.mario.api;
 
 import com.mario.cache.CacheManager;
+import com.mario.contact.ContactBook;
 import com.mario.entity.EntityManager;
 import com.mario.extension.ExtensionManager;
 import com.mario.gateway.GatewayManager;
@@ -8,6 +9,7 @@ import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.monitor.MonitorAgentManager;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.impl.SchedulerFactory;
+import com.mario.services.ServiceManager;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.db.cassandra.CassandraDatasourceManager;
@@ -32,12 +34,16 @@ public final class MarioApiFactory {
 	private PuObjectRO globalProperties;
 	private ServerWrapperManager serverWrapperManager;
 
+	private ContactBook contactBook;
+	private ServiceManager serviceManager;
+
 	public MarioApiFactory(SQLDataSourceManager sqlDataSourceManager,
 			CassandraDatasourceManager cassandraDatasourceManager, SchedulerFactory schedulerFactory,
 			MongoDBSourceManager mongoDBSourceManager, CacheManager cacheManager,
 			MonitorAgentManager monitorAgentManager, MessageProducerManager producerManager,
 			GatewayManager gatewayManager, ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
-			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties) {
+			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties, ContactBook contactBook,
+			ServiceManager serviceManager) {
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
 		this.sqlDataSourceManager = sqlDataSourceManager;
 		this.schedulerFactory = schedulerFactory;
@@ -51,6 +57,8 @@ public final class MarioApiFactory {
 		this.serverWrapperManager = serverWrapperManager;
 
 		this.globalProperties = globalProperties;
+		this.contactBook = contactBook;
+		this.serviceManager = serviceManager;
 	}
 
 	public MarioApi newApi() {
@@ -58,7 +66,7 @@ public final class MarioApiFactory {
 				this.schedulerFactory.newSchedulerInstance(), this.cacheManager, this.mongoDBSourceManager,
 				this.entityManager, this.gatewayManager.getSocketSessionManager(), this.monitorAgentManager,
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
-				this.serverWrapperManager, this.globalProperties.deepClone());
+				this.serverWrapperManager, this.globalProperties.deepClone(), this.contactBook, this.serviceManager);
 	}
 
 	public void setEntityManager(EntityManager entityManager) {

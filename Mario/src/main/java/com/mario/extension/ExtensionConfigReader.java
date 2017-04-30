@@ -20,6 +20,7 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -31,7 +32,6 @@ import com.mario.config.LifeCycleConfig;
 import com.mario.config.ManagedObjectConfig;
 import com.mario.config.MessageHandlerConfig;
 import com.mario.config.MessageProducerConfig;
-import com.mario.config.MonitorAgentConfig;
 import com.mario.config.RabbitMQProducerConfig;
 import com.mario.config.RedisConfig;
 import com.mario.config.SSLContextConfig;
@@ -48,10 +48,18 @@ import com.mario.config.serverwrapper.HttpServerWrapperConfig;
 import com.mario.config.serverwrapper.RabbitMQServerWrapperConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig.ServerWrapperType;
+import com.mario.contact.ContactBook;
 import com.mario.extension.xml.CredentialReader;
 import com.mario.extension.xml.EndpointReader;
 import com.mario.gateway.http.JettyHttpServerOptions;
 import com.mario.gateway.socket.SocketProtocol;
+import com.mario.monitor.MonitorableStatus;
+import com.mario.monitor.config.MonitorAgentConfig;
+import com.mario.monitor.config.MonitorAlertConfig;
+import com.mario.monitor.config.MonitorAlertRecipientsConfig;
+import com.mario.monitor.config.MonitorAlertServicesConfig;
+import com.mario.monitor.config.MonitorAlertStatusConfig;
+import com.mario.services.ServiceManager;
 import com.nhb.common.data.PuObject;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.data.exception.InvalidDataException;
@@ -92,8 +100,14 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	private final PuObjectRO globalProperties;
 
-	public ExtensionConfigReader(PuObjectRO globalProperties) {
+	private final ContactBook contactBook;
+
+	private final ServiceManager serviceManager;
+
+	public ExtensionConfigReader(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager) {
 		this.globalProperties = globalProperties;
+		this.contactBook = contactBook;
+		this.serviceManager = serviceManager;
 	}
 
 	@Override
@@ -109,6 +123,24 @@ class ExtensionConfigReader extends XmlConfigReader {
 		try {
 			System.out.println("\t\t\t- Reading properties");
 			this.readProperties((Node) xPath.compile("/mario/properties").evaluate(document, XPathConstants.NODE));
+		} catch (Exception ex) {
+			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
+				getLogger().error("Error", ex);
+			}
+		}
+
+		try {
+			System.out.println("\t\t\t- Reading contacts");
+			this.readContacts((Node) xPath.compile("/mario/contacts").evaluate(document, XPathConstants.NODE));
+		} catch (Exception ex) {
+			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
+				getLogger().error("Error", ex);
+			}
+		}
+
+		try {
+			System.out.println("\t\t\t- Reading services");
+			this.readServices((Node) xPath.compile("/mario/services").evaluate(document, XPathConstants.NODE));
 		} catch (Exception ex) {
 			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
 				getLogger().error("Error", ex);
@@ -193,6 +225,14 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 
 		System.out.println("\t\t\t- *** Reading configs done ***");
+	}
+
+	private void readServices(Node node) {
+		this.serviceManager.readFromXml(node);
+	}
+
+	private void readContacts(Node node) {
+		this.contactBook.readFromXml(node);
 	}
 
 	private SSLContextConfig _readSSLContextConfig(Node node) {
@@ -1316,8 +1356,115 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 	}
 
+	private MonitorAlertConfig readMonitorAlertConfig(Node node) {
+		if (node != null) {
+			Node curr = node.getFirstChild();
+			MonitorAlertConfig config = new MonitorAlertConfig();
+			while (curr != null) {
+				if (curr.getNodeType() == Element.ELEMENT_NODE) {
+					String nodeName = curr.getNodeName().toLowerCase();
+					MonitorableStatus status = MonitorableStatus.fromName(nodeName);
+					if (status != null) {
+						MonitorAlertStatusConfig statusConfig = new MonitorAlertStatusConfig();
+						statusConfig.setStatus(status);
+
+						Node statusEle = curr.getFirstChild();
+						while (statusEle != null) {
+							if (statusEle.getNodeType() == Element.ELEMENT_NODE) {
+								String statusEleName = statusEle.getNodeName().toLowerCase();
+								switch (statusEleName) {
+								case "recipients":
+									MonitorAlertRecipientsConfig recipientsConfig = new MonitorAlertRecipientsConfig();
+									Node recipientsEle = statusEle.getFirstChild();
+									while (recipientsEle != null) {
+										if (recipientsEle.getNodeType() == Element.ELEMENT_NODE) {
+											String recipientsNodeName = recipientsEle.getNodeName().toLowerCase();
+											switch (recipientsNodeName) {
+											case "contact":
+												recipientsConfig.getContacts()
+														.add(recipientsEle.getTextContent().trim());
+												break;
+											case "group":
+												recipientsConfig.getGroups().add(recipientsEle.getTextContent().trim());
+												break;
+											}
+										}
+										recipientsEle = recipientsEle.getNextSibling();
+									}
+									statusConfig.setRecipientsConfig(recipientsConfig);
+									break;
+								case "services":
+									MonitorAlertServicesConfig servicesConfig = new MonitorAlertServicesConfig();
+									Node servicesEle = statusEle.getFirstChild();
+									while (servicesEle != null) {
+										if (servicesEle.getNodeType() == Element.ELEMENT_NODE) {
+											String servicesNodeName = servicesEle.getNodeName().toLowerCase();
+											switch (servicesNodeName) {
+											case "sms":
+												servicesConfig.getSmsServices()
+														.add(servicesEle.getTextContent().trim());
+												break;
+											case "email":
+												servicesConfig.getEmailServices()
+														.add(servicesEle.getTextContent().trim());
+												break;
+											}
+										}
+										servicesEle = servicesEle.getNextSibling();
+									}
+									statusConfig.setServicesConfig(servicesConfig);
+									break;
+								}
+							}
+							statusEle = statusEle.getNextSibling();
+						}
+						config.getStatusToConfigs().put(status, statusConfig);
+					}
+				}
+				curr = curr.getNextSibling();
+			}
+			return config;
+		}
+		return null;
+	}
+
 	private void readMonitorAgentConfigs(Node node) throws Exception {
 		this.monitorAgentConfigs = new ArrayList<>();
+		Node curr = node.getFirstChild();
+		while (curr != null) {
+			if (curr.getNodeType() == Element.ELEMENT_NODE) {
+				String nodeName = curr.getNodeName().toLowerCase();
+				if (nodeName.equalsIgnoreCase("agent")) {
+					Node ele = curr.getFirstChild();
+					MonitorAgentConfig config = new MonitorAgentConfig();
+					config.setExtensionName(getExtensionName());
+					while (ele != null) {
+						if (ele.getNodeType() == Element.ELEMENT_NODE) {
+							String eleName = ele.getNodeName();
+							switch (eleName) {
+							case "name":
+								config.setName(ele.getTextContent().trim());
+								break;
+							case "target":
+								config.setTarget(ele.getTextContent().trim());
+								break;
+							case "interval":
+								config.setInterval(Long.valueOf(ele.getTextContent().trim()));
+								break;
+							case "alert":
+								config.setAlertConfig(this.readMonitorAlertConfig(ele));
+								break;
+							case "variables":
+								config.setMonitoringParams(PuObject.fromXML(ele));
+								break;
+							}
+						}
+					}
+					this.monitorAgentConfigs.add(config);
+				}
+			}
+			curr = curr.getNextSibling();
+		}
 	}
 
 	private void readProducerConfigs(Node node) throws XPathExpressionException {

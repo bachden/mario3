@@ -2,12 +2,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.11.1</version>
-	
+	<version>3.12.0</version>
+
 	<properties>
 		<project.name>${project.artifactId}</project.name>
 		<project.dir>${project.name}-${project.version}</project.dir>
-		<nhb.common.version>1.2.1</nhb.common.version>
+		<nhb.common.version>1.2.2</nhb.common.version>
 	</properties>
 
 	<build>
@@ -195,7 +195,7 @@
 			<artifactId>jetty-servlets</artifactId>
 			<version>9.3.14.v20161028</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast-all -->
 		<dependency>
 			<groupId>com.hazelcast</groupId>
@@ -271,6 +271,13 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.16.12</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.mail/mail -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.7</version>
 		</dependency>
 	</dependencies>
 

@@ -16,6 +16,7 @@ import com.mario.api.MarioApiFactory;
 import com.mario.cache.CacheManager;
 import com.mario.config.LifeCycleConfig;
 import com.mario.config.MessageHandlerConfig;
+import com.mario.contact.ContactBook;
 import com.mario.entity.EntityManager;
 import com.mario.extension.ExtensionManager;
 import com.mario.gateway.Gateway;
@@ -25,6 +26,7 @@ import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.monitor.MonitorAgentManager;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.impl.SchedulerFactory;
+import com.mario.services.ServiceManager;
 import com.mario.ssl.SSLContextManager;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.nhb.common.BaseLoggable;
@@ -108,6 +110,9 @@ public final class Mario extends BaseLoggable {
 	private ZooKeeperClientManager zkClientManager;
 	private SSLContextManager sslContextManager;
 
+	private ServiceManager serviceManager;
+	private ContactBook contactBook;
+
 	private final PuObject globalProperties = new PuObject();
 
 	private void start() throws Exception {
@@ -122,6 +127,12 @@ public final class Mario extends BaseLoggable {
 				throw new InvalidDataException("Child-value of globalProperties must be PuObject");
 			}
 		}
+
+		System.out.println("create contack book");
+		this.contactBook = new ContactBook();
+
+		System.out.println("create service manager");
+		this.serviceManager = new ServiceManager();
 
 		getLogger().debug("Global properties: " + this.globalProperties);
 
@@ -150,7 +161,7 @@ public final class Mario extends BaseLoggable {
 		this.cacheManager = new CacheManager(this.extensionManager);
 
 		System.out.println("Loading extension...");
-		this.extensionManager.load(this.globalProperties);
+		this.extensionManager.load(this.globalProperties, this.contactBook, this.serviceManager);
 
 		System.out.println("Init SSLContexts");
 		this.sslContextManager.init(this.extensionManager.getSSLContextConfigs());
@@ -165,7 +176,8 @@ public final class Mario extends BaseLoggable {
 		this.cassandraDatasourceManager = new CassandraDatasourceManager();
 
 		System.out.println("Create gateway manager");
-		this.gatewayManager = new GatewayManager(this.extensionManager, this.serverWrapperManager, this.sslContextManager);
+		this.gatewayManager = new GatewayManager(this.extensionManager, this.serverWrapperManager,
+				this.sslContextManager);
 
 		System.out.println("Add configs to mongoDB data source manager");
 		this.mongoDBSourceManager.addConfigs(this.extensionManager.getMongoDBConfigs());
@@ -174,10 +186,13 @@ public final class Mario extends BaseLoggable {
 		this.apiFactory = new MarioApiFactory(this.sqlDataSourceManager, this.cassandraDatasourceManager,
 				this.schedulerFactory, this.mongoDBSourceManager, this.cacheManager, this.monitorAgentManager,
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
-				this.serverWrapperManager, this.globalProperties);
+				this.serverWrapperManager, this.globalProperties, this.contactBook, this.serviceManager);
+
+		System.out.println("Init service mananger");
+		serviceManager.init(this.apiFactory);
 
 		System.out.println("create monitor agent");
-		this.monitorAgentManager = new MonitorAgentManager(apiFactory);
+		this.monitorAgentManager = new MonitorAgentManager(apiFactory, this.entityManager);
 
 		System.out.println("Register sql datasource config");
 		for (SQLDataSourceConfig dataSourceConfig : this.extensionManager.getDataSourceConfigs()) {
@@ -329,6 +344,18 @@ public final class Mario extends BaseLoggable {
 		if (this.cacheManager != null) {
 			System.out.print("Stopping cache manager... ");
 			this.cacheManager.stop();
+			System.out.println("DONE");
+		}
+
+		if (this.monitorAgentManager != null) {
+			System.out.println("Stoping monitor agents...");
+			this.monitorAgentManager.stop();
+			System.out.println("DONE");
+		}
+
+		if (this.serviceManager != null) {
+			System.out.println("Stoping service manager...");
+			this.serviceManager.shutdown();
 			System.out.println("DONE");
 		}
 	}

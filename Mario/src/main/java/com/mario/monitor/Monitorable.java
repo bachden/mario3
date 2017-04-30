@@ -1,10 +1,10 @@
 package com.mario.monitor;
 
+import com.nhb.common.data.PuObjectRO;
+
 public interface Monitorable {
 
-	String getId();
+	void initMonitoring(PuObjectRO params);
 
-	MonitorableStatus checkStatus();
-
-	void resume();
+	MonitorableResponse checkStatus();
 }

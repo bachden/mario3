@@ -265,10 +265,11 @@
 			<topics>[the_topics_seperate_by_comma(,)]</topics>
 			<minBatchingSize>
 				[min record(s) will be published to worker.
-				If it less than or equals 0, gateway will split a batch into single pieces before publish to worker,
-				otherwise, whole batch will be re-batched until: 
-					- the new batch size reach greater than or equals minBatchingSize or 
-					- maxRetentionTime reached.
+				If it less than or equals 0, gateway will split a batch into single pieces before publish to
+				worker,
+				otherwise, whole batch will be re-batched until:
+				- the new batch size reach greater than or equals minBatchingSize or
+				- maxRetentionTime reached.
 				Default == 0]
 			</minBatchingSize>
 			<maxRetentionTime>
@@ -320,11 +321,108 @@
 		</zookeeper>
 	</cooperations>
 
+	<contacts>
+		<contact>
+			<name>[the contact name]</name>
+			<email>[email]</email>
+			<phone>[phone number]</phone>
+		</contact>
+		<group>
+			<name>[name of group]</name>
+			<members>
+				<contact>[name of contact]</contact>
+			</members>
+		</group>
+	</contacts>
+
+	<services>
+		<email>
+			<name>[name for the email service]</name>
+			<handle>[default is com.mario.services.email.DefaultEmailService, custom class must implements EmailService]</handle>
+			<variables>
+				<!-- In case using custom EmailService class, this PuObject will be passed to init method if the class implement SimpleLifeCycle -->
+			</variables>
+			<!-- <incoming> -->
+			<!-- <protocol>[imap (default) | pop]</protocol> -->
+			<!-- <host>[incomming mail server]</host> -->
+			<!-- <port>[incoming port (defaults: POP - 110, SECURE_POP - 995, IMAP - 143, SECURE_IMAP - 993)]</port> -->
+			<!-- <secure>[true | false (default)]</secure> -->
+			<!-- <authenticator> -->
+			<!-- <username>[username to login to incoming server]</username> -->
+			<!-- <password>[password to login...]</password> -->
+			<!-- </authenticator> -->
+			<!-- </incoming> -->
+			<outgoing>
+				<from>[email address will be set to "from" field before send]</from>
+				<replyTo>[reply to address]</replyTo>
+				<host>[smtp outgoing mail server]</host>
+				<port>[smtp outgoing port (defaults:SMTP - 25, SMTP_SSL - 465, SMTP_TLS - 587)]</port>
+				<secure>[NONE (default) | TLS | SSL]</secure>
+				<authenticator>
+					<username>[if smtp mail server require user to send email]</username>
+					<password>[password for username]</password>
+				</authenticator>
+			</outgoing>
+		</email>
+		<sms>
+			<name>[sms service name]</name>
+			<handle>[class name which implement SMSService interface, use to send sms to a contact]</handle>
+			<variables>
+				<!-- Init params for the service -->
+			</variables>
+		</sms>
+	</services>
+
 	<monitor>
 		<agent ref="[the property which hold the config, optional]">
 			<name>[agent-name]</name>
 			<interval>[checking-interval-time]</interval>
-			<handle>[handler-class-name -> must implement MonitorAgent interface]</handle>
+			<target>[a lifeCycle which implement Monitorable interface]</target>
+			<alert>
+				<ok>
+					<recipients>
+						<group>[group of contact]</group>
+						<contact>[single contact]</contact>
+					</recipients>
+					<services>
+						<sms>[sms_service_name]</sms>
+						<email>[email_service_name]</email>
+					</services>
+				</ok>
+				<warning>
+					<recipients>
+						<group>[group of contact]</group>
+						<contact>[single contact]</contact>
+					</recipients>
+					<services>
+						<sms>[sms_service_name]</sms>
+						<email>[email_service_name]</email>
+					</services>
+				</warning>
+				<critical>
+					<recipients>
+						<group>[group of contact]</group>
+						<contact>[single contact]</contact>
+					</recipients>
+					<services>
+						<sms>[sms_service_name]</sms>
+						<email>[email_service_name]</email>
+					</services>
+				</critical>
+				<unknown>
+					<recipients>
+						<group>[group of contact]</group>
+						<contact>[single contact]</contact>
+					</recipients>
+					<services>
+						<sms>[sms_service_name]</sms>
+						<email>[email_service_name]</email>
+					</services>
+				</unknown>
+			</alert>
+			<variables>
+				<!-- Monitoring params, will be passed to target object in initMonitoring method -->
+			</variables>
 		</agent>
 	</monitor>
 </mario>

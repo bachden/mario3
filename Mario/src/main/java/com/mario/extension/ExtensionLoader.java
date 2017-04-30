@@ -6,6 +6,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
 
+import com.mario.contact.ContactBook;
+import com.mario.services.ServiceManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.utils.FileSystemUtils;
@@ -25,11 +27,12 @@ final class ExtensionLoader extends BaseLoggable {
 		this(new File(path));
 	}
 
-	public void load(PuObjectRO globalProperties) throws Exception {
+	public void load(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager)
+			throws Exception {
 		if (extFolder.exists() && extFolder.isDirectory()) {
 			// read config
 			System.out.println("\t\t- Reading config file");
-			this.configReader = new ExtensionConfigReader(globalProperties);
+			this.configReader = new ExtensionConfigReader(globalProperties, contactBook, serviceManager);
 			this.configReader.read(FileSystemUtils.createPathFrom(extFolder.getAbsolutePath(), "extension.xml"));
 			this.name = configReader.getExtensionName();
 

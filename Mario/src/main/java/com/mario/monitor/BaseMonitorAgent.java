@@ -1,34 +1,36 @@
 package com.mario.monitor;
 
-import com.mario.schedule.ScheduledCallback;
-import com.nhb.common.data.PuObjectRO;
+import com.mario.api.MarioApi;
+import com.mario.entity.Pluggable;
+import com.mario.monitor.config.MonitorAlertConfig;
 
-public class BaseMonitorAgent extends AbstractMonitorAgent {
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
-	@Override
-	public void init(PuObjectRO initParams) {
-		
-	}
+public abstract class BaseMonitorAgent implements MonitorAgent, Pluggable {
 
-	@Override
-	public void start() {
-		getApi().getScheduler().scheduleAtFixedRate(getInterval(), getInterval(), new ScheduledCallback() {
+	@Setter
+	@Getter
+	private String name;
 
-			@Override
-			public void call() {
-				
-			}
-		});
-	}
+	@Setter
+	@Getter
+	private String extensionName;
 
-	@Override
-	public void stop() {
+	@Setter
+	@Getter(AccessLevel.PROTECTED)
+	private long interval = -1;
 
-	}
+	@Setter
+	@Getter
+	private MarioApi api;
 
-	@Override
-	public void monitor(Monitorable monitorable) {
-		
-	}
+	@Setter
+	@Getter(AccessLevel.PROTECTED)
+	private MonitorAlertConfig alertConfig;
 
+	@Setter
+	@Getter(AccessLevel.PROTECTED)
+	private Monitorable target;
 }

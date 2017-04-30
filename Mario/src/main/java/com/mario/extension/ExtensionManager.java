@@ -10,12 +10,14 @@ import java.util.Map;
 import com.mario.config.HazelcastConfig;
 import com.mario.config.LifeCycleConfig;
 import com.mario.config.MessageProducerConfig;
-import com.mario.config.MonitorAgentConfig;
 import com.mario.config.RedisConfig;
 import com.mario.config.SSLContextConfig;
 import com.mario.config.ZkClientConfig;
 import com.mario.config.gateway.GatewayConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig;
+import com.mario.contact.ContactBook;
+import com.mario.monitor.config.MonitorAgentConfig;
+import com.mario.services.ServiceManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.db.cassandra.CassandraDatasourceConfig;
@@ -33,7 +35,8 @@ public final class ExtensionManager extends BaseLoggable {
 		return this.loaded;
 	}
 
-	public void load(PuObjectRO globalProperties) throws Exception {
+	public void load(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager)
+			throws Exception {
 		File file = new File(FileSystemUtils.createAbsolutePathFrom(extensionsFolder));
 		if (file.exists() && file.isDirectory()) {
 			this.extensionLoaderByName = new HashMap<String, ExtensionLoader>();
@@ -42,7 +45,7 @@ public final class ExtensionManager extends BaseLoggable {
 				if (ext.isDirectory() && !ext.getName().equalsIgnoreCase("__lib__")) {
 					ExtensionLoader loader = new ExtensionLoader(ext);
 					System.out.println("\t- Loading extension: " + ext.getName());
-					loader.load(globalProperties.deepClone());
+					loader.load(globalProperties.deepClone(), contactBook, serviceManager);
 					this.extensionLoaderByName.put(loader.getName(), loader);
 				}
 			}

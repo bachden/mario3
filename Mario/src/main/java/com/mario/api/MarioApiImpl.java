@@ -7,6 +7,7 @@ import org.apache.zookeeper.ZooKeeper;
 import com.hazelcast.core.HazelcastInstance;
 import com.mario.cache.CacheManager;
 import com.mario.cache.hazelcast.HazelcastInitializer;
+import com.mario.contact.ContactBook;
 import com.mario.entity.EntityManager;
 import com.mario.entity.ManagedObject;
 import com.mario.entity.MessageHandler;
@@ -26,6 +27,9 @@ import com.mario.monitor.MonitorAgent;
 import com.mario.monitor.MonitorAgentManager;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.Scheduler;
+import com.mario.services.ServiceManager;
+import com.mario.services.email.EmailService;
+import com.mario.services.sms.SmsService;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.mongodb.MongoClient;
 import com.nhb.common.cache.jedis.JedisService;
@@ -38,6 +42,8 @@ import com.nhb.common.db.mongodb.MongoDBSourceManager;
 import com.nhb.common.db.sql.DBIAdapter;
 import com.nhb.common.db.sql.SQLDataSourceManager;
 import com.nhb.messaging.MessageProducer;
+
+import lombok.Getter;
 
 @SuppressWarnings("deprecation")
 class MarioApiImpl implements MarioApi {
@@ -55,15 +61,20 @@ class MarioApiImpl implements MarioApi {
 	private ZooKeeperClientManager zkClientManager;
 	private ExtensionManager extensionManager;
 
+	@Getter
+	private ContactBook contactBook;
+
 	private PuObjectRO globalProperties;
 	private ServerWrapperManager serverWrapperManager;
+	private ServiceManager serviceManager;
 
 	MarioApiImpl(SQLDataSourceManager dataSourceManager, CassandraDatasourceManager cassandraDatasourceManager,
 			Scheduler scheduler, CacheManager cacheManager, MongoDBSourceManager mongoDBSourceManager,
 			EntityManager entityManager, SocketSessionManager sessionManager, MonitorAgentManager monitorAgentManager,
 			MessageProducerManager producerManager, GatewayManager gatewayManager,
 			ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
-			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties) {
+			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties, ContactBook contactBook,
+			ServiceManager serviceManager) {
 
 		this.sqlDatasourceManager = dataSourceManager;
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
@@ -80,6 +91,9 @@ class MarioApiImpl implements MarioApi {
 		this.serverWrapperManager = serverWrapperManager;
 
 		this.globalProperties = globalProperties;
+
+		this.contactBook = contactBook;
+		this.serviceManager = serviceManager;
 	}
 
 	@Override
@@ -252,5 +266,15 @@ class MarioApiImpl implements MarioApi {
 	@Override
 	public PuObjectRO getGlobalProperty(String name) {
 		return this.globalProperties.getPuObject(name);
+	}
+
+	@Override
+	public SmsService getSmsService(String name) {
+		return this.serviceManager.getSmsService(name);
+	}
+
+	@Override
+	public EmailService getEmailService(String name) {
+		return this.serviceManager.getEmailService(name);
 	}
 }
