@@ -1,0 +1,67 @@
+<mario>
+	<name>test-monitor-agent</name>
+
+	<contacts>
+		<contact>
+			<name>bachnh-puppetteam</name>
+			<phone>0973101196</phone>
+			<email>bachnh@puppetteam.com</email>
+		</contact>
+	</contacts>
+
+	<services>
+		<sms>
+			<name>speed-sms-service</name>
+			<handle>nhb.utils.sms.SpeedSmsService</handle>
+			<variables>
+				<variable name="speedSmsAccessToken" type="String">AqmgeZzH9VMW7DxxPy5St0liwiKkg449</variable>
+			</variables>
+		</sms>
+		<email>
+			<name>alert-puppet-email-service</name>
+			<!-- <handle>[default is com.mario.services.email.DefaultEmailService, custom class must implements EmailService]</handle> -->
+			<!-- <variables> -->
+			<!-- In case using custom EmailService class, this PuObject will be passed to init method if the class implement SimpleLifeCycle -->
+			<!-- </variables> -->
+			<outgoing>
+				<from>alert@puppetteam.com</from>
+				<replyTo>no-reply@puppetteam.com</replyTo>
+				<host>smtp.gmail.com</host>
+				<secure>SSL</secure>
+				<authenticator>
+					<username>alert@puppetteam.com</username>
+					<password>Alert.show(1)</password>
+				</authenticator>
+			</outgoing>
+		</email>
+	</services>
+
+	<lifecycles>
+		<entry>
+			<name>test-monitorable-lifecycle</name>
+			<handle>nhb.test.monitorable.TestMonitorableLifeCycle</handle>
+		</entry>
+	</lifecycles>
+
+	<monitor>
+		<agent>
+			<name>test-monitorable-agent</name>
+			<interval>5000</interval> <!-- ms -->
+			<target>test-monitorable-lifecycle</target>
+			<variables>
+				<variable name="key" type="String">This is demo variable</variable>
+			</variables>
+			<alert>
+				<critical>
+					<recipients>
+						<contact>bachnh-puppetteam</contact>
+					</recipients>
+					<services>
+						<sms>speed-sms-service</sms>
+						<email>alert-puppet-email-service</email>
+					</services>
+				</critical>
+			</alert>
+		</agent>
+	</monitor>
+</mario>
