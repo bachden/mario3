@@ -173,7 +173,7 @@ public final class ExtensionManager extends BaseLoggable {
 		if (this.isLoaded()) {
 			List<MonitorAgentConfig> results = new ArrayList<MonitorAgentConfig>();
 			for (ExtensionLoader loader : this.extensionLoaderByName.values()) {
-				if (loader.getConfigReader().getMongoDBConfigs() != null) {
+				if (loader.getConfigReader().getMonitorAgentConfigs() != null) {
 					results.addAll(loader.getConfigReader().getMonitorAgentConfigs());
 				}
 			}

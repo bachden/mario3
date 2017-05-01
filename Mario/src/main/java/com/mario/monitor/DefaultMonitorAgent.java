@@ -12,8 +12,9 @@ import com.mario.schedule.ScheduledFuture;
 import com.mario.services.email.DefaultEmailEnvelope;
 import com.mario.services.email.EmailService;
 import com.mario.services.sms.SmsService;
+import com.nhb.common.Loggable;
 
-public class DefaultMonitorAgent extends BaseMonitorAgent {
+public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 
 	private ScheduledFuture monitorScheduledId;
 
@@ -33,12 +34,14 @@ public class DefaultMonitorAgent extends BaseMonitorAgent {
 
 	@Override
 	public void start() {
+		getLogger().info("Start monitor agent {}", this.getName());
 		this.monitorScheduledId = getApi().getScheduler().scheduleAtFixedRate(getInterval(), getInterval(),
 				new ScheduledCallback() {
 
 					@Override
 					public void call() {
 						MonitorableResponse response = getTarget().checkStatus();
+						getLogger().debug("{} is execute check status on target", getName());
 						if (response != null) {
 							MonitorableStatus status = response.getStatus();
 							MonitorAlertStatusConfig alertConfig = getAlertConfig().getStatusToConfigs().get(status);

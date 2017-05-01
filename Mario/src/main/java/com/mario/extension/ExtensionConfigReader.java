@@ -1459,6 +1459,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 								break;
 							}
 						}
+						ele = ele.getNextSibling();
 					}
 					this.monitorAgentConfigs.add(config);
 				}

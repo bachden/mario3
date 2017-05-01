@@ -191,8 +191,6 @@ public final class Mario extends BaseLoggable {
 		System.out.println("Init service mananger");
 		serviceManager.init(this.apiFactory);
 
-		System.out.println("create monitor agent");
-		this.monitorAgentManager = new MonitorAgentManager(apiFactory, this.entityManager);
 
 		System.out.println("Register sql datasource config");
 		for (SQLDataSourceConfig dataSourceConfig : this.extensionManager.getDataSourceConfigs()) {
@@ -230,9 +228,12 @@ public final class Mario extends BaseLoggable {
 				cacheManager.autoInitLazyHazelcasts(entityManager);
 			}
 		});
-
+		
 		System.out.println("Init entity manager");
 		this.entityManager.init();
+
+		System.out.println("create monitor agent");
+		this.monitorAgentManager = new MonitorAgentManager(apiFactory, this.entityManager);
 
 		System.out.println("Init monitor agent");
 		this.monitorAgentManager.init(extensionManager.getMonitorAgentConfigs());
