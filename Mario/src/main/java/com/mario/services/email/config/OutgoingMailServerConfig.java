@@ -12,13 +12,13 @@ import lombok.Setter;
 @Getter
 public class OutgoingMailServerConfig {
 
-	public static enum SecurityType {
+	public static enum EmailSecurityType {
 		NONE, TLS, SSL;
 
-		public static final SecurityType fromName(String name) {
+		public static final EmailSecurityType fromName(String name) {
 			if (name != null) {
 				name = name.trim();
-				for (SecurityType value : values()) {
+				for (EmailSecurityType value : values()) {
 					if (value.name().equalsIgnoreCase(name)) {
 						return value;
 					}
@@ -32,7 +32,7 @@ public class OutgoingMailServerConfig {
 	private String replyTo;
 	private String host;
 	private int port;
-	private SecurityType securityType;
+	private EmailSecurityType securityType;
 
 	private UserNameAndPassword authenticator;
 
@@ -50,7 +50,7 @@ public class OutgoingMailServerConfig {
 					config.setPort(Integer.valueOf(curr.getTextContent().trim()));
 					break;
 				case "secure":
-					config.setSecurityType(SecurityType.fromName(curr.getTextContent().trim()));
+					config.setSecurityType(EmailSecurityType.fromName(curr.getTextContent().trim()));
 					break;
 				case "from":
 					config.setFrom(curr.getTextContent().trim());
@@ -84,8 +84,8 @@ public class OutgoingMailServerConfig {
 		}
 
 		if (config.getPort() == -1) {
-			config.setPort(config.getSecurityType() == SecurityType.NONE ? 25
-					: (config.getSecurityType() == SecurityType.SSL ? 465 : 587));
+			config.setPort(config.getSecurityType() == EmailSecurityType.NONE ? 25
+					: (config.getSecurityType() == EmailSecurityType.SSL ? 465 : 587));
 		}
 		return config;
 	}

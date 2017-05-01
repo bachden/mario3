@@ -10,29 +10,36 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import com.mario.services.email.config.IncomingMailServerConfig;
-import com.mario.services.email.config.OutgoingMailServerConfig;
 import com.nhb.common.data.PuObjectRO;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 
 public class DefaultEmailService extends AbstractEmailService {
 
-	public DefaultEmailService(String name, OutgoingMailServerConfig outgoingConfig,
-			IncomingMailServerConfig incomingConfig) {
-		this.setName(name);
-		this.setIncomingConfig(incomingConfig);
-		this.setOutgoingConfig(outgoingConfig);
-
-		this.initIncoming();
-		this.initOutgoing();
-	}
-
-	public DefaultEmailService(String name, OutgoingMailServerConfig outgoingConfig) {
-		this(name, outgoingConfig, null);
-	}
+	@Getter(AccessLevel.PROTECTED)
+	private Session outgoingSession;
 
 	private void initOutgoing() {
 		if (this.getOutgoingConfig() != null) {
+			Properties mailProps = initMailProps();
 
+			Session session = null;
+			if (this.getOutgoingConfig().getAuthenticator() == null) {
+				// Get the default Session object.
+				session = Session.getDefaultInstance(mailProps);
+			} else {
+				Authenticator authenticator = new Authenticator() {
+					@Override
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(getOutgoingConfig().getAuthenticator().getUserName(),
+								getOutgoingConfig().getAuthenticator().getPassword());
+					}
+				};
+				session = Session.getDefaultInstance(mailProps, authenticator);
+			}
+
+			this.outgoingSession = session;
 		}
 	}
 
@@ -67,28 +74,9 @@ public class DefaultEmailService extends AbstractEmailService {
 
 	@Override
 	public void send(EmailEnvelope envelope) {
-
 		try {
-
-			Properties mailProps = initMailProps();
-
-			Session session = null;
-			if (this.getOutgoingConfig().getAuthenticator() == null) {
-				// Get the default Session object.
-				session = Session.getDefaultInstance(mailProps);
-			} else {
-				Authenticator authenticator = new Authenticator() {
-					@Override
-					protected PasswordAuthentication getPasswordAuthentication() {
-						return new PasswordAuthentication(getOutgoingConfig().getAuthenticator().getUserName(),
-								getOutgoingConfig().getAuthenticator().getPassword());
-					}
-				};
-				Session.getDefaultInstance(mailProps, authenticator);
-			}
-
 			// Create a default MimeMessage object.
-			MimeMessage message = new MimeMessage(session);
+			MimeMessage message = new MimeMessage(this.outgoingSession);
 
 			if (this.getOutgoingConfig().getFrom() != null) {
 				// Set From: header field of the header.
@@ -135,7 +123,8 @@ public class DefaultEmailService extends AbstractEmailService {
 
 	@Override
 	public void init(PuObjectRO initParams) {
-		// do nothing
+		this.initIncoming();
+		this.initOutgoing();
 	}
 
 	@Override

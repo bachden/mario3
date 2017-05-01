@@ -23,5 +23,4 @@ public class DefaultEmailEnvelope implements EmailEnvelope {
 	private String content;
 
 	private Multipart multipart;
-
 }

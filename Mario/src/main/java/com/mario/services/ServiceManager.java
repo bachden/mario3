@@ -114,26 +114,25 @@ public class ServiceManager implements Loggable {
 					Class<? extends EmailService> clazz = (Class<? extends EmailService>) Class
 							.forName(emailConfig.getHandle());
 					emailService = clazz.newInstance();
-					if (emailService instanceof NamedLifeCycle) {
-						((NamedLifeCycle) emailService).setName(emailConfig.getName());
-					}
-					if (emailService instanceof Pluggable) {
-						((Pluggable) emailService).setApi(apiFactory.newApi());
-					}
-					if (emailService instanceof EmailServiceConfigurable) {
-						((EmailServiceConfigurable) emailService).setIncomingConfig(emailConfig.getIncomingConfig());
-						((EmailServiceConfigurable) emailService).setOutgoingConfig(emailConfig.getOutgoingConfig());
-					}
-					emailService
-							.init(emailConfig.getInitParams() == null ? new PuObject() : emailConfig.getInitParams());
 				} catch (Exception e) {
 					throw new RuntimeException(
 							"Cannot init email service with handle class " + emailConfig.getHandle());
 				}
 			} else {
-				emailService = new DefaultEmailService(emailConfig.getName(), emailConfig.getOutgoingConfig(),
-						emailConfig.getIncomingConfig());
+				emailService = new DefaultEmailService();
 			}
+			if (emailService instanceof NamedLifeCycle) {
+				((NamedLifeCycle) emailService).setName(emailConfig.getName());
+			}
+			if (emailService instanceof Pluggable) {
+				((Pluggable) emailService).setApi(apiFactory.newApi());
+			}
+			if (emailService instanceof EmailServiceConfigurable) {
+				((EmailServiceConfigurable) emailService).setIncomingConfig(emailConfig.getIncomingConfig());
+				((EmailServiceConfigurable) emailService).setOutgoingConfig(emailConfig.getOutgoingConfig());
+			}
+			emailService.init(emailConfig.getInitParams() == null ? new PuObject() : emailConfig.getInitParams());
+
 			this.emailManager.register(emailService);
 		}
 
