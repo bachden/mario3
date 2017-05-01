@@ -83,7 +83,7 @@ public class OutgoingMailServerConfig {
 			curr = curr.getNextSibling();
 		}
 
-		if (config.getPort() == -1) {
+		if (config.getPort() == 0) {
 			config.setPort(config.getSecurityType() == EmailSecurityType.NONE ? 25
 					: (config.getSecurityType() == EmailSecurityType.SSL ? 465 : 587));
 		}

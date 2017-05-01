@@ -2,6 +2,8 @@ package com.mario.monitor;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.mario.contact.Contact;
 import com.mario.monitor.config.MonitorAlertRecipientsConfig;
@@ -17,6 +19,8 @@ import com.nhb.common.Loggable;
 public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 
 	private ScheduledFuture monitorScheduledId;
+
+	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	private Collection<Contact> extractContactListFromRecipientsConfig(MonitorAlertRecipientsConfig recipientsConfig) {
 		Collection<Contact> results = new HashSet<>();
@@ -72,7 +76,17 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 										for (String emailServiceName : servicesConfig.getEmailServices()) {
 											EmailService emailService = getApi().getEmailService(emailServiceName);
 											if (emailService != null) {
-												emailService.send(envelope);
+												executor.submit(new Runnable() {
+
+													@Override
+													public void run() {
+														try {
+															emailService.send(envelope);
+														} catch (Exception e) {
+															getLogger().error("Error while sending email: ", e);
+														}
+													}
+												});
 											}
 										}
 									}
@@ -81,7 +95,11 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 										for (String smsServiceName : servicesConfig.getSmsServices()) {
 											SmsService smsService = getApi().getSmsService(smsServiceName);
 											if (smsService != null) {
-												smsService.send(response.getMessage(), phoneNumbers);
+												try {
+													smsService.send(response.getMessage(), phoneNumbers);
+												} catch (Exception e) {
+													getLogger().error("Error while sending sms: ", e);
+												}
 											}
 										}
 									}
