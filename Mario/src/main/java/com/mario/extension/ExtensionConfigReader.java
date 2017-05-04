@@ -59,6 +59,7 @@ import com.mario.monitor.config.MonitorAlertConfig;
 import com.mario.monitor.config.MonitorAlertRecipientsConfig;
 import com.mario.monitor.config.MonitorAlertServicesConfig;
 import com.mario.monitor.config.MonitorAlertStatusConfig;
+import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
 import com.mario.services.ServiceManager;
 import com.nhb.common.data.PuObject;
 import com.nhb.common.data.PuObjectRO;
@@ -104,10 +105,14 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	private final ServiceManager serviceManager;
 
-	public ExtensionConfigReader(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager) {
+	private final HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager;
+
+	public ExtensionConfigReader(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager,
+			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager) {
 		this.globalProperties = globalProperties;
 		this.contactBook = contactBook;
 		this.serviceManager = serviceManager;
+		this.hzDistributedSchedulerConfigManager = hzDistributedSchedulerConfigManager;
 	}
 
 	@Override
@@ -141,6 +146,16 @@ class ExtensionConfigReader extends XmlConfigReader {
 		try {
 			System.out.println("\t\t\t- Reading services");
 			this.readServices((Node) xPath.compile("/mario/services").evaluate(document, XPathConstants.NODE));
+		} catch (Exception ex) {
+			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
+				getLogger().error("Error", ex);
+			}
+		}
+
+		try {
+			System.out.println("\t\t\t- Reading scheduler configs");
+			this.readDistributedSchedulerConfigs(
+					(Node) xPath.compile("/mario/schedulers").evaluate(document, XPathConstants.NODE));
 		} catch (Exception ex) {
 			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
 				getLogger().error("Error", ex);
@@ -225,6 +240,10 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 
 		System.out.println("\t\t\t- *** Reading configs done ***");
+	}
+
+	private void readDistributedSchedulerConfigs(Node node) {
+		this.hzDistributedSchedulerConfigManager.read(node);
 	}
 
 	private void readServices(Node node) {
@@ -1449,6 +1468,9 @@ class ExtensionConfigReader extends XmlConfigReader {
 							switch (eleName) {
 							case "name":
 								config.setName(ele.getTextContent().trim());
+								break;
+							case "scheduler":
+								config.setSchedulerName(ele.getTextContent().trim());
 								break;
 							case "target":
 								config.setTarget(ele.getTextContent().trim());

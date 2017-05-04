@@ -27,6 +27,8 @@ import com.mario.monitor.MonitorAgentManager;
 import com.mario.monitor.agent.MonitorAgent;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.Scheduler;
+import com.mario.schedule.distributed.DistributedScheduler;
+import com.mario.schedule.distributed.impl.HzDistributedSchedulerManager;
 import com.mario.services.ServiceManager;
 import com.mario.services.email.EmailService;
 import com.mario.services.sms.SmsService;
@@ -68,6 +70,7 @@ class MarioApiImpl implements MarioApi {
 	private PuObjectRO globalProperties;
 	private ServerWrapperManager serverWrapperManager;
 	private ServiceManager serviceManager;
+	private HzDistributedSchedulerManager hzDistributedSchedulerManager;
 
 	MarioApiImpl(SQLDataSourceManager dataSourceManager, CassandraDatasourceManager cassandraDatasourceManager,
 			Scheduler scheduler, CacheManager cacheManager, MongoDBSourceManager mongoDBSourceManager,
@@ -75,7 +78,7 @@ class MarioApiImpl implements MarioApi {
 			MessageProducerManager producerManager, GatewayManager gatewayManager,
 			ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
 			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties, ContactBook contactBook,
-			ServiceManager serviceManager) {
+			ServiceManager serviceManager, HzDistributedSchedulerManager hzDistributedSchedulerManager) {
 
 		this.sqlDatasourceManager = dataSourceManager;
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
@@ -95,6 +98,7 @@ class MarioApiImpl implements MarioApi {
 
 		this.contactBook = contactBook;
 		this.serviceManager = serviceManager;
+		this.hzDistributedSchedulerManager = hzDistributedSchedulerManager;
 	}
 
 	@Override
@@ -282,5 +286,10 @@ class MarioApiImpl implements MarioApi {
 	@Override
 	public TelegramBot getTelegramBot(String telegramBotName) {
 		return this.serviceManager.getTelegramBot(telegramBotName);
+	}
+
+	@Override
+	public DistributedScheduler getDistributedScheduler(String name) {
+		return this.hzDistributedSchedulerManager.getDistributedScheduler(name);
 	}
 }

@@ -15,4 +15,6 @@ public interface MonitorAgent extends Pluggable {
 	public void setTarget(Monitorable monitorable);
 
 	public void setAlertConfig(MonitorAlertConfig alertConfig);
+	
+	public void executeCheck();
 }

@@ -387,9 +387,17 @@
 		</telegrambot>
 	</services>
 
+	<schedulers>
+		<hazelcast>
+			<name>[name of the scheduler, shouldn't have any space]</name>
+			<hazelcastName>[name of the hazelcast instance which can be acquired via MarioAPI.getHazelcastInstance(name)]</hazelcastName>
+		</hazelcast>
+	</schedulers>
+
 	<monitor>
 		<agent ref="[the property which hold the config, optional]">
 			<name>[agent-name]</name>
+			<scheduler>[scheduler name - optional, if not specific, auto use default Mario local scheduler]</scheduler>
 			<interval>[checking-interval-time]</interval>
 			<target>[a lifeCycle which implement Monitorable interface]</target>
 			<alert>

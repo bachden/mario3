@@ -34,7 +34,7 @@ public class MonitorAgentManager {
 							+ ", extension " + config.getExtensionName());
 				}
 
-				DefaultMonitorAgent agent = new DefaultMonitorAgent();
+				DefaultMonitorAgent agent = new DefaultMonitorAgent(config.getSchedulerName());
 				agent.setName(config.getName());
 				agent.setExtensionName(config.getExtensionName());
 				agent.setApi(this.apiFactory.newApi());

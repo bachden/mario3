@@ -13,6 +13,7 @@ import com.mario.gateway.serverwrapper.ServerWrapper;
 import com.mario.gateway.socket.SocketSession;
 import com.mario.monitor.agent.MonitorAgent;
 import com.mario.schedule.Scheduler;
+import com.mario.schedule.distributed.DistributedScheduler;
 import com.mario.services.email.EmailService;
 import com.mario.services.sms.SmsService;
 import com.mario.services.telegram.TelegramBot;
@@ -34,6 +35,8 @@ public interface MarioApi {
 	}
 
 	Scheduler getScheduler();
+
+	DistributedScheduler getDistributedScheduler(String name);
 
 	CassandraDataSource getCassandraDataSource(String name);
 

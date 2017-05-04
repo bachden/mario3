@@ -15,6 +15,7 @@ public class MonitorAgentConfig extends MarioBaseConfig {
 	private String target;
 	private PuObjectRO monitoringParams;
 	private MonitorAlertConfig alertConfig;
+	private String schedulerName;
 
 	@Override
 	protected void _readPuObject(PuObjectRO data) {
