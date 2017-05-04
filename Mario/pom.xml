@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.12.0</version>
+	<version>3.13.1</version>
 
 	<properties>
 		<project.name>${project.artifactId}</project.name>
@@ -283,7 +283,7 @@
 			<artifactId>mail</artifactId>
 			<version>1.4.7</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.telegram</groupId>
 			<artifactId>telegrambots</artifactId>
