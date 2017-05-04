@@ -3,9 +3,10 @@
 
 	<contacts>
 		<contact>
-			<name>bachnh-puppetteam</name>
-			<phone>0973101196</phone>
-			<email>bachnh@puppetteam.com</email>
+			<name>bachnh</name>
+			<phone>****</phone>
+			<email>****@***.***</email>
+			<telegram>*****</telegram>
 		</contact>
 	</contacts>
 
@@ -14,26 +15,38 @@
 			<name>speed-sms-service</name>
 			<handle>nhb.utils.sms.SpeedSmsService</handle>
 			<variables>
-				<variable name="speedSmsAccessToken" type="String">AqmgeZzH9VMW7DxxPy5St0liwiKkg449</variable>
+				<variable name="speedSmsAccessToken" type="String"><!-- speed sms token -->
+				</variable>
 			</variables>
 		</sms>
 		<email>
-			<name>alert-puppet-email-service</name>
+			<name>alert-email-service</name>
 			<!-- <handle>[default is com.mario.services.email.DefaultEmailService, custom class must implements EmailService]</handle> -->
 			<!-- <variables> -->
 			<!-- In case using custom EmailService class, this PuObject will be passed to init method if the class implement SimpleLifeCycle -->
 			<!-- </variables> -->
 			<outgoing>
-				<from>alert@puppetteam.com</from>
-				<replyTo>no-reply@puppetteam.com</replyTo>
-				<host>smtp.gmail.com</host>
+				<from>***@***.***</from>
+				<replyTo>no-reply@***.***</replyTo>
+				<host>smtp.example.com</host>
 				<secure>SSL</secure>
 				<authenticator>
-					<username>alert@puppetteam.com</username>
-					<password>Alert.show(1)</password>
+					<username>***@***.***</username>
+					<password>*****</password>
 				</authenticator>
 			</outgoing>
 		</email>
+		<telegrambot>
+			<name>alert-telegram-bot</name>
+			<botUsername>puppet_alert_bot</botUsername>
+			<botToken><!-- bot token -->
+			</botToken>
+			<type>LONG_POLLING</type>
+			<storage>
+				<type>file</type>
+				<filePath><![CDATA[logs/telegram/puppet_alert_bot_chat_ids.txt]]></filePath>
+			</storage>
+		</telegrambot>
 	</services>
 
 	<lifecycles>
@@ -54,11 +67,12 @@
 			<alert>
 				<critical>
 					<recipients>
-						<contact>bachnh-puppetteam</contact>
+						<contact>bachnh</contact>
 					</recipients>
 					<services>
-						<sms>speed-sms-service</sms>
-						<email>alert-puppet-email-service</email>
+						<!-- <sms>speed-sms-service</sms> -->
+						<!-- <email>alert-email-service</email> -->
+						<telegramBot>alert-telegram-bot</telegramBot>
 					</services>
 				</critical>
 			</alert>
