@@ -38,9 +38,8 @@
 		</email>
 		<telegrambot>
 			<name>alert-telegram-bot</name>
-			<botUsername>puppet_alert_bot</botUsername>
-			<botToken><!-- bot token -->
-			</botToken>
+			<botUsername><!-- username_bot --></botUsername>
+			<botToken><!-- bot token --></botToken>
 			<type>LONG_POLLING</type>
 			<storage>
 				<type>file</type>
