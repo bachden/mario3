@@ -188,10 +188,6 @@ public final class Mario extends BaseLoggable {
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
 				this.serverWrapperManager, this.globalProperties, this.contactBook, this.serviceManager);
 
-		System.out.println("Init service mananger");
-		serviceManager.init(this.apiFactory);
-
-
 		System.out.println("Register sql datasource config");
 		for (SQLDataSourceConfig dataSourceConfig : this.extensionManager.getDataSourceConfigs()) {
 			this.sqlDataSourceManager.registerDataSource(dataSourceConfig.getName(), dataSourceConfig.getProperties());
@@ -213,6 +209,9 @@ public final class Mario extends BaseLoggable {
 		System.out.println("Start producer manager");
 		this.producerManager.start();
 
+		System.out.println("Init service mananger");
+		serviceManager.init(apiFactory);
+
 		System.out.println("Init gateway manager");
 		this.gatewayManager.init(extensionManager.getGatewayConfigs());
 
@@ -226,9 +225,10 @@ public final class Mario extends BaseLoggable {
 				System.out.println("entity init complete");
 				entityManager.removeEventListener("initComplete", this);
 				cacheManager.autoInitLazyHazelcasts(entityManager);
+
 			}
 		});
-		
+
 		System.out.println("Init entity manager");
 		this.entityManager.init();
 

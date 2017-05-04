@@ -23,13 +23,14 @@ import com.mario.gateway.serverwrapper.ServerWrapper;
 import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.gateway.socket.SocketSession;
 import com.mario.gateway.socket.SocketSessionManager;
-import com.mario.monitor.MonitorAgent;
 import com.mario.monitor.MonitorAgentManager;
+import com.mario.monitor.agent.MonitorAgent;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.Scheduler;
 import com.mario.services.ServiceManager;
 import com.mario.services.email.EmailService;
 import com.mario.services.sms.SmsService;
+import com.mario.services.telegram.TelegramBot;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.mongodb.MongoClient;
 import com.nhb.common.cache.jedis.JedisService;
@@ -276,5 +277,10 @@ class MarioApiImpl implements MarioApi {
 	@Override
 	public EmailService getEmailService(String name) {
 		return this.serviceManager.getEmailService(name);
+	}
+
+	@Override
+	public TelegramBot getTelegramBot(String telegramBotName) {
+		return this.serviceManager.getTelegramBot(telegramBotName);
 	}
 }

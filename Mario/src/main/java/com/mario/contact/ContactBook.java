@@ -35,6 +35,10 @@ public class ContactBook implements Loggable {
 				case "phone":
 					contact.setPhoneNumber(eleValue);
 					break;
+				case "telegram":
+				case "telegramid":
+					contact.setTelegramId(eleValue);
+					break;
 				}
 			}
 			ele = ele.getNextSibling();

@@ -1,7 +1,8 @@
-package com.mario.monitor;
+package com.mario.monitor.agent;
 
 import com.mario.api.MarioApi;
 import com.mario.entity.Pluggable;
+import com.mario.monitor.Monitorable;
 import com.mario.monitor.config.MonitorAlertConfig;
 
 import lombok.AccessLevel;

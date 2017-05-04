@@ -1,11 +1,16 @@
-package com.mario.monitor;
+package com.mario.monitor.agent;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.telegram.telegrambots.api.methods.send.SendMessage;
+import org.telegram.telegrambots.bots.AbsSender;
+
 import com.mario.contact.Contact;
+import com.mario.monitor.MonitorableResponse;
+import com.mario.monitor.MonitorableStatus;
 import com.mario.monitor.config.MonitorAlertRecipientsConfig;
 import com.mario.monitor.config.MonitorAlertServicesConfig;
 import com.mario.monitor.config.MonitorAlertStatusConfig;
@@ -14,6 +19,7 @@ import com.mario.schedule.ScheduledFuture;
 import com.mario.services.email.DefaultEmailEnvelope;
 import com.mario.services.email.EmailService;
 import com.mario.services.sms.SmsService;
+import com.mario.services.telegram.TelegramBot;
 import com.nhb.common.Loggable;
 
 public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
@@ -56,6 +62,7 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 
 									Collection<String> emails = new HashSet<>();
 									Collection<String> phoneNumbers = new HashSet<>();
+									Collection<String> telegramIds = new HashSet<>();
 
 									for (Contact contact : contacts) {
 										if (contact.getEmail() != null) {
@@ -63,6 +70,9 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 										}
 										if (contact.getPhoneNumber() != null) {
 											phoneNumbers.add(contact.getPhoneNumber());
+										}
+										if (contact.getTelegramId() != null) {
+											telegramIds.add(contact.getTelegramId());
 										}
 									}
 
@@ -99,6 +109,31 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 													smsService.send(response.getMessage(), phoneNumbers);
 												} catch (Exception e) {
 													getLogger().error("Error while sending sms: ", e);
+												}
+											}
+										}
+									}
+
+									if (telegramIds.size() > 0) {
+										for (String telegramBotName : servicesConfig.getTelegramBots()) {
+											TelegramBot bot = getApi().getTelegramBot(telegramBotName);
+											if (bot != null) {
+												for (String telegramPhoneNumber : telegramIds) {
+													try {
+														long chatId = bot.getChatId(telegramPhoneNumber);
+														if (chatId > 0) {
+															SendMessage message = new SendMessage();
+															message.setChatId(chatId);
+															message.setText(response.getMessage());
+															((AbsSender) bot).sendMessage(message);
+														} else {
+															getLogger().warn(
+																	"Cannot fetch telegram chat id for phone number {}",
+																	telegramPhoneNumber);
+														}
+													} catch (Exception e) {
+														getLogger().error("Send message via telegram bot error", e);
+													}
 												}
 											}
 										}

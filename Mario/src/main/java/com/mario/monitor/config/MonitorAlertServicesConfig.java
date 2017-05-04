@@ -10,4 +10,5 @@ public class MonitorAlertServicesConfig {
 
 	private final Collection<String> smsServices = new HashSet<>();
 	private final Collection<String> emailServices = new HashSet<>();
+	private final Collection<String> telegramBots = new HashSet<>();
 }

@@ -21,6 +21,12 @@ import com.mario.services.sms.SmsService;
 import com.mario.services.sms.SmsServiceManager;
 import com.mario.services.sms.config.SmsServiceConfig;
 import com.mario.services.sms.config.SmsServiceConfig.SmsServiceConfigBuilder;
+import com.mario.services.telegram.TelegramBot;
+import com.mario.services.telegram.TelegramBotManager;
+import com.mario.services.telegram.TelegramBotType;
+import com.mario.services.telegram.bots.DefaultTelegramLongPollingBot;
+import com.mario.services.telegram.bots.DefaultTelegramWebhookBot;
+import com.mario.services.telegram.storage.TelegramBotStorageConfig;
 import com.nhb.common.Loggable;
 import com.nhb.common.data.PuObject;
 
@@ -28,6 +34,7 @@ public class ServiceManager implements Loggable {
 
 	private final SmsServiceManager smsManager = new SmsServiceManager();
 	private final EmailServiceManager emailManager = new EmailServiceManager();
+	private final TelegramBotManager telegramBotManager = new TelegramBotManager();
 
 	private final List<SmsServiceConfig> smsConfigs = new ArrayList<>();
 	private final List<EmailServiceConfig> emailConfigs = new ArrayList<>();
@@ -84,6 +91,66 @@ public class ServiceManager implements Loggable {
 		this.emailConfigs.add(builder.build());
 	}
 
+	private void readTelegarmBotConfig(Node node) {
+		TelegramBotType botType = null;
+		String name = null;
+		String botToken = null;
+		String botUsername = null;
+		TelegramBotStorageConfig storageConfig = null;
+
+		Node ele = node.getFirstChild();
+		while (ele != null) {
+			if (ele.getNodeType() == Element.ELEMENT_NODE) {
+				String eleName = ele.getNodeName().toLowerCase();
+				String eleValue = ele.getTextContent().trim();
+
+				switch (eleName) {
+				case "name":
+					name = eleValue;
+					break;
+				case "botusername":
+					botUsername = eleValue;
+					break;
+				case "bottoken":
+					botToken = eleValue;
+					break;
+				case "type":
+					botType = TelegramBotType.fromName(eleValue);
+					break;
+				case "storage":
+					storageConfig = TelegramBotStorageConfig.read(ele);
+					break;
+				}
+
+			}
+			ele = ele.getNextSibling();
+		}
+
+		if (botType == null) {
+			throw new RuntimeException("Telegram bot config must contain type info");
+		}
+
+		if (name == null) {
+			throw new RuntimeException("Telegram bot config must contain name info");
+		}
+
+		if (storageConfig == null) {
+			throw new RuntimeException("Storage config cannot be null");
+		}
+
+		TelegramBot bot = null;
+		switch (botType) {
+		case LONG_POLLING:
+			bot = new DefaultTelegramLongPollingBot(name, storageConfig, botToken, botUsername);
+			break;
+		case WEBHOOK:
+			bot = new DefaultTelegramWebhookBot(name, storageConfig, botToken, botUsername);
+			break;
+		}
+
+		this.telegramBotManager.register(bot);
+	}
+
 	public void readFromXml(Node node) {
 		Node curr = node.getFirstChild();
 		while (curr != null) {
@@ -95,6 +162,10 @@ public class ServiceManager implements Loggable {
 					break;
 				case "sms":
 					readSmsConfig(curr);
+					break;
+				case "telegram":
+				case "telegrambot":
+					readTelegarmBotConfig(curr);
 					break;
 				default:
 					getLogger().warn("Service name cannot be recognized " + currName);
@@ -153,6 +224,8 @@ public class ServiceManager implements Loggable {
 				throw new RuntimeException("Error while create SmsService instance", e);
 			}
 		}
+
+		this.telegramBotManager.init(apiFactory);
 	}
 
 	public SmsService getSmsService(String name) {
@@ -161,6 +234,10 @@ public class ServiceManager implements Loggable {
 
 	public EmailService getEmailService(String name) {
 		return this.emailManager.getEmailService(name);
+	}
+
+	public TelegramBot getTelegramBot(String name) {
+		return this.telegramBotManager.getBot(name);
 	}
 
 	public void shutdown() {

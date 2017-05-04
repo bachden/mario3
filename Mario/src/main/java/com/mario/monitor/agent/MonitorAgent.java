@@ -1,6 +1,7 @@
-package com.mario.monitor;
+package com.mario.monitor.agent;
 
 import com.mario.entity.Pluggable;
+import com.mario.monitor.Monitorable;
 import com.mario.monitor.config.MonitorAlertConfig;
 
 public interface MonitorAgent extends Pluggable {

@@ -1408,6 +1408,11 @@ class ExtensionConfigReader extends XmlConfigReader {
 												servicesConfig.getEmailServices()
 														.add(servicesEle.getTextContent().trim());
 												break;
+											case "telegram":
+											case "telegrambot":
+												servicesConfig.getTelegramBots()
+														.add(servicesEle.getTextContent().trim());
+												break;
 											}
 										}
 										servicesEle = servicesEle.getNextSibling();

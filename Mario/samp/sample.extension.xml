@@ -326,6 +326,7 @@
 			<name>[the contact name]</name>
 			<email>[email]</email>
 			<phone>[phone number]</phone>
+			<telegramId>[telegram id, it may be phone number]</telegramId>
 		</contact>
 		<group>
 			<name>[name of group]</name>
@@ -371,6 +372,18 @@
 				<!-- Init params for the service -->
 			</variables>
 		</sms>
+		<telegrambot>
+			<name>[service name use in MarioApi.getTelegramBot(name) method]</name>
+			<botUsername>[optional, the bot's username]</botUsername>
+			<botToken>[required, the bot's token]</botToken>
+			<type>[WEBHOOK | LONG_POLLING (default) - *** for now, support only LONG_POLLING bot type ***]</type>
+			<storage>
+				<type>[file | mysql | mongo]</type>
+				<filePath>[/path/to/file - use for 'file' storage type]</filePath>
+				<datasource>[datasource name - use for mysql | mongo storage type]</datasource>
+			</storage>
+			<!-- <webhookurl>[the url which telegram will call if the bot has updated, not supported right now]</webhookurl> -->
+		</telegrambot>
 	</services>
 
 	<monitor>
