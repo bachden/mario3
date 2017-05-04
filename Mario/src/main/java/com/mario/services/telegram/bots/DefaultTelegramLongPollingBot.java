@@ -145,7 +145,10 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 			String phoneNumber = update.getMessage().getContact().getPhoneNumber();
 			if (phoneNumber != null && chatId > 0) {
 				try {
-					this.storage.saveChatId(phoneNumber, chatId);
+					if (this.storage.saveChatId(phoneNumber, chatId)) {
+						getLogger().info("TelegramBot name {} --> saved phone number {} and chat id {}",
+								this.botUsername, phoneNumber, chatId);
+					}
 				} catch (Exception e) {
 					getLogger().error("Cannot save chatId", e);
 				}

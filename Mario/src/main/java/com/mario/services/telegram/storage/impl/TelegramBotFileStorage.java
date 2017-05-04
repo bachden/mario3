@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.mario.services.telegram.storage.TelegramBotStorage;
 import com.nhb.common.Loggable;
@@ -27,7 +28,7 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 
 	public TelegramBotFileStorage(String filePath, String botUsername) {
 		this.botUsername = botUsername;
-		
+
 		this.file = new File(filePath);
 		if (!this.file.exists()) {
 			if (!this.file.getParentFile().exists()) {
@@ -69,17 +70,19 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 	}
 
 	@Override
-	public void saveChatId(String phoneNumber, long chatId) {
+	public boolean saveChatId(String phoneNumber, long chatId) {
 		if (phoneNumber == null || chatId <= 0) {
 			throw new IllegalArgumentException("User id and chat id must be not-null and > 0");
 		}
 		Long oldValue = this.userIdToChatId.putIfAbsent(phoneNumber, chatId);
 		if (oldValue == null) {
-			_write(this.botUsername + ":" + phoneNumber + ":" + chatId);
+			return _write(this.botUsername + ":" + phoneNumber + ":" + chatId);
 		}
+		return false;
 	}
 
-	private void _write(final String line) {
+	private boolean _write(final String line) {
+		final AtomicBoolean success = new AtomicBoolean(false);
 		try {
 			this.writingExecutor.submit(new Runnable() {
 
@@ -87,6 +90,7 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 				public void run() {
 					try (BufferedWriter output = new BufferedWriter(new FileWriter(file, true))) {
 						output.append(line);
+						success.set(true);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -95,6 +99,7 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException("Cannot wait for writing process to be completed", e);
 		}
+		return success.get();
 	}
 
 	@Override

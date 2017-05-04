@@ -13,6 +13,7 @@ import com.mario.services.telegram.event.TelegramEvent;
 import com.mario.services.telegram.storage.TelegramBotStorage;
 import com.mario.services.telegram.storage.TelegramBotStorageConfig;
 import com.mario.services.telegram.storage.impl.TelegramBotFileStorage;
+import com.nhb.common.Loggable;
 import com.nhb.eventdriven.Event;
 import com.nhb.eventdriven.EventDispatcher;
 import com.nhb.eventdriven.EventHandler;
@@ -21,7 +22,7 @@ import com.nhb.eventdriven.impl.BaseEventDispatcher;
 import lombok.Getter;
 import lombok.Setter;
 
-public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements EventDispatcher, TelegramBot {
+public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements EventDispatcher, TelegramBot, Loggable {
 
 	@Getter
 	@Setter
@@ -89,7 +90,10 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 			Long chatId = update.getMessage().getChatId();
 			String phoneNumber = update.getMessage().getContact().getPhoneNumber();
 			if (phoneNumber != null && chatId > 0) {
-				this.storage.saveChatId(phoneNumber, chatId);
+				if (this.storage.saveChatId(phoneNumber, chatId)) {
+					getLogger().info("TelegramBot name {} --> saved phone number {} and chat id {}",
+							this.botUsername, phoneNumber, chatId);
+				}
 			}
 		}
 		this.dispatchEvent(TelegramEvent.newUpdateEvent(update));

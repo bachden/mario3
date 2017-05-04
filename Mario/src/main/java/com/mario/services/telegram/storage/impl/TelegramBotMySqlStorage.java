@@ -64,19 +64,21 @@ public class TelegramBotMySqlStorage implements TelegramBotStorage, Loggable {
 	}
 
 	@Override
-	public void saveChatId(String phoneNumber, long chatId) {
+	public boolean saveChatId(String phoneNumber, long chatId) {
 		if (this.getChatId(phoneNumber) == -1) {
 			synchronized (getMonitorObject(phoneNumber)) {
 				if (this.getChatId(phoneNumber) == -1) {
 					this.localCache.put(phoneNumber, chatId);
 					try (ChatIdDAO dao = this.adapter.openDAO(ChatIdDAO.class)) {
 						dao.insert(phoneNumber, botUsername, chatId);
+						return true;
 					} catch (Exception e) {
 						throw e;
 					}
 				}
 			}
 		}
+		return false;
 	}
 
 	@Override

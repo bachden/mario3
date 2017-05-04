@@ -77,7 +77,7 @@ public class TelegramBotMongoStorage implements TelegramBotStorage, Loggable {
 	}
 
 	@Override
-	public void saveChatId(String phoneNumber, long chatId) {
+	public boolean saveChatId(String phoneNumber, long chatId) {
 		if (this.getChatId(phoneNumber) == -1) {
 			synchronized (getMonitorObject(phoneNumber)) {
 				if (this.getChatId(phoneNumber) == -1) {
@@ -87,12 +87,14 @@ public class TelegramBotMongoStorage implements TelegramBotStorage, Loggable {
 								.append(BOT_USERNAME, this.botUsername).append(CHAT_ID, chatId));
 						getLogger().debug("Saved phoneNumber {} and chatId {} for bot {}", phoneNumber, chatId,
 								botUsername);
+						return true;
 					} catch (Exception e) {
 						throw e;
 					}
 				}
 			}
 		}
+		return false;
 	}
 
 	@Override
