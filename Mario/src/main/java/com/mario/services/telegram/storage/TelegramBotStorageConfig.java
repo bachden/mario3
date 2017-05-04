@@ -37,7 +37,7 @@ public class TelegramBotStorageConfig {
 			while (ele != null) {
 				if (ele.getNodeType() == Element.ELEMENT_NODE) {
 					String nodeName = ele.getNodeName().toLowerCase();
-					String nodeValue = ele.getNodeValue().trim();
+					String nodeValue = ele.getTextContent().trim();
 					switch (nodeName) {
 					case "type":
 						TelegramBotStorageType type = TelegramBotStorageType.fromName(nodeValue);

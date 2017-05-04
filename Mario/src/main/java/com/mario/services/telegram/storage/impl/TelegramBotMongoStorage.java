@@ -21,7 +21,7 @@ public class TelegramBotMongoStorage implements TelegramBotStorage, Loggable {
 
 	private static final String BOT_USERNAME = "botUsername";
 
-	private static final String PHONE_NUMBER = "phoneNumber";
+	private static final String USERNAME = "userName";
 
 	public static final String BOT_CHAT_IDS_COLLECTION_NAME = "chatIds";
 
@@ -58,7 +58,7 @@ public class TelegramBotMongoStorage implements TelegramBotStorage, Loggable {
 
 	private void init() {
 		MongoCollection<Document> collection = this.getBotChatIdCollection();
-		List<Document> indexes = Arrays.asList(new Document().append(PHONE_NUMBER, 1).append(BOT_USERNAME, 1));
+		List<Document> indexes = Arrays.asList(new Document().append(USERNAME, 1).append(BOT_USERNAME, 1));
 		for (Document index : indexes) {
 			try {
 				collection.createIndex(index, new IndexOptions().unique(true));
@@ -83,7 +83,7 @@ public class TelegramBotMongoStorage implements TelegramBotStorage, Loggable {
 				if (this.getChatId(phoneNumber) == -1) {
 					this.localCache.put(phoneNumber, chatId);
 					try {
-						this.getBotChatIdCollection().insertOne(new Document().append(PHONE_NUMBER, phoneNumber)
+						this.getBotChatIdCollection().insertOne(new Document().append(USERNAME, phoneNumber)
 								.append(BOT_USERNAME, this.botUsername).append(CHAT_ID, chatId));
 						getLogger().debug("Saved phoneNumber {} and chatId {} for bot {}", phoneNumber, chatId,
 								botUsername);
@@ -98,22 +98,22 @@ public class TelegramBotMongoStorage implements TelegramBotStorage, Loggable {
 	}
 
 	@Override
-	public long getChatId(String phoneNumber) {
-		if (!this.localCache.containsKey(phoneNumber)) {
-			synchronized (getMonitorObject(phoneNumber)) {
-				if (!this.localCache.containsKey(phoneNumber)) {
-					FindIterable<Document> found = this.getBotChatIdCollection().find(
-							new Document().append(BOT_USERNAME, this.botUsername).append(PHONE_NUMBER, phoneNumber));
+	public long getChatId(String userName) {
+		if (!this.localCache.containsKey(userName)) {
+			synchronized (getMonitorObject(userName)) {
+				if (!this.localCache.containsKey(userName)) {
+					FindIterable<Document> found = this.getBotChatIdCollection()
+							.find(new Document().append(BOT_USERNAME, this.botUsername).append(USERNAME, userName));
 					Document first = found.first();
 					if (first != null) {
-						this.localCache.put(phoneNumber, first.getLong(CHAT_ID));
+						this.localCache.put(userName, first.getLong(CHAT_ID));
 					} else {
 						return -1;
 					}
 				}
 			}
 		}
-		return this.localCache.get(phoneNumber);
+		return this.localCache.get(userName);
 	}
 
 }

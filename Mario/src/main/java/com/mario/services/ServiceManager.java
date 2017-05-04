@@ -23,6 +23,7 @@ import com.mario.services.sms.config.SmsServiceConfig;
 import com.mario.services.sms.config.SmsServiceConfig.SmsServiceConfigBuilder;
 import com.mario.services.telegram.TelegramBot;
 import com.mario.services.telegram.TelegramBotManager;
+import com.mario.services.telegram.TelegramBotRegisterStrategy;
 import com.mario.services.telegram.TelegramBotType;
 import com.mario.services.telegram.bots.DefaultTelegramLongPollingBot;
 import com.mario.services.telegram.bots.DefaultTelegramWebhookBot;
@@ -97,6 +98,7 @@ public class ServiceManager implements Loggable {
 		String botToken = null;
 		String botUsername = null;
 		TelegramBotStorageConfig storageConfig = null;
+		TelegramBotRegisterStrategy registerStrategy = null;
 
 		Node ele = node.getFirstChild();
 		while (ele != null) {
@@ -113,6 +115,9 @@ public class ServiceManager implements Loggable {
 					break;
 				case "bottoken":
 					botToken = eleValue;
+					break;
+				case "register":
+					registerStrategy = TelegramBotRegisterStrategy.fromName(eleValue);
 					break;
 				case "type":
 					botType = TelegramBotType.fromName(eleValue);
@@ -138,13 +143,17 @@ public class ServiceManager implements Loggable {
 			throw new RuntimeException("Storage config cannot be null");
 		}
 
+		if (registerStrategy == null) {
+			registerStrategy = TelegramBotRegisterStrategy.IMMEDIATELY;
+		}
+
 		TelegramBot bot = null;
 		switch (botType) {
 		case LONG_POLLING:
-			bot = new DefaultTelegramLongPollingBot(name, storageConfig, botToken, botUsername);
+			bot = new DefaultTelegramLongPollingBot(name, storageConfig, registerStrategy, botToken, botUsername);
 			break;
 		case WEBHOOK:
-			bot = new DefaultTelegramWebhookBot(name, storageConfig, botToken, botUsername);
+			bot = new DefaultTelegramWebhookBot(name, storageConfig, registerStrategy, botToken, botUsername);
 			break;
 		}
 

@@ -24,9 +24,9 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 
 	private ExecutorService writingExecutor = Executors.newFixedThreadPool(1);
 
-	private final Map<String, Long> userIdToChatId = new ConcurrentHashMap<>();
+	private final Map<String, Long> userNameToChatId = new ConcurrentHashMap<>();
 
-	public TelegramBotFileStorage(String filePath, String botUsername) {
+	public TelegramBotFileStorage(String botUsername, String filePath) {
 		this.botUsername = botUsername;
 
 		this.file = new File(filePath);
@@ -57,7 +57,7 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 				String[] arr = line.split(":");
 				if (arr.length == 3) {
 					if (arr[0].trim().equals(this.botUsername)) {
-						this.userIdToChatId.put(arr[1], Long.valueOf(arr[2]));
+						this.userNameToChatId.put(arr[1], Long.valueOf(arr[2]));
 					}
 				} else {
 					getLogger().warn("Invalid line: " + line);
@@ -70,13 +70,13 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 	}
 
 	@Override
-	public boolean saveChatId(String phoneNumber, long chatId) {
-		if (phoneNumber == null || chatId <= 0) {
+	public boolean saveChatId(String userName, long chatId) {
+		if (userName == null || chatId <= 0) {
 			throw new IllegalArgumentException("User id and chat id must be not-null and > 0");
 		}
-		Long oldValue = this.userIdToChatId.putIfAbsent(phoneNumber, chatId);
+		Long oldValue = this.userNameToChatId.putIfAbsent(userName, chatId);
 		if (oldValue == null) {
-			return _write(this.botUsername + ":" + phoneNumber + ":" + chatId);
+			return _write(this.botUsername + ":" + userName + ":" + chatId);
 		}
 		return false;
 	}
@@ -89,7 +89,7 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 				@Override
 				public void run() {
 					try (BufferedWriter output = new BufferedWriter(new FileWriter(file, true))) {
-						output.append(line);
+						output.append(line + "\n");
 						success.set(true);
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -103,8 +103,8 @@ public class TelegramBotFileStorage implements TelegramBotStorage, Loggable {
 	}
 
 	@Override
-	public long getChatId(String phoneNumber) {
-		Long value = this.userIdToChatId.get(phoneNumber);
+	public long getChatId(String userName) {
+		Long value = this.userNameToChatId.get(userName);
 		return value == null ? -1 : value.longValue();
 	}
 }

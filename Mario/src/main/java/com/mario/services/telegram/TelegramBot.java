@@ -27,6 +27,8 @@ public interface TelegramBot extends Pluggable {
 	 * @return true if this bot did not registered before
 	 */
 	boolean setRegistered();
+	
+	TelegramBotRegisterStrategy getRegisterStrategy();
 
 	long getChatId(String phoneNumber);
 }

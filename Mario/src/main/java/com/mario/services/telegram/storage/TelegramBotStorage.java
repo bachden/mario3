@@ -2,7 +2,7 @@ package com.mario.services.telegram.storage;
 
 public interface TelegramBotStorage {
 
-	boolean saveChatId(String phoneNumber, long chatId);
+	boolean saveChatId(String userName, long chatId);
 
-	long getChatId(String phoneNumber);
+	long getChatId(String userName);
 }

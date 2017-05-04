@@ -49,15 +49,24 @@ public class TelegramBotManager {
 	public void init(MarioApiFactory apiFactory) {
 		for (TelegramBot bot : this.bots.values()) {
 			bot.setApi(apiFactory.newApi());
+			bot.init();
+
+			if (bot.getRegisterStrategy() == TelegramBotRegisterStrategy.IMMEDIATELY) {
+				this.registerWithApi(bot);
+			}
 		}
 	}
 
 	private void registerWithApi(TelegramBot bot) {
 		try {
-			if (bot instanceof TelegramLongPollingBot) {
-				this.botsApi.registerBot((TelegramLongPollingBot) bot);
-			} else if (bot instanceof TelegramWebhookBot) {
-				this.botsApi.registerBot((TelegramWebhookBot) bot);
+			if (bot.setRegistered()) {
+				if (bot instanceof TelegramLongPollingBot) {
+					this.botsApi.registerBot((TelegramLongPollingBot) bot);
+				} else if (bot instanceof TelegramWebhookBot) {
+					this.botsApi.registerBot((TelegramWebhookBot) bot);
+				} else {
+					throw new IllegalArgumentException("Invalid bot type");
+				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Register bot error", e);
@@ -66,7 +75,7 @@ public class TelegramBotManager {
 
 	public TelegramBot getBot(String name) {
 		TelegramBot bot = this.bots.get(name);
-		if (bot.setRegistered()) {
+		if (!bot.isRegistered()) {
 			this.registerWithApi(bot);
 		}
 		return bot;

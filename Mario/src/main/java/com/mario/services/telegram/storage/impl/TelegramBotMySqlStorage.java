@@ -22,18 +22,18 @@ public class TelegramBotMySqlStorage implements TelegramBotStorage, Loggable {
 
 	public static abstract class ChatIdDAO extends BaseMySqlDAO {
 
-		@SqlQuery("SELECT chat_id FROM chat_ids WHERE phone_number=:phoneNumber AND bot_username=:botUsername")
-		public abstract Long fetchChatIdByPhoneNumberAndBotUsername(@Bind("phoneNumber") String phoneNumber,
+		@SqlQuery("SELECT chat_id FROM chat_ids WHERE username=:userName AND bot_username=:botUsername")
+		public abstract Long fetchChatIdByUserNameAndBotUsername(@Bind("userName") String userName,
 				@Bind("botUsername") String botUsername);
 
-		@SqlUpdate("INSERT INTO `chat_ids` (`bot_username`, `phone_number`, `chat_id`) VALUES (:botUsername, :phoneNumber, :chatId)")
-		public abstract void insert(@Bind("phoneNumber") String phoneNumber, @Bind("botUsername") String botUsername,
+		@SqlUpdate("INSERT INTO `chat_ids` (`bot_username`, `username`, `chat_id`) VALUES (:botUsername, :userName, :chatId)")
+		public abstract void insert(@Bind("userName") String userName, @Bind("botUsername") String botUsername,
 				@Bind("chatId") long chatId);
 
 		@SqlQuery("SHOW TABLES LIKE :tableName")
 		public abstract List<String> showTable(@Bind("tableName") String tableName);
 
-		@SqlUpdate("CREATE TABLE `chat_ids` (`id` INT NOT NULL AUTO_INCREMENT, `bot_username` VARCHAR(128) NOT NULL, `phone_number` VARCHAR(15) NOT NULL, `chat_id` BIGINT(20) NOT NULL, PRIMARY KEY (`id`), UNIQUE INDEX `botusername_phonenumber_unq` (`bot_username` ASC, `phone_number` ASC))")
+		@SqlUpdate("CREATE TABLE `chat_ids` (`id` INT NOT NULL AUTO_INCREMENT, `bot_username` VARCHAR(128) NOT NULL, `username` VARCHAR(15) NOT NULL, `chat_id` BIGINT(20) NOT NULL, PRIMARY KEY (`id`), UNIQUE INDEX `botusername_username_unq` (`bot_username` ASC, `username` ASC))")
 		public abstract void createTable();
 	}
 
@@ -57,20 +57,20 @@ public class TelegramBotMySqlStorage implements TelegramBotStorage, Loggable {
 
 	private final Map<String, Object> synchronizedMonitorObjects = new ConcurrentHashMap<>();
 
-	private Object getMonitorObject(String phoneNumber) {
+	private Object getMonitorObject(String userName) {
 		Object obj = new Object();
-		Object old = this.synchronizedMonitorObjects.putIfAbsent(phoneNumber, obj);
+		Object old = this.synchronizedMonitorObjects.putIfAbsent(userName, obj);
 		return old != null ? old : obj;
 	}
 
 	@Override
-	public boolean saveChatId(String phoneNumber, long chatId) {
-		if (this.getChatId(phoneNumber) == -1) {
-			synchronized (getMonitorObject(phoneNumber)) {
-				if (this.getChatId(phoneNumber) == -1) {
-					this.localCache.put(phoneNumber, chatId);
+	public boolean saveChatId(String userName, long chatId) {
+		if (this.getChatId(userName) == -1) {
+			synchronized (getMonitorObject(userName)) {
+				if (this.getChatId(userName) == -1) {
+					this.localCache.put(userName, chatId);
 					try (ChatIdDAO dao = this.adapter.openDAO(ChatIdDAO.class)) {
-						dao.insert(phoneNumber, botUsername, chatId);
+						dao.insert(userName, botUsername, chatId);
 						return true;
 					} catch (Exception e) {
 						throw e;
@@ -82,14 +82,14 @@ public class TelegramBotMySqlStorage implements TelegramBotStorage, Loggable {
 	}
 
 	@Override
-	public long getChatId(String phoneNumber) {
-		if (!this.localCache.containsKey(phoneNumber)) {
-			synchronized (getMonitorObject(phoneNumber)) {
-				if (!this.localCache.containsKey(phoneNumber)) {
+	public long getChatId(String userName) {
+		if (!this.localCache.containsKey(userName)) {
+			synchronized (getMonitorObject(userName)) {
+				if (!this.localCache.containsKey(userName)) {
 					try (ChatIdDAO dao = this.adapter.openDAO(ChatIdDAO.class)) {
-						Long chatId = dao.fetchChatIdByPhoneNumberAndBotUsername(phoneNumber, this.botUsername);
+						Long chatId = dao.fetchChatIdByUserNameAndBotUsername(userName, this.botUsername);
 						if (chatId != null) {
-							this.localCache.put(phoneNumber, chatId);
+							this.localCache.put(userName, chatId);
 						} else {
 							return -1;
 						}
@@ -97,7 +97,7 @@ public class TelegramBotMySqlStorage implements TelegramBotStorage, Loggable {
 				}
 			}
 		}
-		return this.localCache.get(phoneNumber);
+		return this.localCache.get(userName);
 	}
 
 }
