@@ -43,7 +43,7 @@
 			<type>LONG_POLLING</type>
 			<storage>
 				<type>file</type>
-				<filePath><![CDATA[logs/telegram/puppet_alert_bot_chat_ids.txt]]></filePath>
+				<filePath><![CDATA[logs/telegram/alert_bot_chat_ids.txt]]></filePath>
 			</storage>
 		</telegrambot>
 	</services>
