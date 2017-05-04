@@ -127,7 +127,6 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 
 			SendMessage reply = new SendMessage();
 			reply.setChatId(chatId);
-
 			if (userName != null) {
 				if (getChatId(userName) > 0) {
 					reply.setText("Hello, you're already registered, now you just have to wait for alert");
@@ -136,20 +135,20 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 						if (this.storage.saveChatId(userName, chatId)) {
 							getLogger().info("TelegramBot name {} --> saved userName {} and chat id {}",
 									this.botUsername, userName, chatId);
-							reply.setText(
-									"Your userName is '{}', I did save it with the chatId and re-use it to send alert to your");
+							reply.setText("Your userName is '" + userName
+									+ "', I did save and will re-use it to send alert to you");
 						} else {
-							reply.setText(
-									"Your userName is '{}', I can't save it because of unknown error, I'm sorry!!!");
+							reply.setText("Your userName is '" + userName
+									+ "', I can't save it because of unknown error, I'm sorry, try again later");
 						}
 					} catch (Exception e) {
 						getLogger().error("Cannot save chatId", e);
 						reply.setText("Your userName is '{}', I can't save it because of '" + e.getMessage()
-								+ "', I'm sorry");
+								+ "', I'm sorry, try again later");
 					}
 				}
 			} else {
-				reply.setText("Your userName doesn't set, please set it in profile setting and chat with me again");
+				reply.setText("Your userName doesn't set, please do it in profile setting and chat with me again");
 			}
 
 			try {
