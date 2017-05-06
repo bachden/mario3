@@ -243,10 +243,16 @@ class ExtensionConfigReader extends XmlConfigReader {
 	}
 
 	private void readDistributedSchedulerConfigs(Node node) {
+		if (node == null) {
+			return;
+		}
 		this.hzDistributedSchedulerConfigManager.read(node);
 	}
 
 	private void readServices(Node node) {
+		if (node == null) {
+			return;
+		}
 		this.serviceManager.readFromXml(node);
 	}
 
