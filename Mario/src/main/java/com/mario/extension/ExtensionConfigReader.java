@@ -251,6 +251,9 @@ class ExtensionConfigReader extends XmlConfigReader {
 	}
 
 	private void readContacts(Node node) {
+		if (node == null) {
+			return;
+		}
 		this.contactBook.readFromXml(node);
 	}
 
