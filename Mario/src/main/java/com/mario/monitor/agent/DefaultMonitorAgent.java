@@ -54,7 +54,7 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 	@Override
 	public void executeCheck() {
 		MonitorableResponse response = getTarget().checkStatus();
-		getLogger().debug("{} is executing check status on target", getName());
+		getLogger().debug("{} execute status checking on target", getName());
 		if (response != null) {
 			MonitorableStatus status = response.getStatus();
 			MonitorAlertStatusConfig alertConfig = getAlertConfig().getStatusToConfigs().get(status);
