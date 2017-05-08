@@ -60,6 +60,7 @@ public class EchoSocketClient extends NettySocketClient {
 	}
 
 	private void sendPing() throws Exception {
+		String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 		DecimalFormat df = new DecimalFormat("0.##");
 		int numMessages = (int) 1024 * 1024;
 		int numThreads = 1;
@@ -103,23 +104,7 @@ public class EchoSocketClient extends NettySocketClient {
 
 					PuElement[] arr = new PuElement[messagePerThread];
 					for (int i = 0; i < arr.length; i++) {
-						arr[i] = PuObject.fromObject(new MapTuple<>("id", 0, "name", "Nguyen Hoang Bach", "data",
-								"2015-11-19 19:32:47.905 [nioEventLoopGroup-2-1] DEBUG "
-										+ "com.mario.test.socket.echo.client.EchoSocketClient (EchoSocketClient.java:143"
-										+ ") - Connected to server at localhost:9999 --> start ping2015-11-19 "
-										+ "19:32:47.905 [nioEventLoopGroup-2-1] DEBUG com.mario.test.socket.echo"
-										+ ".client.EchoSocketClient (EchoSocketClient.java:143) - Connected to serv"
-										+ "er at localhost:9999 --> start ping2015-11-19 19:32:47.905 [nioEventLoopGr"
-										+ "oup-2-1] DEBUG com.mario.test.socket.echo.client.EchoSocketClient (EchoSoc"
-										+ "ketClient.java:143) - Connected to server at localhost:9999 --> start ping"
-										+ "2015-11-19 19:32:47.905 [nioEventLoopGroup-2-1] DEBUG com.mario.test.socket."
-										+ "echo.client.EchoSocketClient (EchoSocketClient.java:143) - Connected to ser"
-										+ "ver at localhost:9999 --> start ping2015-11-19 19:32:47.905 [nioEventLoopGro"
-										+ "up-2-1] DEBUG com.mario.test.socket.echo.client.EchoSocketClient (EchoSocket"
-										+ "Client.java:143) - Connected to server at localhost:9999 --> start ping2015-1"
-										+ "1-19 19:32:47.905 [nioEventLoopGroup-2-1] DEBUG com.mario.test.socket.echo.cl"
-										+ "ient.EchoSocketClient (EchoSocketClient.java:143) - Connected to server at lo"
-										+ "calhost:9999 --> start ping"));
+						arr[i] = PuObject.fromObject(new MapTuple<>("id", 0, "name", "Nguyen Hoang Bach", "data", str));
 					}
 					try {
 						startSignal.await();
@@ -152,23 +137,7 @@ public class EchoSocketClient extends NettySocketClient {
 
 		long time = System.nanoTime() - startTime;
 
-		int messageSize = PuObject.fromObject(new MapTuple<>("id", 0, "name", "Nguyen Hoang Bach", "data",
-				"2015-11-19 19:32:47.905 [nioEventLoopGroup-2-1] DEBUG "
-						+ "com.mario.test.socket.echo.client.EchoSocketClient (EchoSocketClient.java:143"
-						+ ") - Connected to server at localhost:9999 --> start ping2015-11-19 "
-						+ "19:32:47.905 [nioEventLoopGroup-2-1] DEBUG com.mario.test.socket.echo"
-						+ ".client.EchoSocketClient (EchoSocketClient.java:143) - Connected to serv"
-						+ "er at localhost:9999 --> start ping2015-11-19 19:32:47.905 [nioEventLoopGr"
-						+ "oup-2-1] DEBUG com.mario.test.socket.echo.client.EchoSocketClient (EchoSoc"
-						+ "ketClient.java:143) - Connected to server at localhost:9999 --> start ping"
-						+ "2015-11-19 19:32:47.905 [nioEventLoopGroup-2-1] DEBUG com.mario.test.socket."
-						+ "echo.client.EchoSocketClient (EchoSocketClient.java:143) - Connected to ser"
-						+ "ver at localhost:9999 --> start ping2015-11-19 19:32:47.905 [nioEventLoopGro"
-						+ "up-2-1] DEBUG com.mario.test.socket.echo.client.EchoSocketClient (EchoSocket"
-						+ "Client.java:143) - Connected to server at localhost:9999 --> start ping2015-1"
-						+ "1-19 19:32:47.905 [nioEventLoopGroup-2-1] DEBUG com.mario.test.socket.echo.cl"
-						+ "ient.EchoSocketClient (EchoSocketClient.java:143) - Connected to server at lo"
-						+ "calhost:9999 --> start ping"))
+		int messageSize = PuObject.fromObject(new MapTuple<>("id", 0, "name", "Nguyen Hoang Bach", "data", str))
 				.toBytes().length;
 
 		System.out.println(String.format("************ REPORT ************"));
