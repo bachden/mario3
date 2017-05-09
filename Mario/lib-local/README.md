@@ -7,3 +7,5 @@ mvn install:install-file \
     -Dversion=1.0.0 \
     -Dpackaging=jar \
     -DgeneratePom=true
+    
+use the same command for msgpack-0.6.12-modified.jar
