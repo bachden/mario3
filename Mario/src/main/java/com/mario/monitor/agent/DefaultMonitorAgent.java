@@ -33,6 +33,8 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 
 	private String distributedSchedulerName;
 
+	private MonitorableStatus lastStatus = null;
+
 	public DefaultMonitorAgent(String distributedSchedulerName) {
 		this.distributedSchedulerName = distributedSchedulerName;
 	}
@@ -58,6 +60,21 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 		if (response != null) {
 			MonitorableStatus status = response.getStatus();
 			MonitorAlertStatusConfig alertConfig = getAlertConfig().getStatusToConfigs().get(status);
+
+			// if response status == OK, and auto send recovery is
+			if (alertConfig == null //
+					&& response.getStatus() == MonitorableStatus.OK //
+					&& this.getAlertConfig().isAutoSendRecovery() //
+					&& (lastStatus == MonitorableStatus.CRITICAL || lastStatus == MonitorableStatus.WARNING)) {
+				// try to get alert config for RECOVERY status
+				alertConfig = getAlertConfig().getStatusToConfigs().get(MonitorableStatus.RECOVERY);
+				if (alertConfig == null) {
+					// if RECOVERY status didn't configured, try to get alert
+					// config from lastStatus
+					alertConfig = getAlertConfig().getStatusToConfigs().get(lastStatus);
+				}
+			}
+
 			if (alertConfig != null) {
 				Collection<Contact> contacts = extractContactListFromRecipientsConfig(
 						alertConfig.getRecipientsConfig());
@@ -80,70 +97,90 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 					}
 
 					MonitorAlertServicesConfig servicesConfig = alertConfig.getServicesConfig();
-					if (emails.size() > 0) {
-						DefaultEmailEnvelope envelope = new DefaultEmailEnvelope();
-						envelope.setContent(response.getMessage());
-						envelope.setSubject("[" + getName() + " ALERT] " + status.name());
-						envelope.getTo().addAll(emails);
+					sendAlert(response, emails, phoneNumbers, telegramIds, servicesConfig);
+				}
+			}
+			lastStatus = status;
+		}
+	}
 
-						for (String emailServiceName : servicesConfig.getEmailServices()) {
-							EmailService emailService = getApi().getEmailService(emailServiceName);
-							if (emailService != null) {
-								executor.submit(new Runnable() {
+	private void sendAlert(MonitorableResponse response, Collection<String> emails, Collection<String> phoneNumbers,
+			Collection<String> telegramIds, MonitorAlertServicesConfig servicesConfig) {
+		if (emails.size() > 0) {
+			sendViaEmail(response, emails, servicesConfig);
+		}
+		if (phoneNumbers.size() > 0) {
+			sendViaSMS(response, phoneNumbers, servicesConfig);
+		}
+		if (telegramIds.size() > 0) {
+			sendViaTelegram(response, telegramIds, servicesConfig);
+		}
+	}
 
-									@Override
-									public void run() {
-										try {
-											emailService.send(envelope);
-										} catch (Exception e) {
-											getLogger().error("Error while sending email: ", e);
-										}
-									}
-								});
-							}
+	private void sendViaEmail(MonitorableResponse response, Collection<String> emails,
+			MonitorAlertServicesConfig servicesConfig) {
+		DefaultEmailEnvelope envelope = new DefaultEmailEnvelope();
+		envelope.setContent(response.getMessage());
+		envelope.setSubject("[" + getName() + " ALERT] " + response.getStatus().name());
+		envelope.getTo().addAll(emails);
+
+		for (String emailServiceName : servicesConfig.getEmailServices()) {
+			EmailService emailService = getApi().getEmailService(emailServiceName);
+			if (emailService != null) {
+				executor.submit(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							emailService.send(envelope);
+						} catch (Exception e) {
+							getLogger().error("Error while sending email: ", e);
 						}
 					}
+				});
+			}
+		}
+	}
 
-					if (phoneNumbers.size() > 0) {
-						for (String smsServiceName : servicesConfig.getSmsServices()) {
-							SmsService smsService = getApi().getSmsService(smsServiceName);
-							if (smsService != null) {
-								try {
-									smsService.send(response.getMessage(), phoneNumbers);
-								} catch (Exception e) {
-									getLogger().error("Error while sending sms: ", e);
-								}
-							}
-						}
-					}
+	private void sendViaSMS(MonitorableResponse response, Collection<String> phoneNumbers,
+			MonitorAlertServicesConfig servicesConfig) {
+		String message = "[" + this.getName() + " ALERT] " + response.getStatus().name() + "\n" + response.getMessage();
+		for (String smsServiceName : servicesConfig.getSmsServices()) {
+			SmsService smsService = getApi().getSmsService(smsServiceName);
+			if (smsService != null) {
+				try {
+					smsService.send(message, phoneNumbers);
+				} catch (Exception e) {
+					getLogger().error("Error while sending sms: ", e);
+				}
+			}
+		}
+	}
 
-					if (telegramIds.size() > 0) {
-						for (String telegramBotName : servicesConfig.getTelegramBots()) {
-							TelegramBot bot = getApi().getTelegramBot(telegramBotName);
-							if (bot != null) {
-								for (String telegramPhoneNumber : telegramIds) {
-									try {
-										long chatId = bot.getChatId(telegramPhoneNumber);
-										if (chatId > 0) {
-											SendMessage message = new SendMessage();
-											message.setChatId(chatId);
-											message.setText(response.getMessage());
-											((AbsSender) bot).sendMessage(message);
-										} else {
-											getLogger().warn("Cannot fetch telegram chat id for phone number {}",
-													telegramPhoneNumber);
-										}
-									} catch (Exception e) {
-										getLogger().error("Send message via telegram bot error", e);
-									}
-								}
-							}
+	private void sendViaTelegram(MonitorableResponse response, Collection<String> telegramIds,
+			MonitorAlertServicesConfig servicesConfig) {
+		String messageStr = "[" + this.getName() + " ALERT] " + response.getStatus().name() + "\n"
+				+ response.getMessage();
+		SendMessage message = new SendMessage();
+		message.setText(messageStr);
+		for (String telegramBotName : servicesConfig.getTelegramBots()) {
+			TelegramBot bot = getApi().getTelegramBot(telegramBotName);
+			if (bot != null) {
+				for (String telegramPhoneNumber : telegramIds) {
+					try {
+						long chatId = bot.getChatId(telegramPhoneNumber);
+						if (chatId > 0) {
+							message.setChatId(chatId);
+							((AbsSender) bot).sendMessage(message);
+						} else {
+							getLogger().warn("Cannot fetch telegram chat id for phone number {}", telegramPhoneNumber);
 						}
+					} catch (Exception e) {
+						getLogger().error("Send message via telegram bot error", e);
 					}
 				}
 			}
 		}
-
 	}
 
 	@Override

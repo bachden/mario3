@@ -401,6 +401,7 @@
 			<interval>[checking-interval-time]</interval>
 			<target>[a lifeCycle which implement Monitorable interface]</target>
 			<alert>
+				<autoSendRecovery>[true (default) | false - recipients will got alert if status ok occurs after warning or critical]</autoSendRecovery>
 				<ok>
 					<recipients>
 						<group>[group of contact]</group>
@@ -441,6 +442,16 @@
 						<email>[email_service_name]</email>
 					</services>
 				</unknown>
+				<recovery>
+					<recipients>
+						<group>[group of contact]</group>
+						<contact>[single contact]</contact>
+					</recipients>
+					<services>
+						<sms>[sms_service_name]</sms>
+						<email>[email_service_name]</email>
+					</services>
+				</recovery>
 			</alert>
 			<variables>
 				<!-- Monitoring params, will be passed to target object in initMonitoring method -->

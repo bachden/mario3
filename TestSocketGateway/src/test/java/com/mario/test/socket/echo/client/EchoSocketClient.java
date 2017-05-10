@@ -5,7 +5,6 @@ import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 
 import com.nhb.common.data.MapTuple;
-import com.nhb.common.data.PuElement;
 import com.nhb.common.data.PuObject;
 import com.nhb.common.utils.Initializer;
 import com.nhb.eventdriven.Event;
@@ -59,57 +58,53 @@ public class EchoSocketClient extends NettySocketClient {
 		this.connect(host, port);
 	}
 
-	private void sendPing() throws Exception {
+	private void send() throws Exception {
+
+		DecimalFormat df = new DecimalFormat("0.##");
+
+		int numMessages = (int) 1024 * 1024;
+		int numThreads = 4;
+		int messagePerThread = numMessages / numThreads;
+
+		if (messagePerThread * numThreads < numMessages) {
+			numThreads += 1;
+		}
 
 		String str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 				+ "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 				+ "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
-		DecimalFormat df = new DecimalFormat("0.##");
-		int numMessages = (int) 1024 * 1024;
-		int numThreads = 1;
-		int messagePerThread = numMessages / numThreads;
+		PuObject puo = PuObject.fromObject(new MapTuple<>("id", 0, "name", "Nguyen Hoang Bach", "data", str));
+		int messageSize = puo.toBytes().length;
+		System.out.println("Preparing " + numMessages + " message with size " + messageSize + " bytes");
+
+		PuObject[] messages = new PuObject[numMessages];
+		for (int i = 0; i < messages.length; i++) {
+			messages[i] = puo.deepClone();
+		}
 
 		CountDownLatch startSignal = new CountDownLatch(1);
 		CountDownLatch doneSignal = new CountDownLatch(messagePerThread * numThreads);
 
-		new Thread() {
-			{
-				this.setName("Monitor");
-			}
+		this.addEventListener(SocketEvent.MESSAGE, new EventHandler() {
 
 			@Override
-			public void run() {
-				try {
-					startSignal.await();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				while (true) {
-					System.out.println(String.format("Remaining: %d on total %d, complete %s%%", doneSignal.getCount(),
-							numMessages,
-							df.format(Double.valueOf(numMessages - doneSignal.getCount()) * 100 / numMessages)));
-					if (doneSignal.getCount() == 0) {
-						return;
-					}
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+			public void onEvent(Event event) throws Exception {
+				doneSignal.countDown();
 			}
-		}.start();
+		});
 
 		for (int i = 0; i < numThreads; i++) {
-			new Thread() {
+			final int startIndex = i * messagePerThread;
+			new Thread(new Runnable() {
+
 				@Override
 				public void run() {
-
-					PuElement[] arr = new PuElement[messagePerThread];
-					for (int i = 0; i < arr.length; i++) {
-						arr[i] = PuObject.fromObject(new MapTuple<>("id", 0, "name", "Nguyen Hoang Bach", "data", str));
+					int endIndex = startIndex + messagePerThread;
+					if (endIndex > numMessages) {
+						endIndex = numMessages;
 					}
+
 					try {
 						startSignal.await();
 					} catch (InterruptedException e) {
@@ -117,41 +112,62 @@ public class EchoSocketClient extends NettySocketClient {
 						return;
 					}
 
-					for (int i = 0; i < arr.length; i++) {
-						send(arr[i]);
+					for (int i = startIndex; i < endIndex; i++) {
+						send(messages[i]);
 					}
 				}
-			}.start();
+			}, "Sending thread " + (i + 1)).start();
 		}
 
-		this.addEventListener(SocketEvent.MESSAGE, new EventHandler() {
+		Thread monitorThread = new Thread(new Runnable() {
 
 			@Override
-			public void onEvent(Event event) throws Exception {
-				// SocketEvent socketEvent = (SocketEvent) event;
-				// System.out.println("Client got message: " +
-				// socketEvent.getData());
-				doneSignal.countDown();
+			public void run() {
+				while (true) {
+					long count = doneSignal.getCount();
+					if (count == 0) {
+						System.out.println("*** DONE ***");
+						return;
+					}
+					String percentage = df.format(Double.valueOf(numMessages - count) * 100 / numMessages);
+					System.out.println(
+							String.format("Remaining: %d on total %d, complete %s%%", count, numMessages, percentage));
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						return;
+					}
+				}
 			}
-		});
+		}, "Monitor");
+
+		System.out.println("Start sending and monitoring....");
 
 		startSignal.countDown();
+		monitorThread.start();
+
 		long startTime = System.nanoTime();
 		doneSignal.await();
-
 		long time = System.nanoTime() - startTime;
 
-		int messageSize = PuObject.fromObject(new MapTuple<>("id", 0, "name", "Nguyen Hoang Bach", "data", str))
-				.toBytes().length;
+		System.out.println("Got all message acks, interupt monitor thread and generate report...");
+
+		monitorThread.interrupt();
+
+		long totalDataSentAndReceive = (long) messageSize * (long) numMessages * 2l;
+		double totalDataSentAndReceiveMB = totalDataSentAndReceive / (1024 * 1024);
 
 		System.out.println(String.format("************ REPORT ************"));
-		System.out.println(String.format("Num message: %d", numMessages));
-		System.out.println(String.format("Executing time: %s sec", df.format(Double.valueOf(time / 1e9))));
+		System.out.println(String.format("Num messages: %d", numMessages));
 		System.out.println(String.format("Number of threads: %d", numThreads));
+		System.out.println(String.format("Executing time: %s sec", df.format(Double.valueOf(time / 1e9))));
 		System.out.println(String.format("Message size: %dbyte = %skb", messageSize,
 				df.format(Double.valueOf(messageSize) / 1024)));
-		System.out.println(String.format("Throughput: %sMb/s",
-				df.format(Double.valueOf(messageSize) / Double.valueOf(time / 1e9))));
+		System.out.println(String.format("Total data (sent + received): %sMb (%sGb)",
+				df.format(Double.valueOf(totalDataSentAndReceiveMB)),
+				df.format(Double.valueOf(totalDataSentAndReceiveMB / 1014))));
+		System.out.println(String.format("Throughput (sent + received): %sMb/s",
+				df.format(Double.valueOf(totalDataSentAndReceiveMB) / Double.valueOf(time / 1e9))));
 		System.out.println(String.format("Message per second: %s",
 				df.format(Double.valueOf(numMessages) / Double.valueOf(time / 1e9))));
 
@@ -163,7 +179,7 @@ public class EchoSocketClient extends NettySocketClient {
 		new Thread() {
 			public void run() {
 				try {
-					sendPing();
+					send();
 				} catch (Exception e) {
 					getLogger().error("Send ping error", e);
 					System.exit(1);

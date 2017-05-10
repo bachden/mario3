@@ -2,7 +2,7 @@ package com.mario.monitor;
 
 public enum MonitorableStatus {
 
-	OK, WARNING, CRITICAL, UNKNOWN;
+	OK, WARNING, CRITICAL, UNKNOWN, RECOVERY;
 
 	public static final MonitorableStatus fromName(String name) {
 		if (name != null) {

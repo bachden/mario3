@@ -1391,67 +1391,73 @@ class ExtensionConfigReader extends XmlConfigReader {
 			while (curr != null) {
 				if (curr.getNodeType() == Element.ELEMENT_NODE) {
 					String nodeName = curr.getNodeName().toLowerCase();
-					MonitorableStatus status = MonitorableStatus.fromName(nodeName);
-					if (status != null) {
-						MonitorAlertStatusConfig statusConfig = new MonitorAlertStatusConfig();
-						statusConfig.setStatus(status);
+					if (nodeName.equalsIgnoreCase("autoSendRecovery")) {
+						Boolean value = Boolean.valueOf(curr.getTextContent().trim());
+						config.setAutoSendRecovery(value);
+					} else {
+						MonitorableStatus status = MonitorableStatus.fromName(nodeName);
+						if (status != null) {
+							MonitorAlertStatusConfig statusConfig = new MonitorAlertStatusConfig();
+							statusConfig.setStatus(status);
 
-						Node statusEle = curr.getFirstChild();
-						while (statusEle != null) {
-							if (statusEle.getNodeType() == Element.ELEMENT_NODE) {
-								String statusEleName = statusEle.getNodeName().toLowerCase();
-								switch (statusEleName) {
-								case "recipients":
-									MonitorAlertRecipientsConfig recipientsConfig = new MonitorAlertRecipientsConfig();
-									Node recipientsEle = statusEle.getFirstChild();
-									while (recipientsEle != null) {
-										if (recipientsEle.getNodeType() == Element.ELEMENT_NODE) {
-											String recipientsNodeName = recipientsEle.getNodeName().toLowerCase();
-											switch (recipientsNodeName) {
-											case "contact":
-												recipientsConfig.getContacts()
-														.add(recipientsEle.getTextContent().trim());
-												break;
-											case "group":
-												recipientsConfig.getGroups().add(recipientsEle.getTextContent().trim());
-												break;
+							Node statusEle = curr.getFirstChild();
+							while (statusEle != null) {
+								if (statusEle.getNodeType() == Element.ELEMENT_NODE) {
+									String statusEleName = statusEle.getNodeName().toLowerCase();
+									switch (statusEleName) {
+									case "recipients":
+										MonitorAlertRecipientsConfig recipientsConfig = new MonitorAlertRecipientsConfig();
+										Node recipientsEle = statusEle.getFirstChild();
+										while (recipientsEle != null) {
+											if (recipientsEle.getNodeType() == Element.ELEMENT_NODE) {
+												String recipientsNodeName = recipientsEle.getNodeName().toLowerCase();
+												switch (recipientsNodeName) {
+												case "contact":
+													recipientsConfig.getContacts()
+															.add(recipientsEle.getTextContent().trim());
+													break;
+												case "group":
+													recipientsConfig.getGroups()
+															.add(recipientsEle.getTextContent().trim());
+													break;
+												}
 											}
+											recipientsEle = recipientsEle.getNextSibling();
 										}
-										recipientsEle = recipientsEle.getNextSibling();
-									}
-									statusConfig.setRecipientsConfig(recipientsConfig);
-									break;
-								case "services":
-									MonitorAlertServicesConfig servicesConfig = new MonitorAlertServicesConfig();
-									Node servicesEle = statusEle.getFirstChild();
-									while (servicesEle != null) {
-										if (servicesEle.getNodeType() == Element.ELEMENT_NODE) {
-											String servicesNodeName = servicesEle.getNodeName().toLowerCase();
-											switch (servicesNodeName) {
-											case "sms":
-												servicesConfig.getSmsServices()
-														.add(servicesEle.getTextContent().trim());
-												break;
-											case "email":
-												servicesConfig.getEmailServices()
-														.add(servicesEle.getTextContent().trim());
-												break;
-											case "telegram":
-											case "telegrambot":
-												servicesConfig.getTelegramBots()
-														.add(servicesEle.getTextContent().trim());
-												break;
+										statusConfig.setRecipientsConfig(recipientsConfig);
+										break;
+									case "services":
+										MonitorAlertServicesConfig servicesConfig = new MonitorAlertServicesConfig();
+										Node servicesEle = statusEle.getFirstChild();
+										while (servicesEle != null) {
+											if (servicesEle.getNodeType() == Element.ELEMENT_NODE) {
+												String servicesNodeName = servicesEle.getNodeName().toLowerCase();
+												switch (servicesNodeName) {
+												case "sms":
+													servicesConfig.getSmsServices()
+															.add(servicesEle.getTextContent().trim());
+													break;
+												case "email":
+													servicesConfig.getEmailServices()
+															.add(servicesEle.getTextContent().trim());
+													break;
+												case "telegram":
+												case "telegrambot":
+													servicesConfig.getTelegramBots()
+															.add(servicesEle.getTextContent().trim());
+													break;
+												}
 											}
+											servicesEle = servicesEle.getNextSibling();
 										}
-										servicesEle = servicesEle.getNextSibling();
+										statusConfig.setServicesConfig(servicesConfig);
+										break;
 									}
-									statusConfig.setServicesConfig(servicesConfig);
-									break;
 								}
+								statusEle = statusEle.getNextSibling();
 							}
-							statusEle = statusEle.getNextSibling();
+							config.getStatusToConfigs().put(status, statusConfig);
 						}
-						config.getStatusToConfigs().put(status, statusConfig);
 					}
 				}
 				curr = curr.getNextSibling();
