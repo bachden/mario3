@@ -16,7 +16,7 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
 public abstract class RabbitMQGateway extends AbstractGateway<RabbitMQGatewayConfig>
-		implements RabbitMQChannelHandler, RabbitMQRoutingGateway, HasServerWrapper<RabbitMQServerWrapper> {
+		implements RabbitMQChannelHandler, RabbitMQBindableGateway, HasServerWrapper<RabbitMQServerWrapper> {
 
 	private String queueName;
 
@@ -132,6 +132,7 @@ public abstract class RabbitMQGateway extends AbstractGateway<RabbitMQGatewayCon
 	@Override
 	public void queueUnbind(String rountingKey) throws IOException {
 		if (!this.isReady()) {
+			this.waitingForBindRoutingKeys.remove(rountingKey);
 			return;
 		}
 		if (this.getConfig().getQueueConfig().getExchangeName().isEmpty()) {

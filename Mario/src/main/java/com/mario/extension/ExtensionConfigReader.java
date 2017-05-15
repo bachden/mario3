@@ -1469,6 +1469,9 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	private void readMonitorAgentConfigs(Node node) throws Exception {
 		this.monitorAgentConfigs = new ArrayList<>();
+		if (node == null) {
+			return;
+		}
 		Node curr = node.getFirstChild();
 		while (curr != null) {
 			if (curr.getNodeType() == Element.ELEMENT_NODE) {

@@ -26,6 +26,7 @@ import com.nhb.messaging.http.producer.HttpSyncMessageProducer;
 import com.nhb.messaging.kafka.producer.KafkaMessageProducer;
 import com.nhb.messaging.rabbit.connection.RabbitMQConnection;
 import com.nhb.messaging.rabbit.producer.RabbitMQProducer;
+import com.nhb.messaging.rabbit.producer.RabbitMQPubSubProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQRPCProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQRoutingProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQRoutingRPCProducer;
@@ -114,6 +115,10 @@ public class MessageProducerManager extends BaseLoggable {
 					config.getQueueConfig());
 			break;
 		case PUB_SUB:
+			producer = new RabbitMQPubSubProducer(this.getConnection(config.getConnectionName()),
+					config.getQueueConfig());
+
+			break;
 		case TOPIC:
 		default:
 			throw new UnsupportedTypeException();

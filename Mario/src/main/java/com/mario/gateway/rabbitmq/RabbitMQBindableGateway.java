@@ -2,7 +2,7 @@ package com.mario.gateway.rabbitmq;
 
 import java.io.IOException;
 
-public interface RabbitMQRoutingGateway {
+public interface RabbitMQBindableGateway {
 
 	void queueBind(String rountingKey) throws IOException;
 

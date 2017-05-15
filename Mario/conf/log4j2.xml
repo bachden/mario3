@@ -64,6 +64,9 @@
 		<Logger name="org.I0Itec" additivity="true" level="debug" includeLocation="true">
 			<AppenderRef ref="console" />
 		</Logger>
+		<Logger name="nhb" additivity="true" level="debug" includeLocation="true">
+			<AppenderRef ref="console" />
+		</Logger>
 		<!-- <Logger name="sendEmailToWatchmans" additivity="false" level="info" includeLocation="true"> -->
 		<!-- <AppenderRef ref="sendEmailToBachNHAppender" /> -->
 		<!-- </Logger> -->

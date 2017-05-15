@@ -223,13 +223,11 @@
 			<deserializer>[deserializer-class]</deserializer>
 			<server>[rabbitmq_connection_pool_name]</server>
 			<queue>
-				<type>taskQueue</type>
-				<name>[queueName]</name>
-				<autoack>true</autoack>
-				<routingKey>[rountingKey, default will be queueName if exchangeName
-					== null or empty]
-				</routingKey>
-				<exchangeName>[exchangeName]</exchangeName>
+				<type>pub_sub</type>
+				<name>[queueName ** not require if type == pub_sub or routing]</name>
+				<autoack>[true (default) | false ** if false, ack will be send when consumer process done]</autoack>
+				<routingKey>[rountingKey, default will be queueName if exchangeName == null or empty]</routingKey>
+				<exchangeName>[exchangeName ** require]</exchangeName>
 				<exchangeType>[fanout | direct | topic | headers]</exchangeType>
 			</queue>
 			<workerpool>
