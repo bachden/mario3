@@ -15,13 +15,14 @@ public class HzDistributedScheduledFuture extends HzDistributedScheduleCleaner i
 
 	private long startTime;
 
-	public HzDistributedScheduledFuture(String taskName, IScheduledFuture<?> sourceFuture, String trackingMapName) {
-		this(taskName, sourceFuture, trackingMapName, null);
+	public HzDistributedScheduledFuture(String schedulerName, String taskName, IScheduledFuture<?> sourceFuture,
+			String trackingMapName) {
+		this(schedulerName, taskName, sourceFuture, trackingMapName, null);
 	}
 
-	public HzDistributedScheduledFuture(String taskName, IScheduledFuture<?> sourceFuture, String trackingMapName,
-			HazelcastInstance hazelcastInstance) {
-		super(taskName, trackingMapName, hazelcastInstance);
+	public HzDistributedScheduledFuture(String schedulerName, String taskName, IScheduledFuture<?> sourceFuture,
+			String trackingMapName, HazelcastInstance hazelcastInstance) {
+		super(schedulerName, taskName, trackingMapName, hazelcastInstance);
 		if (sourceFuture == null) {
 			throw new NullPointerException("source future cannot be null");
 		}

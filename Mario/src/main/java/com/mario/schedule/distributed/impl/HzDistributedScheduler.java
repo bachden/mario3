@@ -41,7 +41,7 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 
 	@Override
 	public DistributedScheduledFuture getFutureByName(String taskName) {
-		HzDistributedScheduledFuture result = new HzDistributedScheduledFuture(taskName,
+		HzDistributedScheduledFuture result = new HzDistributedScheduledFuture(this.hzScheduler.getName(), taskName,
 				this.getSourceFutureFromUrn(this.getUrnFromName(taskName)), this.hzTrackingMap.getName(),
 				this.hazelcast);
 		result.autoSyncStartTime();
@@ -50,8 +50,8 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 
 	private DistributedScheduledFuture prepareFuture(String taskName, IScheduledFuture<?> future) {
 		this.hzTrackingMap.put(taskName, future.getHandler().toUrn());
-		HzDistributedScheduledFuture result = new HzDistributedScheduledFuture(taskName, future,
-				this.hzTrackingMap.getName(), hazelcast);
+		HzDistributedScheduledFuture result = new HzDistributedScheduledFuture(this.hzScheduler.getName(), taskName,
+				future, this.hzTrackingMap.getName(), hazelcast);
 		result.autoSyncStartTime();
 		return result;
 	}
@@ -63,9 +63,9 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 			try {
 				if (this.hzTrackingMap.tryLock(taskName, 3, TimeUnit.SECONDS)) {
 					try {
-						IScheduledFuture<?> future = this.hzScheduler.schedule(
-								new HzDistributedRunnable(taskName, this.hzTrackingMap.getName(), runner), delay,
-								timeUnit);
+						IScheduledFuture<?> future = this.hzScheduler
+								.schedule(new HzDistributedRunnable(this.hzScheduler.getName(), taskName,
+										this.hzTrackingMap.getName(), runner), delay, timeUnit);
 						return prepareFuture(taskName, future);
 					} finally {
 						this.hzTrackingMap.unlock(taskName);
@@ -84,9 +84,9 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 		if (!this.hzTrackingMap.containsKey(taskName)) {
 			if (this.hzTrackingMap.tryLock(taskName)) {
 				try {
-					IScheduledFuture<?> future = this.hzScheduler.scheduleAtFixedRate(
-							new HzDistributedRunnable(taskName, this.hzTrackingMap.getName(), runner), delay, period,
-							timeUnit);
+					IScheduledFuture<?> future = this.hzScheduler
+							.scheduleAtFixedRate(new HzDistributedRunnable(this.hzScheduler.getName(), taskName,
+									this.hzTrackingMap.getName(), runner), delay, period, timeUnit);
 					return prepareFuture(taskName, future);
 				} finally {
 					this.hzTrackingMap.unlock(taskName);

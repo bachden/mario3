@@ -10,8 +10,8 @@ public class HzDistributedRunnable extends HzDistributedScheduleCleaner implemen
 
 	private final Runnable runner;
 
-	public HzDistributedRunnable(String taskName, String trackingMapName, Runnable runner) {
-		super(taskName, trackingMapName);
+	public HzDistributedRunnable(String schedulerName, String taskName, String trackingMapName, Runnable runner) {
+		super(schedulerName, taskName, trackingMapName);
 		if (!(runner instanceof Serializable)) {
 			throw new IllegalArgumentException("Runner must be instanceof Serializable");
 		}
