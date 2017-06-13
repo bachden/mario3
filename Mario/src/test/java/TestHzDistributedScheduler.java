@@ -11,7 +11,7 @@ public class TestHzDistributedScheduler {
 		HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance();
 		HzDistributedScheduler scheduler = new HzDistributedScheduler("test_scheduler", hazelcast);
 
-		for (int i = 0; i < 1e6; i++) {
+		for (int i = 0; i < 1; i++) {
 			scheduler.schedule("task_" + i, new TestHzScheduledRunnable(i), 100, TimeUnit.MILLISECONDS);
 		}
 	}
