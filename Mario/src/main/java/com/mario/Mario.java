@@ -24,6 +24,7 @@ import com.mario.gateway.GatewayEvent;
 import com.mario.gateway.GatewayManager;
 import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.monitor.MonitorAgentManager;
+import com.mario.monitor.self.MarioSelfMonitor;
 import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.distributed.impl.HzDistributedSchedulerManager;
 import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
@@ -297,6 +298,10 @@ public final class Mario extends BaseLoggable {
 
 		System.out.println("Start deadlock monitor");
 		this.startDeadlockMonitoring();
+
+		System.out.println("Start self monitor");
+		MarioSelfMonitor selfMonitor = new MarioSelfMonitor();
+		selfMonitor.start();
 	}
 
 	private void readGlobalProperties() {

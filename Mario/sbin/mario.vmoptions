@@ -31,12 +31,15 @@
 -DAsyncLoggerConfig.RingBufferSize=1024*1024
 -Dlog4j.configurationFile=conf/log4j2.xml
 
-# uncomment following lines to enable remote debugging 
+# uncomment following lines to enable jmx remote 
 #-Dcom.sun.management.jmxremote
 #-Dcom.sun.management.jmxremote.port=9001
 #-Dcom.sun.management.jmxremote.local.only=false
 #-Dcom.sun.management.jmxremote.authenticate=false
 #-Dcom.sun.management.jmxremote.ssl=false
+
+# uncomment following line to enable remote debug
+# -agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n
 
 # uncomment following lines to enable boot classpath including alpn (http 2 support)
 # -Xbootclasspath/p:./lib-boot/alpn-boot-8.1.8.v20160420.jar
