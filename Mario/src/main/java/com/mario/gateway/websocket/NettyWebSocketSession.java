@@ -37,6 +37,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
+import io.netty.util.ReferenceCounted;
 
 @SuppressWarnings("deprecation")
 public class NettyWebSocketSession extends NettyTCPSocketSession {
@@ -68,23 +69,36 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
-		if (msg instanceof FullHttpRequest) {
-			FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
-			handleHttpRequest(ctx, fullHttpRequest);
-		} else if (msg instanceof WebSocketFrame) {
-			if (this.getId() == null) {
-				this.setChannelHandlerContext(ctx);
-				this.setId(this.getSessionManager().register(this));
-				this.getReceiver().sessionOpened(this.getId());
+		try {
+			if (msg instanceof FullHttpRequest) {
+				FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
+				handleHttpRequest(ctx, fullHttpRequest);
+			} else if (msg instanceof WebSocketFrame) {
+				if (this.getId() == null) {
+					this.setChannelHandlerContext(ctx);
+					this.setId(this.getSessionManager().register(this));
+					this.getReceiver().sessionOpened(this.getId());
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				handleWebSocketFrame(ctx, (WebSocketFrame) msg);
+			} else {
+				getLogger()
+						.error("NettyWebsocketSession expected for FullHttpRequest or WebSocketFrame instance, but got "
+								+ (msg == null ? "NULL" : msg.getClass()));
+				throw new RuntimeException("Unable to handle message type : " + msg.getClass());
+			}
+		} finally {
+			if (msg instanceof ReferenceCounted) {
 				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
+					((ReferenceCounted) msg).release();
+				} catch (Exception e) {
+					getLogger().error("Error while retaining websocket message", e);
 				}
 			}
-			handleWebSocketFrame(ctx, (WebSocketFrame) msg);
-		} else {
-			throw new RuntimeException("Unable to handle message type : " + msg.getClass());
 		}
 	}
 

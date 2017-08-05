@@ -33,7 +33,7 @@ public final class WebSocketServerIndexPage {
 				+ "if (window.WebSocket) {" + NEWLINE + "  socket = new WebSocket(\"" + webSocketLocation + "\");"
 				+ NEWLINE + "  socket.onmessage = function(event) {" + NEWLINE
 				+ "    var ta = document.getElementById('responseText');" + NEWLINE
-				+ "    ta.value = ta.value + '\\n' + event.data" + NEWLINE + "  };" + NEWLINE
+				+ "    ta.value +='\\n[RECEIVE] >> ' + event.data" + NEWLINE + "  };" + NEWLINE
 				+ "  socket.onopen = function(event) {" + NEWLINE
 				+ "    var ta = document.getElementById('responseText');" + NEWLINE
 				+ "    ta.value = \"Web Socket opened!\";" + NEWLINE + "  };" + NEWLINE

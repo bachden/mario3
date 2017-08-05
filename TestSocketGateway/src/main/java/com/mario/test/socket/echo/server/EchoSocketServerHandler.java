@@ -19,6 +19,7 @@ public class EchoSocketServerHandler extends BaseMessageHandler {
 			switch (message.getSocketMessageType()) {
 			case MESSAGE:
 				PuElement m = message.getData();
+				getLogger().debug("got message: {}, send it to client...", m);
 				session.send(m);
 				break;
 			case CLOSED:

@@ -6,6 +6,7 @@ import javax.net.ssl.SSLEngine;
 import com.mario.config.gateway.WebsocketGatewayConfig;
 import com.mario.entity.message.transcoder.websocket.WebSocketDefaultDeserializer;
 import com.mario.entity.message.transcoder.websocket.WebSocketDefaultSerializer;
+import com.mario.exceptions.InvalidConfigException;
 import com.mario.gateway.SSLContextAware;
 import com.mario.gateway.socket.tcp.NettyTCPSocketGateway;
 
@@ -39,9 +40,14 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway implements SSLC
 		}
 		if (this.getConfig() instanceof WebsocketGatewayConfig) {
 			this.path = ((WebsocketGatewayConfig) this.getConfig()).getPath();
+			if (this.path.equals("/")) {
+				throw new InvalidConfigException(
+						"Websocket path cannot be equal / because of test page already handled at that path, extension: "
+								+ this.getExtensionName());
+			}
 			this.proxy = ((WebsocketGatewayConfig) this.getConfig()).getProxy();
 		} else {
-			this.path = "/";
+			this.path = "/websocket";
 		}
 		if (!this.path.startsWith("/")) {
 			this.path = "/" + this.path;
