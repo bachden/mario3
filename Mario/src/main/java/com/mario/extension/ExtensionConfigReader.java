@@ -888,6 +888,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 					boolean isUserLengprepender = false;
 					int bootGroupThreads = -1;
 					int workerGroupThreads = -1;
+					boolean autoActiveChannel = true;
 					while (ele != null) {
 						if (ele.getNodeType() == 1) {
 							String nodeName = ele.getNodeName();
@@ -902,6 +903,8 @@ class ExtensionConfigReader extends XmlConfigReader {
 								path = value;
 							} else if (nodeName.equalsIgnoreCase("proxy")) {
 								proxy = value;
+							} else if (nodeName.equalsIgnoreCase("autoActiveChannel")) {
+								autoActiveChannel = Boolean.valueOf(value);
 							} else if (nodeName.equalsIgnoreCase("deserializer")) {
 								deserializer = value;
 							} else if (nodeName.equalsIgnoreCase("serializer")) {
@@ -949,12 +952,10 @@ class ExtensionConfigReader extends XmlConfigReader {
 						throw new IllegalArgumentException("Socket gateway's port cannot be <= 0");
 					}
 
-					if (path != null && socketGatewayConfig instanceof WebsocketGatewayConfig) {
-						((WebsocketGatewayConfig) socketGatewayConfig).setPath(path);
-					}
-
-					if (proxy != null && socketGatewayConfig instanceof WebsocketGatewayConfig) {
+					if (socketGatewayConfig instanceof WebsocketGatewayConfig) {
+						((WebsocketGatewayConfig) socketGatewayConfig).setAutoActiveChannel(autoActiveChannel);
 						((WebsocketGatewayConfig) socketGatewayConfig).setProxy(proxy);
+						((WebsocketGatewayConfig) socketGatewayConfig).setPath(path);
 					}
 
 					socketGatewayConfig.setName(name);

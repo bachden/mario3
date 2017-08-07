@@ -53,6 +53,7 @@
 			<!-- <sslcontextname>websocket-ssl-context</sslcontextname> -->
 			<port>8888</port>
 			<path>/websocket</path>
+			<autoActiveChannel>true</autoActiveChannel>
 			<workerpool>
 				<poolsize>8</poolsize>
 				<ringbuffersize>2048</ringbuffersize>

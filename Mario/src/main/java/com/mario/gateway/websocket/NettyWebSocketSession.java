@@ -48,10 +48,11 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 
 	private boolean ssl = false;
 	private InetSocketAddress proxiedRemoteAddress;
+	private boolean autoActive = true;
 
 	public NettyWebSocketSession(String gatewayName, boolean ssl, String path, String proxy,
 			InetSocketAddress inetSocketAddress, SocketSessionManager sessionManager, SocketReceiver receiver,
-			MessageEncoder serializer) {
+			MessageEncoder serializer, boolean autoActive) {
 		super(inetSocketAddress, sessionManager, receiver, serializer);
 		this.ssl = ssl;
 		this.proxy = proxy;
@@ -59,22 +60,30 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 		if (!this.path.startsWith("/")) {
 			path = "/" + path;
 		}
+		this.autoActive = autoActive;
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
-		// super.channelActive(ctx);
 		// do nothing
+		if (this.autoActive) {
+			super.channelActive(ctx);
+		} else {
+			getLogger()
+					.info("Websocket mark as not-autoActiveChannel... waiting for the first message to active it...");
+		}
 	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
 		try {
 			if (msg instanceof FullHttpRequest) {
+				getLogger().debug("Http query...");
 				FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
 				handleHttpRequest(ctx, fullHttpRequest);
 			} else if (msg instanceof WebSocketFrame) {
-				if (this.getId() == null) {
+				if (!this.autoActive && this.getId() == null) {
+					getLogger().debug("Channel read first times: {}", ctx);
 					this.setChannelHandlerContext(ctx);
 					this.setId(this.getSessionManager().register(this));
 					this.getReceiver().sessionOpened(this.getId());

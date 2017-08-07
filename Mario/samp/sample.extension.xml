@@ -242,6 +242,7 @@
 			<protocol>[ TCP | UDT | UDP]</protocol>
 			<path>[for websocket only, must be != '/', default: '/websocket']</path>
 			<proxy>[for websocket only, default null]</proxy>
+			<autoactivechannel>[for websocket only, auto active channel after connect, for render test page, set to false, default true]</autoactivechannel>
 			<host>127.0.0.1</host>
 			<port>9999</port>
 			<uselengthprepender>[true | false]</uselengthprepender>

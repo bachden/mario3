@@ -70,6 +70,8 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway implements SSLC
 				+ (getConfig().getHost() == null ? "0.0.0.0" : this.getConfig().getHost()) + ":" + getConfig().getPort()
 				+ this.path);
 
+		boolean autoActiveChannel = ((WebsocketGatewayConfig) this.getConfig()).isAutoActiveChannel();
+
 		bossGroup = new NioEventLoopGroup(this.getConfig().getBootEventLoopGroupThreads());
 		workerGroup = new NioEventLoopGroup(this.getConfig().getWorkerEventLoopGroupThreads());
 
@@ -93,7 +95,7 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway implements SSLC
 				pipeline.addLast(new NettyWebSocketSession(getName(), getConfig().isSsl(),
 						NettyWebSocketGateway.this.path, NettyWebSocketGateway.this.proxy, ch.remoteAddress(),
 						NettyWebSocketGateway.this.getSessionManager(), NettyWebSocketGateway.this,
-						NettyWebSocketGateway.this.getSerializer()));
+						NettyWebSocketGateway.this.getSerializer(), autoActiveChannel));
 			}
 		});
 
