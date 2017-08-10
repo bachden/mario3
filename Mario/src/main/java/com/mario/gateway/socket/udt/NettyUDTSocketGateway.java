@@ -2,6 +2,8 @@ package com.mario.gateway.socket.udt;
 
 import java.util.concurrent.ThreadFactory;
 
+import javax.net.ssl.SSLEngine;
+
 import com.mario.gateway.socket.tcp.NettyTCPSocketGateway;
 import com.mario.gateway.socket.tcp.NettyTCPSocketSession;
 import com.nhb.messaging.socket.netty.codec.MsgpackDecoder;
@@ -18,6 +20,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 @SuppressWarnings("deprecation")
@@ -45,6 +48,12 @@ public class NettyUDTSocketGateway extends NettyTCPSocketGateway {
 		bootstrap.childHandler(new ChannelInitializer<UdtChannel>() {
 			@Override
 			public void initChannel(UdtChannel ch) throws Exception {
+				if (getConfig().isSsl()) {
+					SSLEngine sslEngine = getSSLEngine();
+					if (sslEngine != null) {
+						ch.pipeline().addLast("ssl", new SslHandler(sslEngine));
+					}
+				}
 				getLogger().debug("use length prepender: " + getConfig().isUseLengthPrepender());
 				if (getConfig().isUseLengthPrepender()) {
 					ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));

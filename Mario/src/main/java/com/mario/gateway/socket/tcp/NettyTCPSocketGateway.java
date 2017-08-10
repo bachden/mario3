@@ -2,10 +2,14 @@ package com.mario.gateway.socket.tcp;
 
 import java.io.IOException;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+
 import com.mario.config.gateway.SocketGatewayConfig;
 import com.mario.entity.message.Message;
 import com.mario.entity.message.impl.BaseSocketMessage;
 import com.mario.entity.message.transcoder.MessageDecodingException;
+import com.mario.gateway.SSLContextAware;
 import com.mario.gateway.socket.BaseSocketGateway;
 import com.mario.gateway.socket.SocketMessageType;
 import com.mario.gateway.socket.SocketReceiver;
@@ -25,8 +29,14 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.ssl.SslHandler;
+import lombok.AccessLevel;
+import lombok.Getter;
 
-public class NettyTCPSocketGateway extends BaseSocketGateway implements SocketReceiver {
+public class NettyTCPSocketGateway extends BaseSocketGateway implements SocketReceiver, SSLContextAware {
+
+	@Getter(AccessLevel.PROTECTED)
+	private SSLContext sslContext;
 
 	protected ChannelFuture channelFuture;
 	protected EventLoopGroup bossGroup;
@@ -68,6 +78,12 @@ public class NettyTCPSocketGateway extends BaseSocketGateway implements SocketRe
 		bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
 			@Override
 			public void initChannel(SocketChannel ch) throws Exception {
+				if (getConfig().isSsl()) {
+					SSLEngine sslEngine = getSSLEngine();
+					if (sslEngine != null) {
+						ch.pipeline().addLast("ssl", new SslHandler(sslEngine));
+					}
+				}
 				if (getConfig().isUseLengthPrepender()) {
 					ch.pipeline().addLast("frameEncoder", new LengthFieldPrepender(4));
 					ch.pipeline().addLast("frameDecoder", new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
@@ -143,4 +159,17 @@ public class NettyTCPSocketGateway extends BaseSocketGateway implements SocketRe
 		}
 	}
 
+	@Override
+	public void setSSLContext(SSLContext sslContext) {
+		this.sslContext = sslContext;
+	}
+
+	protected SSLEngine getSSLEngine() {
+		if (this.getSslContext() == null) {
+			return null;
+		}
+		SSLEngine sslEngine = getSslContext().createSSLEngine();
+		sslEngine.setUseClientMode(false);
+		return sslEngine;
+	}
 }

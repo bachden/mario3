@@ -30,6 +30,7 @@ import com.nhb.common.utils.FileSystemUtils;
 import com.nhb.eventdriven.Event;
 import com.nhb.eventdriven.EventHandler;
 import com.nhb.messaging.kafka.consumer.KafkaMessageConsumer;
+import com.nhb.messaging.kafka.consumer.KafkaOffsetCommitter;
 import com.nhb.messaging.kafka.event.KafkaEvent;
 
 import lombok.Getter;
@@ -45,6 +46,10 @@ public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 	private ScheduledExecutorService scheduledExecutorService;
 
 	private EventHandler eventHandler;
+
+	public KafkaOffsetCommitter getOffsetCommiter() {
+		return this.consumer == null ? null : this.consumer.getOffsetCommitter();
+	}
 
 	protected MessageEventFactory createEventFactory() {
 		return new MessageEventFactory() {

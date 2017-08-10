@@ -1,13 +1,11 @@
 package com.mario.gateway.websocket;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 
 import com.mario.config.gateway.WebsocketGatewayConfig;
 import com.mario.entity.message.transcoder.websocket.WebSocketDefaultDeserializer;
 import com.mario.entity.message.transcoder.websocket.WebSocketDefaultSerializer;
 import com.mario.exceptions.InvalidConfigException;
-import com.mario.gateway.SSLContextAware;
 import com.mario.gateway.socket.tcp.NettyTCPSocketGateway;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -22,9 +20,7 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslHandler;
 
-public class NettyWebSocketGateway extends NettyTCPSocketGateway implements SSLContextAware {
-
-	private SSLContext sslContext;
+public class NettyWebSocketGateway extends NettyTCPSocketGateway {
 
 	private String path;
 	private String proxy;
@@ -54,14 +50,6 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway implements SSLC
 		}
 	}
 
-	private SSLEngine getSSLEngine() {
-		if (this.sslContext == null) {
-			return null;
-		}
-		SSLEngine sslEngine = sslContext.createSSLEngine();
-		sslEngine.setUseClientMode(false);
-		return sslEngine;
-	}
 
 	@Override
 	protected void __start() {
@@ -116,11 +104,6 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway implements SSLC
 		}
 
 		getLogger().info(getName() + " gateway started...");
-	}
-
-	@Override
-	public void setSSLContext(SSLContext sslContext) {
-		this.sslContext = sslContext;
 	}
 
 }
