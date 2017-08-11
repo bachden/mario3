@@ -25,6 +25,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.mario.config.CassandraConfig;
+import com.mario.config.ExternalConfigurationConfig;
 import com.mario.config.HazelcastConfig;
 import com.mario.config.HttpMessageProducerConfig;
 import com.mario.config.KafkaMessageProducerConfig;
@@ -51,6 +52,7 @@ import com.mario.config.serverwrapper.ServerWrapperConfig.ServerWrapperType;
 import com.mario.contact.ContactBook;
 import com.mario.extension.xml.CredentialReader;
 import com.mario.extension.xml.EndpointReader;
+import com.mario.external.configuration.ExternalConfigurationManager;
 import com.mario.gateway.http.JettyHttpServerOptions;
 import com.mario.gateway.socket.SocketProtocol;
 import com.mario.monitor.MonitorableStatus;
@@ -107,12 +109,16 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	private final HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager;
 
+	private final ExternalConfigurationManager externalConfigurationManager;
+
 	public ExtensionConfigReader(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager,
+			ExternalConfigurationManager externalConfigurationManager,
 			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager) {
 		this.globalProperties = globalProperties;
 		this.contactBook = contactBook;
 		this.serviceManager = serviceManager;
 		this.hzDistributedSchedulerConfigManager = hzDistributedSchedulerConfigManager;
+		this.externalConfigurationManager = externalConfigurationManager;
 	}
 
 	@Override
@@ -128,6 +134,15 @@ class ExtensionConfigReader extends XmlConfigReader {
 		try {
 			System.out.println("\t\t\t- Reading properties");
 			this.readProperties((Node) xPath.compile("/mario/properties").evaluate(document, XPathConstants.NODE));
+		} catch (Exception ex) {
+			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
+				getLogger().error("Error", ex);
+			}
+		}
+
+		try {
+			System.out.println("\t\t\t- Reading external config");
+			this.readExternal((Node) xPath.compile("/mario/external").evaluate(document, XPathConstants.NODE));
 		} catch (Exception ex) {
 			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
 				getLogger().error("Error", ex);
@@ -240,6 +255,58 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 
 		System.out.println("\t\t\t- *** Reading configs done ***");
+	}
+
+	private ExternalConfigurationConfig readExternalConfigurationConfig(Node root) {
+		if (root != null) {
+			ExternalConfigurationConfig result = new ExternalConfigurationConfig();
+			Node curr = root.getFirstChild();
+			while (curr != null) {
+				if (curr.getNodeType() == Node.ELEMENT_NODE) {
+					String nodeName = curr.getNodeName();
+					String nodeValue = curr.getTextContent().trim();
+					switch (nodeName.toLowerCase()) {
+					case "name":
+						result.setName(nodeValue);
+						break;
+					case "file":
+					case "path":
+						result.setFilePath(nodeValue);
+						break;
+					case "monitored":
+						result.setMonitored(Boolean.valueOf(nodeValue));
+						break;
+					case "sensitivity":
+						result.setSensitivity(nodeValue);
+						break;
+					case "parser":
+						result.setParser(nodeValue);
+						break;
+					}
+				}
+				curr = curr.getNextSibling();
+			}
+			result.setExtensionName(this.getExtensionName());
+			return result;
+		}
+		return null;
+	}
+
+	private void readExternal(Node root) {
+		if (root != null) {
+			Node curr = root.getFirstChild();
+			while (curr != null) {
+				if (curr.getNodeType() == Node.ELEMENT_NODE) {
+					String nodeName = curr.getNodeName().trim();
+					switch (nodeName.toLowerCase()) {
+					case "configuration":
+						this.externalConfigurationManager.add(this.readExternalConfigurationConfig(curr));
+						break;
+					}
+				}
+				curr = curr.getNextSibling();
+			}
+		}
 	}
 
 	private void readDistributedSchedulerConfigs(Node node) {

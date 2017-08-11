@@ -19,6 +19,7 @@ import com.mario.config.MessageHandlerConfig;
 import com.mario.contact.ContactBook;
 import com.mario.entity.EntityManager;
 import com.mario.extension.ExtensionManager;
+import com.mario.external.configuration.ExternalConfigurationManager;
 import com.mario.gateway.Gateway;
 import com.mario.gateway.GatewayEvent;
 import com.mario.gateway.GatewayManager;
@@ -139,6 +140,10 @@ public final class Mario extends BaseLoggable {
 	private ContactBook contactBook;
 	@Getter
 	private HzDistributedSchedulerManager hzDistributedSchedulerManager;
+
+	@Getter
+	private ExternalConfigurationManager externalConfigurationManager;
+
 	@Getter
 	private final PuObject globalProperties = new PuObject();
 
@@ -184,6 +189,9 @@ public final class Mario extends BaseLoggable {
 		System.out.println("Create SSLContextManager");
 		this.sslContextManager = new SSLContextManager();
 
+		System.out.println("create externalConfigurationManager");
+		this.externalConfigurationManager = new ExternalConfigurationManager();
+
 		System.out.println("create extension manager");
 		this.extensionManager = new ExtensionManager();
 
@@ -192,7 +200,7 @@ public final class Mario extends BaseLoggable {
 
 		System.out.println("Loading extension...");
 		this.extensionManager.load(this.globalProperties, this.contactBook, this.serviceManager,
-				hzDistributedSchedulerConfigManager);
+				this.externalConfigurationManager, hzDistributedSchedulerConfigManager);
 
 		System.out.println("Init SSLContexts");
 		this.sslContextManager.init(this.extensionManager.getSSLContextConfigs());

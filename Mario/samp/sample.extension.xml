@@ -10,6 +10,15 @@
 		</entry>
 	</properties>
 
+	<external>
+		<configuration>
+			<name>[configuration-name, required]</name>
+			<monitored>true</monitored>
+			<path>/path/to/config/file</path>
+			<parser>[reader class to parse file]</parser>
+		</configuration>
+	</external>
+
 	<ssl>
 		<context>
 			<!-- To generate keystore file, following bellow steps (using default algorithm RSA): -->
