@@ -14,10 +14,13 @@ import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.utils.FileSystemUtils;
 
+import lombok.Getter;
+
 public final class ExtensionLoader extends BaseLoggable {
 
 	private ExtensionConfigReader configReader;
 	private File extFolder;
+	@Getter
 	private ClassLoader classLoader;
 	private String name;
 

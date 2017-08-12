@@ -53,7 +53,7 @@ public class YamlFileParser implements ExternalConfigurationParser, Loggable, Ex
 		Object inputStreamReader = inputStreamReaderClass.getConstructor(InputStream.class, Charset.class)
 				.newInstance(inputStream, Charset.forName("utf-8"));
 		YamlReader reader = constructor.newInstance(inputStreamReader);
-
+		reader.getConfig().readConfig.setClassLoader(this.extensionLoader.getClassLoader());
 		return wrapperClass == null ? (T) reader.read() : reader.read(wrapperClass);
 	}
 }

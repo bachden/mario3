@@ -1,4 +1,9 @@
 name: bach
-map:
-  1: one
-  2: two
+data:
+  - !nhb.mario.test.external.configuration.Element
+    key: 1
+    value: one
+  - !nhb.mario.test.external.configuration.Element
+    key: 2
+    value: two
+  

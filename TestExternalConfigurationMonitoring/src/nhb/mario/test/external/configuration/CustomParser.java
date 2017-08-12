@@ -10,7 +10,7 @@ public class CustomParser extends YamlFileParser {
 	public Object parse(InputStream inputStream) {
 		try {
 			CustomConfig customConfig = (CustomConfig) super.parse(inputStream, CustomConfig.class);
-			return "name: " + customConfig.getName();
+			return "name: " + customConfig == null ? "null" : customConfig.getName();
 		} catch (Exception e) {
 			throw new RuntimeException("Error while parsing input stream", e);
 		}
