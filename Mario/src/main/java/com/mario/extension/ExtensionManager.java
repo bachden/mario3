@@ -242,4 +242,8 @@ public final class ExtensionManager extends BaseLoggable {
 	public PuObjectRO getExtensionProperty(String extensionName, String propertyName) {
 		return this.extensionLoaderByName.get(extensionName).getConfigReader().getProperty(propertyName);
 	}
+
+	public ExtensionLoader getExtensionLoader(String name) {
+		return this.extensionLoaderByName.get(name);
+	}
 }

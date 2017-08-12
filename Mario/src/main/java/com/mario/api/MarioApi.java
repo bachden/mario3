@@ -8,6 +8,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.mario.cache.hazelcast.HazelcastInitializer;
 import com.mario.contact.ContactBook;
 import com.mario.entity.message.Message;
+import com.mario.external.configuration.ExternalConfiguration;
 import com.mario.gateway.Gateway;
 import com.mario.gateway.serverwrapper.ServerWrapper;
 import com.mario.gateway.socket.SocketSession;
@@ -89,4 +90,6 @@ public interface MarioApi {
 	EmailService getEmailService(String name);
 
 	TelegramBot getTelegramBot(String telegramBotName);
+
+	ExternalConfiguration getExternalConfiguration(String name);
 }

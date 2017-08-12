@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mario>
+	<name>TestExternalConfigurationMonitoring</name>
+
+	<external>
+		<configuration>
+			<name>textFileConfig</name>
+			<monitored>true</monitored>
+			<path>conf/test.txt</path>
+			<sensitivity>HIGH</sensitivity>
+			<parser>
+				<handler>com.mario.external.configuration.parser.TextAsLinesParser</handler>
+			</parser>
+		</configuration>
+		<configuration>
+			<name>propertiesFileConfig</name>
+			<monitored>true</monitored>
+			<path>conf/test.properties</path>
+			<sensitivity>HIGH</sensitivity>
+			<parser>
+				<handler>com.mario.external.configuration.parser.PropertiesFileParser</handler>
+			</parser>
+		</configuration>
+		<configuration>
+			<name>puElementXmlFileConfig</name>
+			<monitored>true</monitored>
+			<path>conf/test.puelement.xml</path>
+			<sensitivity>HIGH</sensitivity>
+			<parser>
+				<handler>com.mario.external.configuration.parser.PuElementXmlParser</handler>
+			</parser>
+		</configuration>
+		<configuration>
+			<name>yamlConfig</name>
+			<monitored>true</monitored>
+			<path>conf/test.yaml</path>
+			<sensitivity>HIGH</sensitivity>
+			<parser>
+				<handler>com.mario.external.configuration.parser.YamlFileParser</handler>
+				<variables>
+					<variable name="wrapperClass" type="String">nhb.mario.test.external.configuration.CustomConfig</variable>
+				</variables>
+			</parser>
+		</configuration>
+		<configuration>
+			<name>customParserConfig</name>
+			<monitored>true</monitored>
+			<path>conf/test.bin</path>
+			<sensitivity>HIGH</sensitivity>
+			<parser>
+				<handler>nhb.mario.test.external.configuration.CustomParser</handler>
+			</parser>
+		</configuration>
+	</external>
+
+	<lifecycles>
+		<entry>
+			<name>externalConfigurationMonitor</name>
+			<handle>nhb.mario.test.external.configuration.ExternalConfigurationHandler</handle>
+			<variables>
+				<variable name="textConfig" type="String">textFileConfig</variable>
+				<variable name="propertiesConfig" type="String">propertiesFileConfig</variable>
+				<variable name="puElementXmlFileConfig" type="String">puElementXmlFileConfig</variable>
+				<variable name="yamlConfig" type="String">yamlConfig</variable>
+				<variable name="customParserConfig" type="String">customParserConfig</variable>
+			</variables>
+		</entry>
+	</lifecycles>
+</mario>

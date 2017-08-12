@@ -202,6 +202,9 @@ public final class Mario extends BaseLoggable {
 		this.extensionManager.load(this.globalProperties, this.contactBook, this.serviceManager,
 				this.externalConfigurationManager, hzDistributedSchedulerConfigManager);
 
+		System.out.println("Init external configuration manager");
+		this.externalConfigurationManager.init(this.extensionManager);
+
 		System.out.println("Init SSLContexts");
 		this.sslContextManager.init(this.extensionManager.getSSLContextConfigs());
 
@@ -226,7 +229,7 @@ public final class Mario extends BaseLoggable {
 				this.schedulerFactory, this.mongoDBSourceManager, this.cacheManager, this.monitorAgentManager,
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
 				this.serverWrapperManager, this.globalProperties, this.contactBook, this.serviceManager,
-				this.hzDistributedSchedulerManager);
+				this.hzDistributedSchedulerManager, this.externalConfigurationManager);
 
 		System.out.println("Register sql datasource config");
 		for (SQLDataSourceConfig dataSourceConfig : this.extensionManager.getDataSourceConfigs()) {
@@ -403,6 +406,12 @@ public final class Mario extends BaseLoggable {
 		if (this.serviceManager != null) {
 			System.out.println("Stoping service manager...");
 			this.serviceManager.shutdown();
+			System.out.println("DONE");
+		}
+
+		if (this.externalConfigurationManager != null) {
+			System.out.println("Stoping external configuration manager");
+			this.externalConfigurationManager.stop();
 			System.out.println("DONE");
 		}
 	}

@@ -27,6 +27,7 @@ public class ExternalConfigurationImpl extends BaseEventDispatcher implements Ex
 				"addEventListener method cannot be called directly by ExternalConfiguration, use addUpdateListener instead");
 	}
 
+	@Override
 	public <T> void addUpdateListener(Callback<T> callback) {
 		super.addEventListener(ExternalConfigurationEvent.EXTERNAL_CONFIGURATION_UPDATED, new EventHandler() {
 
@@ -49,9 +50,9 @@ public class ExternalConfigurationImpl extends BaseEventDispatcher implements Ex
 	}
 
 	@Override
-	public void update(File configContent) {
+	public void update(File file) {
 		try {
-			Object newValue = this.parser.parse(configContent);
+			Object newValue = this.parser.parse(file);
 			if (this.value != newValue) {
 				if (this.value == null || !this.value.equals(newValue)) {
 					this.value = newValue;
@@ -59,7 +60,7 @@ public class ExternalConfigurationImpl extends BaseEventDispatcher implements Ex
 				}
 			}
 		} catch (Exception ex) {
-			getLogger().error("An error occurs while parsing external config", ex);
+			getLogger().error("An error occurs while parsing external config at " + file.getAbsolutePath(), ex);
 		}
 	}
 

@@ -14,7 +14,7 @@ import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.utils.FileSystemUtils;
 
-final class ExtensionLoader extends BaseLoggable {
+public final class ExtensionLoader extends BaseLoggable {
 
 	private ExtensionConfigReader configReader;
 	private File extFolder;
@@ -63,7 +63,7 @@ final class ExtensionLoader extends BaseLoggable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <ClassType> ClassType loadClass(String className) throws ClassNotFoundException {
+	public <ClassType> ClassType loadClass(String className) throws ClassNotFoundException {
 		if (className != null && className.trim().length() > 0) {
 			Class<?> clazz = this.classLoader == null ? null : this.classLoader.loadClass(className);
 			if (clazz == null) {

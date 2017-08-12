@@ -12,6 +12,8 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.nhb.common.Loggable;
 import com.nhb.common.async.Callback;
@@ -49,21 +51,25 @@ public class FileWatcher implements Loggable {
 			throw new RuntimeException("Cannot create watch service", e);
 		}
 
+		Map<WatchKey, Path> watchKeyToMonitoredPaths = new HashMap<>();
+
 		for (MonitoredFile monitoredFile : monitoredFiles) {
 			File file = monitoredFile.getFile();
 			File folder = file.getParentFile();
-			Path path = folder.toPath();
+			Path path = folder.getAbsoluteFile().toPath();
+
 			try {
+				final WatchKey watchKey;
 				if (monitoredFile.getSensitivity() != null) {
-					path.register(watchService,
+					watchKey = path.register(watchService,
 							new Kind[] { StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE,
 									StandardWatchEventKinds.ENTRY_DELETE },
 							getSensitivityWatchEventModifier(monitoredFile.getSensitivity()));
 				} else {
-					path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY,
+					watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY,
 							StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE);
 				}
-
+				watchKeyToMonitoredPaths.put(watchKey, path);
 			} catch (Exception e) {
 				throw new RuntimeException("An error occurs while register watch service to path: " + path, e);
 			}
@@ -77,8 +83,9 @@ public class FileWatcher implements Loggable {
 						WatchKey watchKey = watchService.take();
 						for (WatchEvent<?> event : watchKey.pollEvents()) {
 							Path changed = (Path) event.context();
+							File changedFile = watchKeyToMonitoredPaths.get(watchKey).resolve(changed).toFile();
 							if (onChange != null) {
-								onChange.apply(changed.toFile());
+								onChange.apply(changedFile);
 							}
 						}
 						// reset the key

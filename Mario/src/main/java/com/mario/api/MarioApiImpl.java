@@ -17,6 +17,8 @@ import com.mario.entity.message.MessageRW;
 import com.mario.exceptions.ManagedObjectNotFoundException;
 import com.mario.exceptions.MessageHandlerNotFoundException;
 import com.mario.extension.ExtensionManager;
+import com.mario.external.configuration.ExternalConfiguration;
+import com.mario.external.configuration.ExternalConfigurationManager;
 import com.mario.gateway.Gateway;
 import com.mario.gateway.GatewayManager;
 import com.mario.gateway.serverwrapper.ServerWrapper;
@@ -63,6 +65,7 @@ class MarioApiImpl implements MarioApi {
 	private GatewayManager gatewayManager;
 	private ZooKeeperClientManager zkClientManager;
 	private ExtensionManager extensionManager;
+	private ExternalConfigurationManager externalConfigurationManager;
 
 	@Getter
 	private ContactBook contactBook;
@@ -78,7 +81,8 @@ class MarioApiImpl implements MarioApi {
 			MessageProducerManager producerManager, GatewayManager gatewayManager,
 			ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
 			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties, ContactBook contactBook,
-			ServiceManager serviceManager, HzDistributedSchedulerManager hzDistributedSchedulerManager) {
+			ServiceManager serviceManager, HzDistributedSchedulerManager hzDistributedSchedulerManager,
+			ExternalConfigurationManager externalConfigurationManager) {
 
 		this.sqlDatasourceManager = dataSourceManager;
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
@@ -99,6 +103,7 @@ class MarioApiImpl implements MarioApi {
 		this.contactBook = contactBook;
 		this.serviceManager = serviceManager;
 		this.hzDistributedSchedulerManager = hzDistributedSchedulerManager;
+		this.externalConfigurationManager = externalConfigurationManager;
 	}
 
 	@Override
@@ -291,5 +296,10 @@ class MarioApiImpl implements MarioApi {
 	@Override
 	public DistributedScheduler getDistributedScheduler(String name) {
 		return this.hzDistributedSchedulerManager.getDistributedScheduler(name);
+	}
+
+	@Override
+	public ExternalConfiguration getExternalConfiguration(String name) {
+		return this.externalConfigurationManager.getConfig(name);
 	}
 }

@@ -26,6 +26,7 @@ import org.w3c.dom.NodeList;
 
 import com.mario.config.CassandraConfig;
 import com.mario.config.ExternalConfigurationConfig;
+import com.mario.config.ExternalConfigurationConfig.ExternalConfigurationParserConfig;
 import com.mario.config.HazelcastConfig;
 import com.mario.config.HttpMessageProducerConfig;
 import com.mario.config.KafkaMessageProducerConfig;
@@ -280,7 +281,23 @@ class ExtensionConfigReader extends XmlConfigReader {
 						result.setSensitivity(nodeValue);
 						break;
 					case "parser":
-						result.setParser(nodeValue);
+						Node _curr = curr.getFirstChild();
+						ExternalConfigurationParserConfig parserConfig = new ExternalConfigurationParserConfig();
+						while (_curr != null) {
+							if (_curr.getNodeType() == Node.ELEMENT_NODE) {
+								String _nodeName = _curr.getNodeName();
+								switch (_nodeName.toLowerCase()) {
+								case "handler":
+									parserConfig.setHandler(_curr.getTextContent().trim());
+									break;
+								case "variables":
+									parserConfig.setInitParams(PuObject.fromXML(_curr));
+									break;
+								}
+							}
+							_curr = _curr.getNextSibling();
+						}
+						result.setParserConfig(parserConfig);
 						break;
 					}
 				}

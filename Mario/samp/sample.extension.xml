@@ -15,7 +15,15 @@
 			<name>[configuration-name, required]</name>
 			<monitored>true</monitored>
 			<path>/path/to/config/file</path>
-			<parser>[reader class to parse file]</parser>
+			<parser>
+				<handler>[reader class to parse file]</handler>
+				<variables>
+					<!-- parser init params -->
+					<variable name="wrapperClass" type="String">[for yaml parser only]</variable>
+				</variables>
+			</parser>
+
+			<sensitivity>[HIGH | MEDIUM | LOW, default null, may effect only on MacOS, use for controlling delay time to detect file change]</sensitivity>
 		</configuration>
 	</external>
 

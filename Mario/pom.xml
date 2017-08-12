@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.15.3</version>
+	<version>3.15.4</version>
 
 	<properties>
 		<project.name>${project.artifactId}</project.name>
@@ -295,6 +295,14 @@
 			<artifactId>telegrambots</artifactId>
 			<version>2.4.4.5</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.esotericsoftware.yamlbeans/yamlbeans -->
+		<dependency>
+			<groupId>com.esotericsoftware.yamlbeans</groupId>
+			<artifactId>yamlbeans</artifactId>
+			<version>1.09</version>
+		</dependency>
+
 	</dependencies>
 
 	<distributionManagement>

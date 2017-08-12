@@ -9,6 +9,7 @@ public class ExternalConfigurationEvent extends AbstractEvent {
 	private final Object value;
 
 	public ExternalConfigurationEvent(Object value) {
+		this.setType(EXTERNAL_CONFIGURATION_UPDATED);
 		this.value = value;
 	}
 
