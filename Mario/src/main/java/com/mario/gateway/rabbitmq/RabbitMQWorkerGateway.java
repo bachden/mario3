@@ -12,6 +12,7 @@ import com.mario.entity.message.RabbitMQMessage;
 import com.mario.entity.message.impl.BaseRabbitMQMessage;
 import com.mario.worker.MessageEventFactory;
 import com.nhb.common.data.PuElement;
+import com.nhb.common.data.PuNull;
 import com.nhb.messaging.MessageForwarder;
 import com.nhb.messaging.MessageProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQProducer;
@@ -84,6 +85,10 @@ public class RabbitMQWorkerGateway extends RabbitMQGateway {
 
 	@Override
 	public final void onHandleComplete(Message message, PuElement result) {
+		if (result instanceof PuNull) {
+			// ignore by handler, will be manually completed
+			return;
+		}
 		if (message instanceof RabbitMQMessage) {
 			RabbitMQMessage rabbitMQMessage = (RabbitMQMessage) message;
 			RabbitMQDeliveredMessage mesProps = rabbitMQMessage.getDeliveredMessage();

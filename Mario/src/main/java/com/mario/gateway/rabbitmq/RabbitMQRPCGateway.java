@@ -3,7 +3,6 @@ package com.mario.gateway.rabbitmq;
 import java.io.IOException;
 
 import com.nhb.common.data.PuElement;
-import com.nhb.common.data.PuNull;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.AMQP.BasicProperties.Builder;
 import com.rabbitmq.client.Envelope;
@@ -18,10 +17,6 @@ public class RabbitMQRPCGateway extends RabbitMQWorkerGateway {
 
 	@Override
 	protected void handleResult(String consumerTag, Envelope envelope, BasicProperties properties, PuElement result) {
-		if (result instanceof PuNull) {
-			// ignore
-			return;
-		}
 		String replyQueue = properties.getReplyTo();
 		if (replyQueue != null && replyQueue.trim().length() > 0) {
 			byte[] response = result == null ? null : result.toBytes();
