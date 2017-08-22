@@ -44,6 +44,8 @@ public interface MarioApi {
 	DBIAdapter getDatabaseAdapter(String dataSourceName);
 
 	MongoClient getMongoClient(String name);
+	
+	com.mongodb.async.client.MongoClient getAsyncMongoClient(String name);
 
 	HazelcastInstance getHazelcastInstance(String name);
 
