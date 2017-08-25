@@ -12,10 +12,10 @@ public interface DistributedScheduler {
 
 	DistributedScheduledFuture getFutureByName(String taskName);
 
-	DistributedScheduledFuture schedule(String taskName, Runnable runner, long delay, TimeUnit timeUnit)
+	DistributedScheduledFuture schedule(String taskName, DistributedRunnable runner, long delay, TimeUnit timeUnit)
 			throws DistributedScheduleException;
 
-	DistributedScheduledFuture scheduleAtFixedRate(String taskName, Runnable runner, long delay, long period,
+	DistributedScheduledFuture scheduleAtFixedRate(String taskName, DistributedRunnable runner, long delay, long period,
 			TimeUnit timeUnit) throws DistributedScheduleException;
 
 	static DistributedScheduler newHzDistributedScheduler(String schedulerName, HazelcastInstance hazelcastInstance) {

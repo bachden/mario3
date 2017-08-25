@@ -3,6 +3,7 @@ package com.mario.schedule.distributed.impl;
 import java.io.Serializable;
 
 import com.hazelcast.core.HazelcastInstanceAware;
+import com.mario.schedule.distributed.DistributedRunnable;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -12,17 +13,14 @@ public class HzDistributedRunnableWrapper extends HzDistributedScheduleCleaner i
 
 	private static final long serialVersionUID = 7251235487019550384L;
 
-	private final Runnable runner;
+	private final DistributedRunnable runner;
 
 	@Getter
 	private final boolean autoClean;
 
 	public HzDistributedRunnableWrapper(String schedulerName, boolean autoClean, String taskName,
-			String trackingMapName, Runnable runner) {
+			String trackingMapName, DistributedRunnable runner) {
 		super(schedulerName, taskName, trackingMapName);
-		if (!(runner instanceof Serializable)) {
-			throw new IllegalArgumentException("Runner must be instanceof Serializable");
-		}
 		this.runner = runner;
 		this.autoClean = autoClean;
 	}

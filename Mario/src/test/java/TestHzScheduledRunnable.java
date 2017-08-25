@@ -1,6 +1,6 @@
-import java.io.Serializable;
+import com.mario.schedule.distributed.DistributedRunnable;
 
-public class TestHzScheduledRunnable implements Runnable, Serializable {
+public class TestHzScheduledRunnable implements DistributedRunnable {
 
 	private static final long serialVersionUID = -8062024052215892338L;
 	private final int id;

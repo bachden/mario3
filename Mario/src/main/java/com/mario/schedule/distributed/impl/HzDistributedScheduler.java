@@ -1,16 +1,17 @@
 package com.mario.schedule.distributed.impl;
 
+import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.scheduledexecutor.IScheduledExecutorService;
 import com.hazelcast.scheduledexecutor.IScheduledFuture;
 import com.hazelcast.scheduledexecutor.ScheduledTaskHandler;
+import com.mario.schedule.distributed.DistributedRunnable;
 import com.mario.schedule.distributed.DistributedScheduledFuture;
 import com.mario.schedule.distributed.DistributedScheduler;
 import com.mario.schedule.distributed.exception.DistributedScheduleException;
-
-import java.io.Serializable;
-import java.util.concurrent.TimeUnit;
 
 public class HzDistributedScheduler implements DistributedScheduler, Serializable {
 
@@ -57,8 +58,8 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 	}
 
 	@Override
-	public DistributedScheduledFuture schedule(String taskName, Runnable runner, long delay, TimeUnit timeUnit)
-			throws DistributedScheduleException {
+	public DistributedScheduledFuture schedule(String taskName, DistributedRunnable runner, long delay,
+			TimeUnit timeUnit) throws DistributedScheduleException {
 		if (!this.hzTrackingMap.containsKey(taskName)) {
 			try {
 				if (this.hzTrackingMap.tryLock(taskName, 3, TimeUnit.SECONDS)) {
@@ -79,8 +80,8 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 	}
 
 	@Override
-	public DistributedScheduledFuture scheduleAtFixedRate(String taskName, Runnable runner, long delay, long period,
-			TimeUnit timeUnit) throws DistributedScheduleException {
+	public DistributedScheduledFuture scheduleAtFixedRate(String taskName, DistributedRunnable runner, long delay,
+			long period, TimeUnit timeUnit) throws DistributedScheduleException {
 		if (!this.hzTrackingMap.containsKey(taskName)) {
 			if (this.hzTrackingMap.tryLock(taskName)) {
 				try {
