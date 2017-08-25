@@ -1,14 +1,8 @@
 package com.mario.schedule.distributed.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import com.hazelcast.core.HazelcastInstanceAware;
-import com.mario.schedule.distributed.DistributedRunnable;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -49,34 +43,37 @@ public class HzDistributedRunnableWrapper extends HzDistributedScheduleCleaner i
 			}
 		}
 	}
-
-	public static class DummyRunnable implements DistributedRunnable {
-
-		private static final long serialVersionUID = 3279013156170740326L;
-
-		@Override
-		public void run() {
-			System.out.println("test");
-		}
-
-	}
-
-	public static void main(String[] args) throws IOException, ClassNotFoundException {
-		HzDistributedRunnableWrapper child = new HzDistributedRunnableWrapper("abc", true, "task", "trackingMap",
-				new DummyRunnable());
-		ByteArrayOutputStream fos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		oos.writeObject(child);
-		byte[] bytes = fos.toByteArray();
-		oos.close();
-
-		ByteArrayInputStream fis = new ByteArrayInputStream(bytes);
-		ObjectInputStream ois = new ObjectInputStream(fis);
-		Object obj = ois.readObject();
-		ois.close();
-
-		HzDistributedRunnableWrapper deserializedObject = (HzDistributedRunnableWrapper) obj;
-
-		System.out.println(deserializedObject);
-	}
+	//
+	// public static class DummyRunnable implements DistributedRunnable {
+	//
+	// private static final long serialVersionUID = 3279013156170740326L;
+	//
+	// @Override
+	// public void run() {
+	// System.out.println("test");
+	// }
+	//
+	// }
+	//
+	// public static void main(String[] args) throws IOException,
+	// ClassNotFoundException {
+	// HzDistributedRunnableWrapper child = new HzDistributedRunnableWrapper("abc",
+	// true, "task", "trackingMap",
+	// new DummyRunnable());
+	// ByteArrayOutputStream fos = new ByteArrayOutputStream();
+	// ObjectOutputStream oos = new ObjectOutputStream(fos);
+	// oos.writeObject(child);
+	// byte[] bytes = fos.toByteArray();
+	// oos.close();
+	//
+	// ByteArrayInputStream fis = new ByteArrayInputStream(bytes);
+	// ObjectInputStream ois = new ObjectInputStream(fis);
+	// Object obj = ois.readObject();
+	// ois.close();
+	//
+	// HzDistributedRunnableWrapper deserializedObject =
+	// (HzDistributedRunnableWrapper) obj;
+	//
+	// System.out.println(deserializedObject);
+	// }
 }
