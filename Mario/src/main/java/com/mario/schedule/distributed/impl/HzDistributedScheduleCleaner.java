@@ -1,5 +1,7 @@
 package com.mario.schedule.distributed.impl;
 
+import java.io.Serializable;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceAware;
 import com.hazelcast.core.IMap;
@@ -10,8 +12,13 @@ import com.nhb.common.Loggable;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.ToString;
 
-public class HzDistributedScheduleCleaner implements DistributedScheduleCleaner, HazelcastInstanceAware, Loggable {
+@ToString
+public class HzDistributedScheduleCleaner
+		implements DistributedScheduleCleaner, HazelcastInstanceAware, Serializable, Loggable {
+
+	private static final long serialVersionUID = -8208228162984686550L;
 
 	@Getter(AccessLevel.PROTECTED)
 	private final String schedulerName;

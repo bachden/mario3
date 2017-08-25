@@ -1,14 +1,16 @@
 package com.mario.schedule.distributed.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.scheduledexecutor.IScheduledFuture;
 import com.mario.schedule.distributed.DistributedScheduledFuture;
 
 import lombok.Getter;
 
-import java.util.concurrent.TimeUnit;
-
 public class HzDistributedScheduledFuture extends HzDistributedScheduleCleaner implements DistributedScheduledFuture {
+
+	private static final long serialVersionUID = -4176090454623276044L;
 
 	@Getter
 	private final IScheduledFuture<?> sourceFuture;

@@ -1,8 +1,9 @@
 package com.mario.schedule.distributed;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-public interface DistributedScheduledFuture {
+public interface DistributedScheduledFuture extends Serializable {
 
 	void cancel();
 
@@ -39,8 +40,8 @@ public interface DistributedScheduledFuture {
 	}
 
 	/**
-	 * String represent for this future, it useful for case you want to
-	 * re-construct the future in other node
+	 * String represent for this future, it useful for case you want to re-construct
+	 * the future in other node
 	 * 
 	 * @return
 	 */

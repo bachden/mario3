@@ -40,8 +40,8 @@
 			<PatternLayout pattern="${only-thread-name-layout}" />
 		</Console>
 
-		<logFaces name="logFacesTCP" application="mario-test" protocol="tcp" remoteHost="localhost" port="55200" backup="fileOutputLog" />
-		<logFaces name="logFacesUDP" application="mario-test" protocol="udp" remoteHost="localhost" port="55201" backup="fileOutputLog" />
+		<!-- <logFaces name="logFacesTCP" application="mario-test" protocol="tcp" remoteHost="localhost" port="55200" backup="fileOutputLog" /> -->
+		<!-- <logFaces name="logFacesUDP" application="mario-test" protocol="udp" remoteHost="localhost" port="55201" backup="fileOutputLog" /> -->
 	</Appenders>
 	<Loggers>
 		<Root level="info" includeLocation="false">

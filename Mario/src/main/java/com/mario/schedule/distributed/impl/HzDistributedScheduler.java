@@ -64,7 +64,7 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 				if (this.hzTrackingMap.tryLock(taskName, 3, TimeUnit.SECONDS)) {
 					try {
 						IScheduledFuture<?> future = this.hzScheduler
-								.schedule(new HzDistributedRunnable(this.hzScheduler.getName(), true, taskName,
+								.schedule(new HzDistributedRunnableWrapper(this.hzScheduler.getName(), true, taskName,
 										this.hzTrackingMap.getName(), runner), delay, timeUnit);
 						return prepareFuture(taskName, future);
 					} finally {
@@ -85,8 +85,8 @@ public class HzDistributedScheduler implements DistributedScheduler, Serializabl
 			if (this.hzTrackingMap.tryLock(taskName)) {
 				try {
 					IScheduledFuture<?> future = this.hzScheduler
-							.scheduleAtFixedRate(new HzDistributedRunnable(this.hzScheduler.getName(), false, taskName,
-									this.hzTrackingMap.getName(), runner), delay, period, timeUnit);
+							.scheduleAtFixedRate(new HzDistributedRunnableWrapper(this.hzScheduler.getName(), false,
+									taskName, this.hzTrackingMap.getName(), runner), delay, period, timeUnit);
 					return prepareFuture(taskName, future);
 				} finally {
 					this.hzTrackingMap.unlock(taskName);
