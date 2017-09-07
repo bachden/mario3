@@ -1,10 +1,10 @@
 package com.nhb.test.mario.gateway.rabbitmq;
 
-import nhb.common.data.PuElement;
-import nhb.common.data.PuObject;
-import nhb.common.data.PuObjectRO;
-import nhb.mario3.entity.impl.BaseMessageHandler;
-import nhb.mario3.entity.message.Message;
+import com.mario.entity.impl.BaseMessageHandler;
+import com.mario.entity.message.Message;
+import com.nhb.common.data.PuElement;
+import com.nhb.common.data.PuObject;
+import com.nhb.common.data.PuObjectRO;
 
 public class RoutingRPCHandler extends BaseMessageHandler {
 

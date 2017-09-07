@@ -17,6 +17,13 @@ public class RabbitMQRPCGateway extends RabbitMQWorkerGateway {
 
 	@Override
 	protected void handleResult(String consumerTag, Envelope envelope, BasicProperties properties, PuElement result) {
+		if (result == null) {
+			getLogger().error(
+					"Something went wrong, result is null, you may need to setup resultOnError variable in rabbitmq gateway config",
+					new NullPointerException("Cannot handle null result"));
+			return;
+		}
+
 		String replyQueue = properties.getReplyTo();
 		if (replyQueue != null && replyQueue.trim().length() > 0) {
 			byte[] response = result == null ? null : result.toBytes();

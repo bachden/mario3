@@ -32,6 +32,20 @@
 			</workerpool>
 		</rabbitmq>
 		<rabbitmq>
+			<name>rabbitmq_pubsub_gateway</name>
+			<server>rabbitmq_localhost</server>
+			<queue>
+				<type>PUB_SUB</type>
+				<exchangeName>test.pubsub</exchangeName>
+				<exchangeType>fanout</exchangeType>
+			</queue>
+			<workerpool>
+				<poolsize>8</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>PubSub Worker #%d</threadnamepattern>
+			</workerpool>
+		</rabbitmq>
+		<rabbitmq>
 			<name>rabbitmq_rpc_gateway</name>
 			<server>rabbitmq_localhost</server>
 			<queue>
@@ -194,7 +208,8 @@
 		<!-- ROUTING RPC -->
 		<handler>
 			<name>test_routing_key_rpc_a_handler</name>
-			<handle>com.nhb.test.mario.gateway.rabbitmq.RoutingRPCHandler</handle>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.RoutingRPCHandler
+			</handle>
 			<bind>
 				<gateway>rabbitmq_routing_rpc_a_gateway</gateway>
 			</bind>
@@ -212,6 +227,15 @@
 			<variables>
 				<variable name="routingKey" type="String">b</variable>
 			</variables>
+		</handler>
+
+		<!-- PUB_SUB -->
+		<handler>
+			<name>test_pubsub_handler</name>
+			<handle>com.nhb.test.mario.gateway.rabbitmq.PubSubHandler</handle>
+			<bind>
+				<gateway>rabbitmq_pubsub_gateway</gateway>
+			</bind>
 		</handler>
 	</lifecycles>
 </mario>

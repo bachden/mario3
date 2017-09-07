@@ -64,6 +64,7 @@ import com.mario.monitor.config.MonitorAlertServicesConfig;
 import com.mario.monitor.config.MonitorAlertStatusConfig;
 import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
 import com.mario.services.ServiceManager;
+import com.nhb.common.data.PuElementJSONHelper;
 import com.nhb.common.data.PuObject;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.data.exception.InvalidDataException;
@@ -949,6 +950,10 @@ class ExtensionConfigReader extends XmlConfigReader {
 								rabbitMQConfig.setServerWrapperName(value);
 							} else if (ele.getNodeName().equalsIgnoreCase("queue")) {
 								rabbitMQConfig.setQueueConfig(readRabbitMQQueueConfig(ele));
+							} else if (ele.getNodeName().equalsIgnoreCase("ackOnError")) {
+								rabbitMQConfig.setAckOnError(Boolean.valueOf(ele.getTextContent()));
+							} else if (ele.getNodeName().equalsIgnoreCase("resultOnError")) {
+								rabbitMQConfig.setResultOnError(PuElementJSONHelper.fromJSON(ele.getTextContent()));
 							}
 						}
 						ele = ele.getNextSibling();

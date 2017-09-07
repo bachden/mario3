@@ -2,14 +2,14 @@ package com.nhb.test.mq.rabbit;
 
 import java.io.IOException;
 
-import nhb.common.data.PuObject;
-import nhb.common.utils.Initializer;
-import nhb.common.vo.HostAndPort;
-import nhb.common.vo.UserNameAndPassword;
-import nhb.messaging.rabbit.RabbitMQQueueConfig;
-import nhb.messaging.rabbit.connection.RabbitMQConnection;
-import nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
-import nhb.messaging.rabbit.producer.RabbitMQRoutingRPCProducer;
+import com.nhb.common.data.PuObject;
+import com.nhb.common.utils.Initializer;
+import com.nhb.common.vo.HostAndPort;
+import com.nhb.common.vo.UserNameAndPassword;
+import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnection;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
+import com.nhb.messaging.rabbit.producer.RabbitMQRoutingRPCProducer;
 
 public class TestRoutingKeyRPCProducer extends RabbitMQRoutingRPCProducer {
 
@@ -19,7 +19,7 @@ public class TestRoutingKeyRPCProducer extends RabbitMQRoutingRPCProducer {
 
 		Initializer.bootstrap(TestRoutingKeyRPCProducer.class);
 
-		RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
+		final RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
 		connectionPool.addEndpoints(new HostAndPort("localhost", 5672));
 		connectionPool.setCredential(new UserNameAndPassword("root", "123456"));
 

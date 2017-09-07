@@ -2,12 +2,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>nhb.mario</groupId>
-	<artifactId>test-external-configuration-monitoring</artifactId>
+	<groupId>nhb.mario.test</groupId>
+	<artifactId>test-rabbitmq-gateway</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

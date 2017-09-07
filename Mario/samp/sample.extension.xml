@@ -239,9 +239,11 @@
 			<name>[rabbitmq_gateway_name]</name>
 			<deserializer>[deserializer-class]</deserializer>
 			<server>[rabbitmq_connection_pool_name]</server>
+			<ackOnError>[boolean, default true, auto send ack if error when handling]</ackOnError>
+			<resultOnError>[default null, json will be convert to PuElement, in RPC queue, producer will be not receive anything if this config is null]</resultOnError>
 			<queue>
-				<type>pub_sub</type>
-				<name>[queueName ** not require if type == pub_sub or routing]</name>
+				<type>[support: TASK_QUEUE, RPC, PUB_SUB, ROUTING, ROUTING_RPC, TOPIC, TOPIC_RPC]</type>
+				<name>[queueName ** not require if type == PUB_SUB or routing]</name>
 				<autoack>[true (default) | false ** if false, ack will be send when consumer process done]</autoack>
 				<routingKey>[rountingKey, default will be queueName if exchangeName == null or empty]</routingKey>
 				<exchangeName>[exchangeName ** require]</exchangeName>

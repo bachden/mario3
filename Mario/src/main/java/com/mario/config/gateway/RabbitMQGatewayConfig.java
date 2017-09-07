@@ -2,9 +2,16 @@ package com.mario.config.gateway;
 
 import com.mario.entity.message.transcoder.binary.BinaryMessageSerializer;
 import com.mario.entity.message.transcoder.rabbitmq.RabbitMQMessageDeserializer;
+import com.nhb.common.data.PuElement;
+import com.nhb.common.data.PuObject;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class RabbitMQGatewayConfig extends GatewayConfig {
 
 	{
@@ -15,37 +22,31 @@ public class RabbitMQGatewayConfig extends GatewayConfig {
 
 	private RabbitMQQueueConfig queueConfig;
 	private String serverWrapperName;
+	private boolean ackOnError = true;
+	private PuElement resultOnError = null;
 
 	@Override
 	protected void _readPuObject(PuObjectRO data) {
-		super._readPuObject(data);
-		if (data.variableExists("serverWrapperName")) {
-			this.setServerWrapperName(data.getString("serverWrapperName"));
-		} else if (data.variableExists("server")) {
-			this.setServerWrapperName(data.getString("server"));
-		}
-		if (data.variableExists("queueConfig")) {
-			if (this.queueConfig == null) {
-				this.queueConfig = new RabbitMQQueueConfig();
+		if (data != null) {
+			super._readPuObject(data);
+
+			String serverName = data.getString("server", data.getString("serverWrapperName", null));
+			this.setServerWrapperName(serverName);
+
+			PuObject queueConfigPuo = data.getPuObject("queueConfig", null);
+			if (queueConfigPuo != null) {
+				if (this.queueConfig == null) {
+					this.queueConfig = new RabbitMQQueueConfig();
+				}
+				this.queueConfig.readPuObject(queueConfigPuo);
 			}
-			this.queueConfig.readPuObject(data.getPuObject("queueConfig"));
+
+			this.setAckOnError(data.getBoolean("ackOnError", true));
+
+			if (data.variableExists("resultOnError")) {
+				this.setResultOnError(data.get("resultOnError"));
+			}
 		}
-	}
-
-	public RabbitMQQueueConfig getQueueConfig() {
-		return queueConfig;
-	}
-
-	public void setQueueConfig(RabbitMQQueueConfig queueConfig) {
-		this.queueConfig = queueConfig;
-	}
-
-	public String getServerWrapperName() {
-		return serverWrapperName;
-	}
-
-	public void setServerWrapperName(String serverWrapperName) {
-		this.serverWrapperName = serverWrapperName;
 	}
 
 }

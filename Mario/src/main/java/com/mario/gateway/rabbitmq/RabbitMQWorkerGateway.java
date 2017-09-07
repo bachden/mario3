@@ -47,12 +47,7 @@ public class RabbitMQWorkerGateway extends RabbitMQGateway {
 		try {
 			this.publishToWorkers(new Object[] { body, deliveredMessage });
 		} catch (Exception e) {
-			getLogger().error("Error while publish message to worker");
-			if (deliveredMessage != null) {
-				ack(deliveredMessage.getEnvelope().getDeliveryTag());
-				this.handleResult(deliveredMessage.getConsumerTag(), deliveredMessage.getEnvelope(),
-						deliveredMessage.getProperties(), null);
-			}
+			tryHandleError(deliveredMessage, e);
 		}
 	}
 
@@ -70,15 +65,36 @@ public class RabbitMQWorkerGateway extends RabbitMQGateway {
 		}
 	}
 
+	private void tryHandleError(RabbitMQDeliveredMessage mesProps, Throwable ex) {
+		try {
+			if (this.getConfig().getResultOnError() != null) {
+				getLogger().debug("Error while handle message, default resultOnError will be handled as result", ex);
+				this.handleResult(mesProps.getConsumerTag(), mesProps.getEnvelope(), mesProps.getProperties(),
+						this.getConfig().getResultOnError());
+			} else {
+				getLogger().error(
+						"An error occur while handling message, you may want to config resultOnError in config of gateway name {}, extension {}",
+						this.getConfig().getName(), this.getConfig().getExtensionName(), ex);
+			}
+		} finally {
+			if (this.getConfig().isAckOnError()) {
+				getLogger().info("Sending ack on error, gateway name {}, extension {}", this.getConfig().getName(),
+						this.getConfig().getExtensionName());
+				ack(mesProps.getEnvelope().getDeliveryTag());
+			}
+		}
+	}
+
 	@Override
 	public final void onHandleError(Message message, Throwable exception) {
 		if (message instanceof RabbitMQMessage) {
 			RabbitMQMessage rabbitMQMessage = (RabbitMQMessage) message;
-			getLogger().error("Error while handling message", exception);
 			RabbitMQDeliveredMessage mesProps = rabbitMQMessage.getDeliveredMessage();
 			if (mesProps != null) {
-				ack(mesProps.getEnvelope().getDeliveryTag());
-				this.handleResult(mesProps.getConsumerTag(), mesProps.getEnvelope(), mesProps.getProperties(), null);
+				tryHandleError(mesProps, exception);
+			} else {
+				getLogger().error("Error while handling message without message properties, gateway {}, extension {}",
+						this.getConfig().getName(), this.getConfig().getExtensionName(), exception);
 			}
 		}
 	}

@@ -4,17 +4,17 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 
-import nhb.common.async.Callback;
-import nhb.common.data.PuElement;
-import nhb.common.data.PuObject;
-import nhb.common.utils.Initializer;
-import nhb.common.vo.HostAndPort;
-import nhb.common.vo.UserNameAndPassword;
-import nhb.messaging.MessagingModel;
-import nhb.messaging.rabbit.RabbitMQQueueConfig;
-import nhb.messaging.rabbit.connection.RabbitMQConnection;
-import nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
-import nhb.messaging.rabbit.producer.RabbitMQRPCProducer;
+import com.nhb.common.async.Callback;
+import com.nhb.common.data.PuElement;
+import com.nhb.common.data.PuObject;
+import com.nhb.common.utils.Initializer;
+import com.nhb.common.vo.HostAndPort;
+import com.nhb.common.vo.UserNameAndPassword;
+import com.nhb.messaging.MessagingModel;
+import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnection;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
+import com.nhb.messaging.rabbit.producer.RabbitMQRPCProducer;
 
 public class TestRPCProducer extends RabbitMQRPCProducer {
 
@@ -24,7 +24,7 @@ public class TestRPCProducer extends RabbitMQRPCProducer {
 
 		Initializer.bootstrap(TestRPCProducer.class);
 
-		RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
+		final RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
 		connectionPool.addEndpoints(new HostAndPort("localhost", 5672));
 		connectionPool.setCredential(new UserNameAndPassword("root", "123456"));
 
@@ -61,9 +61,9 @@ public class TestRPCProducer extends RabbitMQRPCProducer {
 
 	private void execute() throws InterruptedException {
 
-		DecimalFormat df = new DecimalFormat("0.##");
+		final DecimalFormat df = new DecimalFormat("0.##");
 		int numThreads = 200;
-		int total = 100000;
+		final int total = 100000;
 
 		final CountDownLatch startSignal = new CountDownLatch(1);
 		final CountDownLatch doneSignal = new CountDownLatch(total);
@@ -85,7 +85,7 @@ public class TestRPCProducer extends RabbitMQRPCProducer {
 			};
 		};
 
-		int messagePerThread = new Double(Double.valueOf(total) / Double.valueOf(numThreads)).intValue();
+		final int messagePerThread = new Double(Double.valueOf(total) / Double.valueOf(numThreads)).intValue();
 
 		for (int i = 0; i < numThreads; i++) {
 			new Thread() {

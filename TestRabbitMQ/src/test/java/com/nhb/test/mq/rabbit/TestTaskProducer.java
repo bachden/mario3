@@ -3,15 +3,15 @@ package com.nhb.test.mq.rabbit;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
-import nhb.common.data.PuObject;
-import nhb.common.utils.Initializer;
-import nhb.common.vo.HostAndPort;
-import nhb.common.vo.UserNameAndPassword;
-import nhb.messaging.MessagingModel;
-import nhb.messaging.rabbit.RabbitMQQueueConfig;
-import nhb.messaging.rabbit.connection.RabbitMQConnection;
-import nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
-import nhb.messaging.rabbit.producer.RabbitMQTaskProducer;
+import com.nhb.common.data.PuObject;
+import com.nhb.common.utils.Initializer;
+import com.nhb.common.vo.HostAndPort;
+import com.nhb.common.vo.UserNameAndPassword;
+import com.nhb.messaging.MessagingModel;
+import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnection;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
+import com.nhb.messaging.rabbit.producer.RabbitMQTaskProducer;
 
 public class TestTaskProducer extends RabbitMQTaskProducer {
 
@@ -21,7 +21,7 @@ public class TestTaskProducer extends RabbitMQTaskProducer {
 
 		Initializer.bootstrap(TestTaskProducer.class);
 
-		RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
+		final RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
 		connectionPool.addEndpoints(new HostAndPort("localhost", 5672));
 		connectionPool.setCredential(new UserNameAndPassword("root", "123456"));
 

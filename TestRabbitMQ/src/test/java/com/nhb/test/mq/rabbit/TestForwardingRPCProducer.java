@@ -2,14 +2,14 @@ package com.nhb.test.mq.rabbit;
 
 import java.io.IOException;
 
-import nhb.common.data.PuObject;
-import nhb.common.utils.Initializer;
-import nhb.common.vo.HostAndPort;
-import nhb.common.vo.UserNameAndPassword;
-import nhb.messaging.rabbit.RabbitMQQueueConfig;
-import nhb.messaging.rabbit.connection.RabbitMQConnection;
-import nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
-import nhb.messaging.rabbit.producer.RabbitMQRPCProducer;
+import com.nhb.common.data.PuObject;
+import com.nhb.common.utils.Initializer;
+import com.nhb.common.vo.HostAndPort;
+import com.nhb.common.vo.UserNameAndPassword;
+import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnection;
+import com.nhb.messaging.rabbit.connection.RabbitMQConnectionPool;
+import com.nhb.messaging.rabbit.producer.RabbitMQRPCProducer;
 
 public class TestForwardingRPCProducer extends RabbitMQRPCProducer {
 
@@ -19,7 +19,7 @@ public class TestForwardingRPCProducer extends RabbitMQRPCProducer {
 
 		Initializer.bootstrap(TestForwardingRPCProducer.class);
 
-		RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
+		final RabbitMQConnectionPool connectionPool = new RabbitMQConnectionPool();
 		connectionPool.addEndpoints(new HostAndPort("localhost", 5672));
 		connectionPool.setCredential(new UserNameAndPassword("root", "123456"));
 
