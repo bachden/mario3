@@ -1043,8 +1043,12 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 					if (socketGatewayConfig instanceof WebsocketGatewayConfig) {
 						((WebsocketGatewayConfig) socketGatewayConfig).setAutoActiveChannel(autoActiveChannel);
-						((WebsocketGatewayConfig) socketGatewayConfig).setProxy(proxy);
-						((WebsocketGatewayConfig) socketGatewayConfig).setPath(path);
+						if (proxy != null) {
+							((WebsocketGatewayConfig) socketGatewayConfig).setProxy(proxy);
+						}
+						if (path != null) {
+							((WebsocketGatewayConfig) socketGatewayConfig).setPath(path);
+						}
 					}
 
 					socketGatewayConfig.setName(name);

@@ -67,7 +67,22 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 				return;
 			}
 			HttpGateway.this.handle(req, resp);
-		};
+		}
+
+		@Override
+		protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			HttpGateway.this.handle(req, resp);
+		}
+
+		@Override
+		protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			HttpGateway.this.handle(req, resp);
+		}
+
+		@Override
+		protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			HttpGateway.this.handle(req, resp);
+		}
 	});
 
 	protected MessageHandlingWorkerPool createWorkerPool() {

@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 public class WebsocketGatewayConfig extends SocketGatewayConfig {
 
-	private String path = "";
+	private String path = "/websocket";
 	private String proxy = null;
 	private boolean autoActiveChannel = true;
 

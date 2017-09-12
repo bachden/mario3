@@ -4,9 +4,8 @@ import com.mario.entity.message.MessageRW;
 import com.mario.entity.message.SocketMessage;
 import com.mario.entity.message.transcoder.binary.BinaryMessageDeserializer;
 import com.mario.gateway.socket.SocketMessageType;
-import com.nhb.common.data.PuArrayList;
 import com.nhb.common.data.PuElement;
-import com.nhb.common.data.PuObject;
+import com.nhb.common.data.PuElementJSONHelper;
 
 public class SocketMessageDeserializer extends BinaryMessageDeserializer {
 
@@ -26,13 +25,7 @@ public class SocketMessageDeserializer extends BinaryMessageDeserializer {
 				// websocket support
 				String bodyString = (String) body;
 				bodyString = bodyString.trim();
-				if (((String) body).startsWith("{")) {
-					message.setData(PuObject.fromJSON(bodyString));
-				} else if (bodyString.startsWith("[")) {
-					message.setData(PuArrayList.fromJSON(bodyString));
-				} else {
-					throw new RuntimeException("Unrecognized body data: " + bodyString);
-				}
+				message.setData(PuElementJSONHelper.fromJSON(bodyString));
 			}
 
 			if (message instanceof SocketMessage) {

@@ -258,10 +258,10 @@
 		<socket ref="[the property which hold the config, optional]">
 			<name>default-tcp</name>
 			<deserializer>[deserializer-class]</deserializer>
-			<protocol>[ TCP | UDT | UDP]</protocol>
+			<protocol>[ TCP | UDT | UDP | WEBSOCKET]</protocol>
 			<path>[for websocket only, must be != '/', default: '/websocket']</path>
 			<proxy>[for websocket only, default null]</proxy>
-			<autoactivechannel>[for websocket only, auto active channel after connect, for render test page, set to false, default true]</autoactivechannel>
+			<autoactivechannel>[for websocket only, auto active channel after connect. For render test page, set to false. Default true]</autoactivechannel>
 			<host>127.0.0.1</host>
 			<port>9999</port>
 			<uselengthprepender>[true | false]</uselengthprepender>
