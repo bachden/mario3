@@ -1,7 +1,7 @@
 -server
 -d64
--Xms1g
--Xmx1g
+-Xms512M
+-Xmx512M
 
 # print full stacktrace
 # -XX:-OmitStackTraceInFastThrow
