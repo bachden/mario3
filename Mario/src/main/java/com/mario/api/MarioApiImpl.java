@@ -35,6 +35,7 @@ import com.mario.services.ServiceManager;
 import com.mario.services.email.EmailService;
 import com.mario.services.sms.SmsService;
 import com.mario.services.telegram.TelegramBot;
+import com.mario.zeromq.ZMQSocketRegistryManager;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.mongodb.MongoClient;
 import com.nhb.common.cache.jedis.JedisService;
@@ -47,6 +48,7 @@ import com.nhb.common.db.mongodb.MongoDBSourceManager;
 import com.nhb.common.db.sql.DBIAdapter;
 import com.nhb.common.db.sql.SQLDataSourceManager;
 import com.nhb.messaging.MessageProducer;
+import com.nhb.messaging.zmq.ZMQSocketRegistry;
 
 import lombok.Getter;
 
@@ -66,6 +68,7 @@ class MarioApiImpl implements MarioApi {
 	private ZooKeeperClientManager zkClientManager;
 	private ExtensionManager extensionManager;
 	private ExternalConfigurationManager externalConfigurationManager;
+	private ZMQSocketRegistryManager zmqSocketRegistryMamager;
 
 	@Getter
 	private ContactBook contactBook;
@@ -82,7 +85,8 @@ class MarioApiImpl implements MarioApi {
 			ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
 			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties, ContactBook contactBook,
 			ServiceManager serviceManager, HzDistributedSchedulerManager hzDistributedSchedulerManager,
-			ExternalConfigurationManager externalConfigurationManager) {
+			ExternalConfigurationManager externalConfigurationManager,
+			ZMQSocketRegistryManager zmqSocketRegistryMamager) {
 
 		this.sqlDatasourceManager = dataSourceManager;
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
@@ -104,6 +108,12 @@ class MarioApiImpl implements MarioApi {
 		this.serviceManager = serviceManager;
 		this.hzDistributedSchedulerManager = hzDistributedSchedulerManager;
 		this.externalConfigurationManager = externalConfigurationManager;
+		this.zmqSocketRegistryMamager = zmqSocketRegistryMamager;
+	}
+
+	@Override
+	public ZMQSocketRegistry getZMQSocketRegistry(String name) {
+		return this.zmqSocketRegistryMamager.getZMQSocketRegistry(name);
 	}
 
 	@Override
@@ -245,8 +255,8 @@ class MarioApiImpl implements MarioApi {
 	}
 
 	/**
-	 * this method will be removed in near future, please use "initializers"
-	 * config in extension.xml
+	 * this method will be removed in near future, please use "initializers" config
+	 * in extension.xml
 	 */
 	@Override
 	public HazelcastInstance getHazelcastInstance(String name, HazelcastInitializer initializer) {

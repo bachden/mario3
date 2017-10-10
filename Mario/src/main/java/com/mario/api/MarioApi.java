@@ -27,6 +27,7 @@ import com.nhb.common.db.cassandra.CassandraDataSource;
 import com.nhb.common.db.sql.DBIAdapter;
 import com.nhb.common.utils.FileSystemUtils;
 import com.nhb.messaging.MessageProducer;
+import com.nhb.messaging.zmq.ZMQSocketRegistry;
 
 @SuppressWarnings("deprecation")
 public interface MarioApi {
@@ -44,14 +45,14 @@ public interface MarioApi {
 	DBIAdapter getDatabaseAdapter(String dataSourceName);
 
 	MongoClient getMongoClient(String name);
-	
+
 	com.mongodb.async.client.MongoClient getAsyncMongoClient(String name);
 
 	HazelcastInstance getHazelcastInstance(String name);
 
 	/**
-	 * this method will be removed in near future, please use "initializers"
-	 * config in extension.xml instead
+	 * this method will be removed in near future, please use "initializers" config
+	 * in extension.xml instead
 	 */
 	HazelcastInstance getHazelcastInstance(String name, HazelcastInitializer initializer);
 
@@ -94,4 +95,6 @@ public interface MarioApi {
 	TelegramBot getTelegramBot(String telegramBotName);
 
 	ExternalConfiguration getExternalConfiguration(String name);
+
+	ZMQSocketRegistry getZMQSocketRegistry(String name);
 }

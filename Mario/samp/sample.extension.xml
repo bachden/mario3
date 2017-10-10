@@ -190,6 +190,13 @@
 		</kafka>
 	</servers>
 
+	<zeromq>
+		<registry>
+			<name>[zeromq context registry name]</name>
+			<numIOThreads>[io thread used for zeromq context, default 1]</numIOThreads>
+		</registry>
+	</zeromq>
+
 	<producers>
 		<rabbitmq ref="[the property which hold the config, optional]">
 			<name>[producer_name, used for getApi to locate]</name>

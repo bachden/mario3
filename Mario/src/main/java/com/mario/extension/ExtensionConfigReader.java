@@ -38,6 +38,7 @@ import com.mario.config.RabbitMQProducerConfig;
 import com.mario.config.RedisConfig;
 import com.mario.config.SSLContextConfig;
 import com.mario.config.WorkerPoolConfig;
+import com.mario.config.ZMQSocketRegistryConfig;
 import com.mario.config.ZkClientConfig;
 import com.mario.config.gateway.GatewayConfig;
 import com.mario.config.gateway.GatewayType;
@@ -64,6 +65,7 @@ import com.mario.monitor.config.MonitorAlertServicesConfig;
 import com.mario.monitor.config.MonitorAlertStatusConfig;
 import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
 import com.mario.services.ServiceManager;
+import com.mario.zeromq.ZMQSocketRegistryManager;
 import com.nhb.common.data.PuElementJSONHelper;
 import com.nhb.common.data.PuObject;
 import com.nhb.common.data.PuObjectRO;
@@ -113,14 +115,18 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	private final ExternalConfigurationManager externalConfigurationManager;
 
+	private final ZMQSocketRegistryManager zmqSocketRegistryManager;
+
 	public ExtensionConfigReader(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager,
 			ExternalConfigurationManager externalConfigurationManager,
-			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager) {
+			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager,
+			ZMQSocketRegistryManager zmqSocketRegistryManager) {
 		this.globalProperties = globalProperties;
 		this.contactBook = contactBook;
 		this.serviceManager = serviceManager;
 		this.hzDistributedSchedulerConfigManager = hzDistributedSchedulerConfigManager;
 		this.externalConfigurationManager = externalConfigurationManager;
+		this.zmqSocketRegistryManager = zmqSocketRegistryManager;
 	}
 
 	@Override
@@ -256,7 +262,46 @@ class ExtensionConfigReader extends XmlConfigReader {
 			}
 		}
 
+		try {
+			System.out.println("\t\t\t- Reading zeromq configs");
+			this.readZeroMQConfigs((Node) xPath.compile("/mario/zeromq").evaluate(document, XPathConstants.NODE));
+		} catch (Exception ex) {
+			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
+				getLogger().error("Error", ex);
+			}
+		}
+
 		System.out.println("\t\t\t- *** Reading configs done ***");
+	}
+
+	private void readZeroMQConfigs(Node root) {
+		if (root != null) {
+			Node curr = root.getFirstChild();
+			while (curr != null) {
+				if (curr.getNodeType() == Node.ELEMENT_NODE) {
+					String nodeName = curr.getNodeName();
+					if (nodeName.equalsIgnoreCase("registry")) {
+						ZMQSocketRegistryConfig config = new ZMQSocketRegistryConfig();
+						Node childNode = curr.getFirstChild();
+						while (childNode != null) {
+							String text = childNode.getTextContent().trim();
+							switch (childNode.getNodeName().toLowerCase()) {
+							case "name":
+								config.setName(text);
+								break;
+							case "numiothreads":
+								config.setNumIOThreads(Integer.valueOf(text));
+								break;
+							}
+							childNode = childNode.getNextSibling();
+						}
+						config.setExtensionName(getExtensionName());
+						this.zmqSocketRegistryManager.addConfig(config);
+					}
+				}
+				curr = curr.getNextSibling();
+			}
+		}
 	}
 
 	private ExternalConfigurationConfig readExternalConfigurationConfig(Node root) {

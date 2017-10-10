@@ -32,6 +32,7 @@ import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigMa
 import com.mario.schedule.impl.SchedulerFactory;
 import com.mario.services.ServiceManager;
 import com.mario.ssl.SSLContextManager;
+import com.mario.zeromq.ZMQSocketRegistryManager;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuDataType;
@@ -145,6 +146,9 @@ public final class Mario extends BaseLoggable {
 	private ExternalConfigurationManager externalConfigurationManager;
 
 	@Getter
+	private ZMQSocketRegistryManager zmqSocketRegistryManager;
+
+	@Getter
 	private final PuObject globalProperties = new PuObject();
 
 	private void start() throws Exception {
@@ -159,6 +163,8 @@ public final class Mario extends BaseLoggable {
 				throw new InvalidDataException("Child-value of globalProperties must be PuObject");
 			}
 		}
+
+		this.zmqSocketRegistryManager = new ZMQSocketRegistryManager();
 
 		this.hzDistributedSchedulerManager = new HzDistributedSchedulerManager();
 		HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager = new HzDistributedSchedulerConfigManager();
@@ -200,7 +206,7 @@ public final class Mario extends BaseLoggable {
 
 		System.out.println("Loading extension...");
 		this.extensionManager.load(this.globalProperties, this.contactBook, this.serviceManager,
-				this.externalConfigurationManager, hzDistributedSchedulerConfigManager);
+				this.externalConfigurationManager, hzDistributedSchedulerConfigManager, this.zmqSocketRegistryManager);
 
 		System.out.println("Init external configuration manager");
 		this.externalConfigurationManager.init(this.extensionManager);
@@ -229,7 +235,7 @@ public final class Mario extends BaseLoggable {
 				this.schedulerFactory, this.mongoDBSourceManager, this.cacheManager, this.monitorAgentManager,
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
 				this.serverWrapperManager, this.globalProperties, this.contactBook, this.serviceManager,
-				this.hzDistributedSchedulerManager, this.externalConfigurationManager);
+				this.hzDistributedSchedulerManager, this.externalConfigurationManager, this.zmqSocketRegistryManager);
 
 		System.out.println("Register sql datasource config");
 		for (SQLDataSourceConfig dataSourceConfig : this.extensionManager.getDataSourceConfigs()) {
@@ -398,20 +404,26 @@ public final class Mario extends BaseLoggable {
 		}
 
 		if (this.monitorAgentManager != null) {
-			System.out.println("Stoping monitor agents...");
+			System.out.println("Stopping monitor agents...");
 			this.monitorAgentManager.stop();
 			System.out.println("DONE");
 		}
 
 		if (this.serviceManager != null) {
-			System.out.println("Stoping service manager...");
+			System.out.println("Stopping service manager...");
 			this.serviceManager.shutdown();
 			System.out.println("DONE");
 		}
 
 		if (this.externalConfigurationManager != null) {
-			System.out.println("Stoping external configuration manager");
+			System.out.println("Stopping external configuration manager");
 			this.externalConfigurationManager.stop();
+			System.out.println("DONE");
+		}
+
+		if (this.zmqSocketRegistryManager != null) {
+			System.out.println("Stopping zmq socket registry manager");
+			this.zmqSocketRegistryManager.destroy();
 			System.out.println("DONE");
 		}
 	}

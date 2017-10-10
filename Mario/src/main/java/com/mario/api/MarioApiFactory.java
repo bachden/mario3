@@ -12,6 +12,7 @@ import com.mario.producer.MessageProducerManager;
 import com.mario.schedule.distributed.impl.HzDistributedSchedulerManager;
 import com.mario.schedule.impl.SchedulerFactory;
 import com.mario.services.ServiceManager;
+import com.mario.zeromq.ZMQSocketRegistryManager;
 import com.mario.zookeeper.ZooKeeperClientManager;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.db.cassandra.CassandraDatasourceManager;
@@ -41,6 +42,7 @@ public final class MarioApiFactory {
 	private HzDistributedSchedulerManager hzDistributedSchedulerManager;
 
 	private ExternalConfigurationManager externalConfigurationManager;
+	private ZMQSocketRegistryManager zmqSocketRegistryMamager;
 
 	public MarioApiFactory(SQLDataSourceManager sqlDataSourceManager,
 			CassandraDatasourceManager cassandraDatasourceManager, SchedulerFactory schedulerFactory,
@@ -49,7 +51,8 @@ public final class MarioApiFactory {
 			GatewayManager gatewayManager, ZooKeeperClientManager zkClientManager, ExtensionManager extensionManager,
 			ServerWrapperManager serverWrapperManager, PuObjectRO globalProperties, ContactBook contactBook,
 			ServiceManager serviceManager, HzDistributedSchedulerManager hzDistributedSchedulerManager,
-			ExternalConfigurationManager externalConfigurationManager) {
+			ExternalConfigurationManager externalConfigurationManager,
+			ZMQSocketRegistryManager zmqSocketRegistryMamager) {
 		this.cassandraDatasourceManager = cassandraDatasourceManager;
 		this.sqlDataSourceManager = sqlDataSourceManager;
 		this.schedulerFactory = schedulerFactory;
@@ -67,6 +70,7 @@ public final class MarioApiFactory {
 		this.serviceManager = serviceManager;
 		this.hzDistributedSchedulerManager = hzDistributedSchedulerManager;
 		this.externalConfigurationManager = externalConfigurationManager;
+		this.zmqSocketRegistryMamager = zmqSocketRegistryMamager;
 	}
 
 	public MarioApi newApi() {
@@ -75,7 +79,7 @@ public final class MarioApiFactory {
 				this.entityManager, this.gatewayManager.getSocketSessionManager(), this.monitorAgentManager,
 				this.producerManager, this.gatewayManager, this.zkClientManager, this.extensionManager,
 				this.serverWrapperManager, this.globalProperties.deepClone(), this.contactBook, this.serviceManager,
-				this.hzDistributedSchedulerManager, this.externalConfigurationManager);
+				this.hzDistributedSchedulerManager, this.externalConfigurationManager, this.zmqSocketRegistryMamager);
 	}
 
 	public void setEntityManager(EntityManager entityManager) {

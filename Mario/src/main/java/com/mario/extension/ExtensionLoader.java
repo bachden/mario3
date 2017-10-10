@@ -10,6 +10,7 @@ import com.mario.contact.ContactBook;
 import com.mario.external.configuration.ExternalConfigurationManager;
 import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
 import com.mario.services.ServiceManager;
+import com.mario.zeromq.ZMQSocketRegistryManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.utils.FileSystemUtils;
@@ -34,12 +35,12 @@ public final class ExtensionLoader extends BaseLoggable {
 
 	public void load(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager,
 			ExternalConfigurationManager externalConfigurationManager,
-			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager) throws Exception {
+			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager, ZMQSocketRegistryManager zmqSocketRegistryManager) throws Exception {
 		if (extFolder.exists() && extFolder.isDirectory()) {
 			// read config
 			System.out.println("\t\t- Reading config file");
 			this.configReader = new ExtensionConfigReader(globalProperties, contactBook, serviceManager,
-					externalConfigurationManager, hzDistributedSchedulerConfigManager);
+					externalConfigurationManager, hzDistributedSchedulerConfigManager, zmqSocketRegistryManager);
 			this.configReader.read(FileSystemUtils.createPathFrom(extFolder.getAbsolutePath(), "extension.xml"));
 			this.name = configReader.getExtensionName();
 

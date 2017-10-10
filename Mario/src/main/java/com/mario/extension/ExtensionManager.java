@@ -20,6 +20,7 @@ import com.mario.external.configuration.ExternalConfigurationManager;
 import com.mario.monitor.config.MonitorAgentConfig;
 import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
 import com.mario.services.ServiceManager;
+import com.mario.zeromq.ZMQSocketRegistryManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.db.cassandra.CassandraDatasourceConfig;
@@ -39,7 +40,8 @@ public final class ExtensionManager extends BaseLoggable {
 
 	public void load(PuObjectRO globalProperties, ContactBook contactBook, ServiceManager serviceManager,
 			ExternalConfigurationManager externalConfigurationManager,
-			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager) throws Exception {
+			HzDistributedSchedulerConfigManager hzDistributedSchedulerConfigManager,
+			ZMQSocketRegistryManager zmqSocketRegistryManager) throws Exception {
 		File file = new File(FileSystemUtils.createAbsolutePathFrom(extensionsFolder));
 		if (file.exists() && file.isDirectory()) {
 			this.extensionLoaderByName = new HashMap<String, ExtensionLoader>();
@@ -49,7 +51,7 @@ public final class ExtensionManager extends BaseLoggable {
 					ExtensionLoader loader = new ExtensionLoader(ext);
 					System.out.println("\t- Loading extension: " + ext.getName());
 					loader.load(globalProperties.deepClone(), contactBook, serviceManager, externalConfigurationManager,
-							hzDistributedSchedulerConfigManager);
+							hzDistributedSchedulerConfigManager, zmqSocketRegistryManager);
 					this.extensionLoaderByName.put(loader.getName(), loader);
 				}
 			}
