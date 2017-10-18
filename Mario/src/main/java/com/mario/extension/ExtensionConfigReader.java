@@ -298,7 +298,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 						config.setExtensionName(getExtensionName());
 						this.zmqSocketRegistryManager.addConfig(config);
 					}
-				}
+				} 
 				curr = curr.getNextSibling();
 			}
 		}

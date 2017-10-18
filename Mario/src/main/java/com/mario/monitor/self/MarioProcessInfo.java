@@ -88,9 +88,12 @@ public class MarioProcessInfo implements MarioProcessInfoMXBean {
 			}
 		}
 
-		Collections.sort(threadDetails);
-
-		this.threadDetails = threadDetails;
+		try {
+			Collections.sort(threadDetails);
+			this.threadDetails = threadDetails;
+		} catch (Exception ex) {
+			// do nothing...
+		}
 	}
 
 	@Override
