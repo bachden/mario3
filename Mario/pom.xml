@@ -247,6 +247,12 @@
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-core</artifactId>
 			<version>${nhb.common.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
