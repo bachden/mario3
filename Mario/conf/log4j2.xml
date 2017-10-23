@@ -62,9 +62,7 @@
 			<AppenderRef ref="console" />
 			<AppenderRef ref="logFacesUDP" />
 		</Logger>
-		<Logger name="com.datastax.driver" additivity="true" level="info" includeLocation="true">
-			<AppenderRef ref="console" />
-		</Logger>
+		<Logger name="com.datastax.driver" additivity="true" level="info" includeLocation="true" />
 		<Logger name="org.I0Itec" additivity="true" level="debug" includeLocation="true">
 			<AppenderRef ref="console" />
 		</Logger>

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SELF_ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 WORKING_DIR=$(dirname $SELF_ABSOLUTE_PATH)
