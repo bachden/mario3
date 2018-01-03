@@ -97,7 +97,7 @@ public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 
 			private final List<ConsumerRecord<byte[], PuElement>> batch = new CopyOnWriteArrayList<>();
 			private ScheduledFuture<?> future = null;
-
+			
 			@Override
 			public void onEvent(Event event) throws Exception {
 				KafkaEvent kafkaEvent = (KafkaEvent) event;
@@ -111,11 +111,32 @@ public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 						for (ConsumerRecord<byte[], PuElement> record : records) {
 							this.batch.add(record);
 						}
+						if (this.future == null) {
+							startBatchingSchedule();
+						}
 					}
 					if (this.batch.size() >= getConfig().getMinBatchingSize()) {
 						this.publish();
 					}
 				}
+			}
+			
+			private void startBatchingSchedule() {
+				if (future != null) {
+					future .cancel(false);
+				}
+				future = scheduledExecutorService.schedule(new Runnable() {
+
+					@Override
+					public void run() {
+						Message message = null;
+						try {
+							message = publish();
+						} catch (MessageDecodingException e) {
+							onHandleError(message, e);
+						}
+					}
+				}, getConfig().getMaxRetentionTime(), TimeUnit.MILLISECONDS);
 			}
 
 			@NotThreadSafe
@@ -125,7 +146,7 @@ public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 						future.cancel(false);
 					}
 					Message message = null;
-					if (this.batch.size() >= 0) {
+					if (this.batch.size() > 0) {
 						List<ConsumerRecord<byte[], PuElement>> data = null;
 						synchronized (this) {
 							data = new ArrayList<>(this.batch);
@@ -136,18 +157,7 @@ public class KafkaGateway extends AbstractGateway<KafkaGatewayConfig> {
 					return message;
 				} finally {
 					if (getConfig().getMinBatchingSize() > 0 && getConfig().getMaxRetentionTime() > 0) {
-						future = scheduledExecutorService.schedule(new Runnable() {
-
-							@Override
-							public void run() {
-								Message message = null;
-								try {
-									message = publish();
-								} catch (MessageDecodingException e) {
-									onHandleError(message, e);
-								}
-							}
-						}, getConfig().getMaxRetentionTime(), TimeUnit.MILLISECONDS);
+						startBatchingSchedule();
 					}
 				}
 			}

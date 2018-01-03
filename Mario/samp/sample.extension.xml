@@ -177,17 +177,6 @@
 				will be ignored if options != sessions)
 			</sessiontimeout>
 		</http>
-		<kafka ref="[the property which hold the config, optional]">
-			<name>[kafka_server_wrapper_name]</name>
-			<zookeeper>
-				<endpoint>
-					<entry>[my.domain1.com:port]</entry>
-					<entry>[my.domain2.com:port]</entry>
-				</endpoint>
-				<connectiontimeout>[connection_timeout]</connectiontimeout>
-				<synctime>[connection_timeout]</synctime>
-			</zookeeper>
-		</kafka>
 	</servers>
 
 	<zeromq>
@@ -287,7 +276,7 @@
 			</deserializer>
 			<config>[relative_path_to_config_file]</config>
 			<pollTimeout>[poll_timeout in milli seconds, default 10ms. It should be less than minBatchingSize]</pollTimeout>
-			<topics>[the_topics_seperate_by_comma(,)]</topics>
+			<topics>[the topics seperated by comma(,)]</topics>
 			<minBatchingSize>
 				[min record(s) will be published to worker.
 				If it less than or equals 0, gateway will split a batch into single pieces before publish to

@@ -26,6 +26,7 @@ import com.mario.worker.MessageEventFactory;
 import com.mario.worker.MessageHandlingWorkerPool;
 import com.nhb.common.data.PuElement;
 import com.nhb.common.data.PuNull;
+import com.nhb.common.data.PuValue;
 import com.nhb.common.utils.PrimitiveTypeUtils;
 
 public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
@@ -129,8 +130,8 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 				message = httpMessage;
 				PuElement puResponse = this.getHandler().handle(message);
 				if (puResponse == PuNull.IGNORE_ME) {
-					getLogger().warn("IGNORE_ME cannot be used in sync mode, sending EMPTY value as response");
-					puResponse = PuNull.EMPTY;
+					getLogger().warn("PuNull response cannot be used in sync mode, sending EMPTY value as response");
+					puResponse = PuValue.fromObject("");
 				}
 				this.onHandleComplete(message, puResponse);
 			}
@@ -209,8 +210,6 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 					if (this.getConfig().getEncoding() != null) {
 						responser.setCharacterEncoding(this.getConfig().getEncoding());
 					}
-
-					getLogger().debug("res: " + res);
 
 					if (res instanceof String) {
 						responser.getWriter().write((String) res);

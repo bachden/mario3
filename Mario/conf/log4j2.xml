@@ -62,6 +62,7 @@
 			<AppenderRef ref="console" />
 			<AppenderRef ref="logFacesUDP" />
 		</Logger>
+		<Logger name="com.mario.gateway.http.HttpGateway" additivity="true" level="info" />
 		<Logger name="com.datastax.driver" additivity="true" level="info" includeLocation="true" />
 		<Logger name="org.I0Itec" additivity="true" level="debug" includeLocation="true">
 			<AppenderRef ref="console" />

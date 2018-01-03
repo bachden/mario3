@@ -56,7 +56,6 @@ public class MessageProducerManager extends BaseLoggable {
 						throw new UnsupportedTypeException();
 					}
 				}
-
 			});
 		}
 	}
