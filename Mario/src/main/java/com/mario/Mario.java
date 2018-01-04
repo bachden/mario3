@@ -259,7 +259,7 @@ public final class Mario extends BaseLoggable {
 		this.producerManager.start();
 
 		System.out.println("Init service mananger");
-		serviceManager.init(apiFactory);
+		serviceManager.init(apiFactory, extensionManager);
 
 		System.out.println("Init gateway manager");
 		this.gatewayManager.init(extensionManager.getGatewayConfigs());

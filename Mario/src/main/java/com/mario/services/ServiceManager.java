@@ -9,6 +9,7 @@ import org.w3c.dom.Node;
 import com.mario.api.MarioApiFactory;
 import com.mario.entity.NamedLifeCycle;
 import com.mario.entity.Pluggable;
+import com.mario.extension.ExtensionManager;
 import com.mario.services.email.DefaultEmailService;
 import com.mario.services.email.EmailService;
 import com.mario.services.email.EmailServiceConfigurable;
@@ -40,7 +41,7 @@ public class ServiceManager implements Loggable {
 	private final List<SmsServiceConfig> smsConfigs = new ArrayList<>();
 	private final List<EmailServiceConfig> emailConfigs = new ArrayList<>();
 
-	private void readSmsConfig(Node node) {
+	private void readSmsConfig(Node node, String extensionName) {
 		Node curr = node.getFirstChild();
 		SmsServiceConfigBuilder builder = SmsServiceConfig.builder();
 		while (curr != null) {
@@ -60,10 +61,11 @@ public class ServiceManager implements Loggable {
 			}
 			curr = curr.getNextSibling();
 		}
+		builder.extensionName(extensionName);
 		this.smsConfigs.add(builder.build());
 	}
 
-	private void readEmailConfig(Node node) {
+	private void readEmailConfig(Node node, String extensionName) {
 		Node curr = node.getFirstChild();
 		EmailServiceConfigBuilder builder = EmailServiceConfig.builder();
 		while (curr != null) {
@@ -89,6 +91,7 @@ public class ServiceManager implements Loggable {
 			}
 			curr = curr.getNextSibling();
 		}
+		builder.extensionName(extensionName);
 		this.emailConfigs.add(builder.build());
 	}
 
@@ -160,17 +163,17 @@ public class ServiceManager implements Loggable {
 		this.telegramBotManager.register(bot);
 	}
 
-	public void readFromXml(Node node) {
+	public void readFromXml(Node node, String extensionName) {
 		Node curr = node.getFirstChild();
 		while (curr != null) {
 			if (curr.getNodeType() == Element.ELEMENT_NODE) {
 				String currName = curr.getNodeName();
 				switch (currName.toLowerCase()) {
 				case "email":
-					readEmailConfig(curr);
+					readEmailConfig(curr, extensionName);
 					break;
 				case "sms":
-					readSmsConfig(curr);
+					readSmsConfig(curr, extensionName);
 					break;
 				case "telegram":
 				case "telegrambot":
@@ -185,15 +188,12 @@ public class ServiceManager implements Loggable {
 		}
 	}
 
-	public void init(MarioApiFactory apiFactory) {
+	public void init(MarioApiFactory apiFactory, ExtensionManager extManager) {
 		for (EmailServiceConfig emailConfig : this.emailConfigs) {
 			EmailService emailService = null;
 			if (emailConfig.getHandle() != null) {
 				try {
-					@SuppressWarnings("unchecked")
-					Class<? extends EmailService> clazz = (Class<? extends EmailService>) Class
-							.forName(emailConfig.getHandle());
-					emailService = clazz.newInstance();
+					emailService = extManager.newInstance(emailConfig.getExtensionName(), emailConfig.getHandle());
 				} catch (Exception e) {
 					throw new RuntimeException(
 							"Cannot init email service with handle class " + emailConfig.getHandle());
@@ -218,10 +218,7 @@ public class ServiceManager implements Loggable {
 
 		for (SmsServiceConfig smsConfig : this.smsConfigs) {
 			try {
-				@SuppressWarnings("unchecked")
-				Class<? extends SmsService<?>> clazz = (Class<? extends SmsService<?>>) Class
-						.forName(smsConfig.getHandle());
-				SmsService<?> smsService = clazz.newInstance();
+				SmsService<?> smsService = extManager.newInstance(smsConfig.getExtensionName(), smsConfig.getHandle());
 				if (smsService instanceof NamedLifeCycle) {
 					((NamedLifeCycle) smsService).setName(smsConfig.getName());
 				}

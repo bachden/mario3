@@ -383,7 +383,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 		if (node == null) {
 			return;
 		}
-		this.serviceManager.readFromXml(node);
+		this.serviceManager.readFromXml(node, extensionName);
 	}
 
 	private void readContacts(Node node) {

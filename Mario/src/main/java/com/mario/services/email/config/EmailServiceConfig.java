@@ -13,6 +13,8 @@ public class EmailServiceConfig {
 
 	private String name;
 
+	private String extensionName;
+
 	private String handle;
 
 	private PuObjectRO initParams;
