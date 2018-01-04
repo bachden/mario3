@@ -146,7 +146,7 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 			MonitorAlertServicesConfig servicesConfig) {
 		String message = "[" + this.getName() + " ALERT] " + response.getStatus().name() + "\n" + response.getMessage();
 		for (String smsServiceName : servicesConfig.getSmsServices()) {
-			SmsService smsService = getApi().getSmsService(smsServiceName);
+			SmsService<?> smsService = getApi().getSmsService(smsServiceName);
 			if (smsService != null) {
 				try {
 					smsService.send(message, phoneNumbers);

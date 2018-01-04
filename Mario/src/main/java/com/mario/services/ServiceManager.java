@@ -219,8 +219,9 @@ public class ServiceManager implements Loggable {
 		for (SmsServiceConfig smsConfig : this.smsConfigs) {
 			try {
 				@SuppressWarnings("unchecked")
-				Class<? extends SmsService> clazz = (Class<? extends SmsService>) Class.forName(smsConfig.getHandle());
-				SmsService smsService = clazz.newInstance();
+				Class<? extends SmsService<?>> clazz = (Class<? extends SmsService<?>>) Class
+						.forName(smsConfig.getHandle());
+				SmsService<?> smsService = clazz.newInstance();
 				if (smsService instanceof NamedLifeCycle) {
 					((NamedLifeCycle) smsService).setName(smsConfig.getName());
 				}
@@ -237,8 +238,9 @@ public class ServiceManager implements Loggable {
 		this.telegramBotManager.init(apiFactory);
 	}
 
-	public SmsService getSmsService(String name) {
-		return this.smsManager.getSmsService(name);
+	@SuppressWarnings("unchecked")
+	public <R> SmsService<R> getSmsService(String name) {
+		return (SmsService<R>) this.smsManager.getSmsService(name);
 	}
 
 	public EmailService getEmailService(String name) {

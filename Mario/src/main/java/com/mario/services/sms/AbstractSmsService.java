@@ -7,7 +7,7 @@ import com.nhb.common.data.PuObjectRO;
 import lombok.Getter;
 import lombok.Setter;
 
-public abstract class AbstractSmsService implements SmsService, NamedLifeCycle, Loggable {
+public abstract class AbstractSmsService<R> implements SmsService<R>, NamedLifeCycle, Loggable {
 
 	@Setter
 	@Getter

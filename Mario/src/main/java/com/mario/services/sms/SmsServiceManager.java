@@ -7,18 +7,18 @@ import com.nhb.common.Loggable;
 
 public class SmsServiceManager implements Loggable {
 
-	private final Map<String, SmsService> smsServices = new ConcurrentHashMap<>();
+	private final Map<String, SmsService<?>> smsServices = new ConcurrentHashMap<>();
 
-	public SmsService getSmsService(String name) {
+	public SmsService<?> getSmsService(String name) {
 		return this.smsServices.get(name);
 	}
 
-	public void register(SmsService service) {
+	public void register(SmsService<?> service) {
 		this.smsServices.put(service.getName(), service);
 	}
 
 	public void shutdown() {
-		for (SmsService smsService : this.smsServices.values()) {
+		for (SmsService<?> smsService : this.smsServices.values()) {
 			try {
 				smsService.destroy();
 			} catch (Exception e) {

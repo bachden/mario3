@@ -88,7 +88,7 @@ public interface MarioApi {
 
 	ContactBook getContactBook();
 
-	SmsService getSmsService(String name);
+	<R> SmsService<R> getSmsService(String name);
 
 	EmailService getEmailService(String name);
 

@@ -5,15 +5,15 @@ import java.util.Collection;
 
 import com.mario.entity.SimpleLifeCycle;
 
-public interface SmsService extends SimpleLifeCycle {
+public interface SmsService<R> extends SimpleLifeCycle {
 
 	String getName();
 
-	void send(String message, Collection<String> recipients);
+	R send(String message, Collection<String> recipients);
 
-	default void send(String message, String... recipients) {
+	default R send(String message, String... recipients) {
 		if (recipients != null && recipients.length > 0) {
-			this.send(message, Arrays.asList(recipients));
+			return this.send(message, Arrays.asList(recipients));
 		} else {
 			throw new NullPointerException("Recipients cannot be empty (or null)");
 		}

@@ -296,7 +296,7 @@ class MarioApiImpl implements MarioApi {
 	}
 
 	@Override
-	public SmsService getSmsService(String name) {
+	public <R> SmsService<R> getSmsService(String name) {
 		return this.serviceManager.getSmsService(name);
 	}
 

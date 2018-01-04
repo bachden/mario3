@@ -42,6 +42,10 @@ import io.netty.util.ReferenceCounted;
 @SuppressWarnings("deprecation")
 public class NettyWebSocketSession extends NettyTCPSocketSession {
 
+	private static final String X_REAL_PORT = "X-Real-Port";
+	private static final String X_REAL_IP = "X-Real-IP";
+	private static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
 	private WebSocketServerHandshaker handshaker;
 	private String path = "";
 	private String proxy = null;
@@ -143,10 +147,16 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 		}
 
 		if (this.proxy != null) {
-			String realIp = req.headers().get("X-Real-IP");
+			String realIp = req.headers().get(X_FORWARDED_FOR);
+			if (realIp != null && !realIp.trim().isEmpty()) {
+				realIp = realIp.split(",")[0];
+			} else {
+				realIp = req.headers().get(X_REAL_IP);
+			}
+
 			int realPort = 0;
 
-			String realPortStr = req.headers().get("X-Real-Port");
+			String realPortStr = req.headers().get(X_REAL_PORT);
 
 			if (realPortStr != null) {
 				try {
