@@ -163,10 +163,13 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 
 	@Override
 	public void onUpdateReceived(Update update) {
+		TelegramEvent event;
 		if (update.hasMessage()) {
 			Message message = update.getMessage();
 			Long chatId = message.getChatId();
 			String userName = message.getFrom().getUserName();
+
+			event = TelegramEvent.newUpdateEvent(chatId, userName, update);
 
 			SendMessage reply = new SendMessage();
 			reply.setChatId(chatId);
@@ -200,8 +203,10 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 			} catch (TelegramApiException e) {
 				getLogger().error("Cannot send reply message", e);
 			}
+		} else {
+			event = TelegramEvent.newUpdateEvent(-1, null, update);
 		}
-		this.dispatchEvent(TelegramEvent.newUpdateEvent(update));
+		this.dispatchEvent(event);
 	}
 
 	@Override

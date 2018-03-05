@@ -7,17 +7,21 @@ import com.nhb.eventdriven.impl.AbstractEvent;
 
 import lombok.Getter;
 
+@Getter
 public class TelegramEvent extends AbstractEvent implements Event {
 
 	public static final String UPDATE = "update";
 
-	@Getter
 	private Update update;
+	private long chatId;
+	private String userName;
 
-	public static TelegramEvent newUpdateEvent(Update update) {
+	public static TelegramEvent newUpdateEvent(long chatId, String userName, Update update) {
 		TelegramEvent event = new TelegramEvent();
 		event.setType(UPDATE);
 		event.update = update;
+		event.chatId = chatId;
+		event.userName = userName;
 		return event;
 	}
 }
