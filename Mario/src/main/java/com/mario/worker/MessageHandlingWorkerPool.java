@@ -91,9 +91,11 @@ public class MessageHandlingWorkerPool extends BaseLoggable implements Exception
 			message = this.ringBuffer.get(sequence);
 			try {
 				this.messageDeserializer.decode(obj, (MessageRW) message);
-			} catch (MessageDecodingException e) {
+			} catch (Exception e) {
+				MessageDecodingException mdex = e instanceof MessageDecodingException ? (MessageDecodingException) e
+						: new MessageDecodingException(message, e);
 				if (message instanceof DecodingErrorMessage) {
-					((DecodingErrorMessage) message).setDecodingFailedCause(e);
+					((DecodingErrorMessage) message).setDecodingFailedCause(mdex);
 				}
 			}
 		} finally {

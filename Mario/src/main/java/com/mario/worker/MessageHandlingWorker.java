@@ -44,6 +44,8 @@ public class MessageHandlingWorker implements WorkHandler<Message> {
 					((MessageRW) message).clear();
 				}
 			}
+		} else {
+			throw new NullPointerException("Cannot handle message without handler");
 		}
 	}
 
