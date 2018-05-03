@@ -266,7 +266,9 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 			writeResponse(message, exception);
 		} else {
 			getLogger().error("", new NullPointerException("response is null, please check"));
+			closeAsyncContext(message);
 		}
+
 	}
 
 	@Override

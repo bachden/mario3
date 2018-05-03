@@ -23,9 +23,9 @@ public class FullSupportHttpMessageDeserializer extends HttpMessageDeserializer 
 	@Override
 	protected void decodeHttpRequest(ServletRequest data, MessageRW message) {
 		HttpServletRequest request = (HttpServletRequest) data;
+		PuObject params = new PuObject();
 		if (request != null) {
-			
-			PuObject params = new PuObject();
+
 			if (request.getMethod().equalsIgnoreCase("post")) {
 				String contentType = request.getContentType().toLowerCase();
 				if (!contentType.contains("application/x-www-form-urlencoded")
@@ -51,21 +51,22 @@ public class FullSupportHttpMessageDeserializer extends HttpMessageDeserializer 
 						if (pue instanceof PuObjectRO) {
 							params.addAll((PuObjectRO) pue);
 						} else {
-							getLogger().error("Cannot parse request as json object: {}", requestStr);
+							getLogger().error("Cannot parse request as json object: '{}'", requestStr);
 						}
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 				}
 			}
-			
+
 			Enumeration<String> it = request.getParameterNames();
 			while (it.hasMoreElements()) {
 				String key = it.nextElement();
 				String value = request.getParameter(key);
 				params.set(key, value);
 			}
-			message.setData(params);
 		}
+		
+		message.setData(params);
 	}
 }
