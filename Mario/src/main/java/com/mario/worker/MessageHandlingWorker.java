@@ -6,9 +6,10 @@ import com.mario.entity.MessageHandler;
 import com.mario.entity.message.DecodingErrorMessage;
 import com.mario.entity.message.Message;
 import com.mario.entity.message.MessageRW;
+import com.nhb.common.Loggable;
 import com.nhb.common.data.PuElement;
 
-public class MessageHandlingWorker implements WorkHandler<Message> {
+public class MessageHandlingWorker implements WorkHandler<Message>, Loggable {
 
 	private MessageHandleCallback callback;
 	private MessageHandler handler;
@@ -22,8 +23,12 @@ public class MessageHandlingWorker implements WorkHandler<Message> {
 				if (message instanceof DecodingErrorMessage
 						&& ((DecodingErrorMessage) message).getDecodingFailedCause() != null) {
 					if (this.getCallback() != null) {
-						this.getCallback().onHandleError(message,
-								((DecodingErrorMessage) message).getDecodingFailedCause());
+						try {
+							this.getCallback().onHandleError(message,
+									((DecodingErrorMessage) message).getDecodingFailedCause());
+						} catch (Exception ex) {
+							getLogger().error("Message decode error, but cannnot send error response to client", ex);
+						}
 					}
 					hasError = true;
 				} else {
@@ -31,13 +36,22 @@ public class MessageHandlingWorker implements WorkHandler<Message> {
 						result = this.getHandler().handle(message);
 					} catch (Exception e) {
 						if (this.getCallback() != null) {
-							this.getCallback().onHandleError(message, e);
+							try {
+								this.getCallback().onHandleError(message, e);
+							} catch (Exception ex) {
+								getLogger().error("Message handling error, but cannnot send error response to client",
+										ex);
+							}
 						}
 						hasError = true;
 					}
 				}
 				if (!hasError && this.getCallback() != null) {
-					this.getCallback().onHandleComplete(message, result);
+					try {
+						this.getCallback().onHandleComplete(message, result);
+					} catch (Exception ex) {
+						getLogger().error("Error while handling complete on message: {}", message.getData(), ex);
+					}
 				}
 			} finally {
 				if (message instanceof MessageRW) {

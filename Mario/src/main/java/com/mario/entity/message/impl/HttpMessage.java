@@ -43,6 +43,7 @@ public class HttpMessage extends BaseMessage implements CloneableMessage {
 
 	@Override
 	public void clear() {
+		super.clear();
 		this.context = null;
 		this.request = null;
 		this.response = null;
