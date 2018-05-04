@@ -174,69 +174,71 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 		return null;
 	}
 
-	private void writeResponse(final Message message, final Object data) {
-		HttpServletResponse responser = extractResponse(message);
-		if (responser != null) {
-			Object res = null;
-			if (data != null) {
-				if (this.getSerializer() != null) {
-					try {
-						res = this.getSerializer().encode(data);
-					} catch (Exception e) {
+	private void writeResponseAndDone(final Message message, final Object data) {
+		try {
+			HttpServletResponse responser = extractResponse(message);
+			if (responser != null) {
+				Object res = null;
+				if (data != null) {
+					if (this.getSerializer() != null) {
 						try {
-							res = this.getSerializer().encode(e);
-						} catch (Exception e1) {
-							getLogger().error("Cannot serialize response data", e1);
-							res = "Cannot serialize response data";
+							res = this.getSerializer().encode(data);
+						} catch (Exception e) {
+							try {
+								res = this.getSerializer().encode(e);
+							} catch (Exception e1) {
+								getLogger().error("Cannot serialize response data", e1);
+								res = "Cannot serialize response data";
+							}
 						}
+					} else {
+						res = data;
+					}
+
+					if (res == null) {
+						res = "";
+					}
+
+					try {
+						if (this.getConfig().getHeaders().size() > 0) {
+							for (Entry<String, String> header : this.getConfig().getHeaders().entrySet()) {
+								responser.setHeader(header.getKey(), header.getValue());
+							}
+						}
+						if (this.getConfig().getContentType() != null) {
+							responser.setContentType(this.getConfig().getContentType());
+						}
+						if (this.getConfig().getEncoding() != null) {
+							responser.setCharacterEncoding(this.getConfig().getEncoding());
+						}
+
+						if (res instanceof String) {
+							responser.getWriter().write((String) res);
+						} else if (res instanceof PuElement) {
+							responser.getWriter().write(((PuElement) res).toJSON());
+						} else if (res instanceof Throwable) {
+							responser.getWriter().write(ExceptionUtils.getFullStackTrace((Throwable) res));
+						} else if (PrimitiveTypeUtils.isPrimitiveOrWrapperType(res.getClass())) {
+							responser.getWriter().write(PrimitiveTypeUtils.getStringValueFrom(res));
+						} else {
+							responser.getWriter().write(res.toString());
+						}
+
+						responser.getWriter().flush();
+
+					} catch (IOException e) {
+						getLogger().error("Cannot write response", e);
 					}
 				} else {
-					res = data;
-				}
-
-				if (res == null) {
-					res = "";
-				}
-
-				try {
-					if (this.getConfig().getHeaders().size() > 0) {
-						for (Entry<String, String> header : this.getConfig().getHeaders().entrySet()) {
-							responser.setHeader(header.getKey(), header.getValue());
-						}
+					try {
+						responser.getWriter().flush();
+					} catch (IOException e) {
+						getLogger().error("Error while writing response", e);
 					}
-					if (this.getConfig().getContentType() != null) {
-						responser.setContentType(this.getConfig().getContentType());
-					}
-					if (this.getConfig().getEncoding() != null) {
-						responser.setCharacterEncoding(this.getConfig().getEncoding());
-					}
-
-					if (res instanceof String) {
-						responser.getWriter().write((String) res);
-					} else if (res instanceof PuElement) {
-						responser.getWriter().write(((PuElement) res).toJSON());
-					} else if (res instanceof Throwable) {
-						responser.getWriter().write(ExceptionUtils.getFullStackTrace((Throwable) res));
-					} else if (PrimitiveTypeUtils.isPrimitiveOrWrapperType(res.getClass())) {
-						responser.getWriter().write(PrimitiveTypeUtils.getStringValueFrom(res));
-					} else {
-						responser.getWriter().write(res.toString());
-					}
-
-					responser.getWriter().flush();
-
-				} catch (IOException e) {
-					getLogger().error("Cannot write response", e);
-				} finally {
-					closeAsyncContext(message);
-				}
-			} else {
-				try {
-					responser.getWriter().flush();
-				} catch (IOException e) {
-					getLogger().error("Error while writing response", e);
 				}
 			}
+		} finally {
+			closeAsyncContext(message);
 		}
 	}
 
@@ -246,7 +248,7 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 			return;
 		}
 
-		writeResponse(message, result);
+		writeResponseAndDone(message, result);
 	}
 
 	@Override
@@ -263,12 +265,10 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 			} else {
 				response.setStatus(500);
 			}
-			writeResponse(message, exception);
 		} else {
 			getLogger().error("", new NullPointerException("response is null, please check"));
-			closeAsyncContext(message);
 		}
-
+		writeResponseAndDone(message, exception);
 	}
 
 	@Override

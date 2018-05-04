@@ -26,6 +26,13 @@ public class FullSupportHttpMessageDeserializer extends HttpMessageDeserializer 
 		PuObject params = new PuObject();
 		if (request != null) {
 
+			Enumeration<String> it = request.getParameterNames();
+			while (it.hasMoreElements()) {
+				String key = it.nextElement();
+				String value = request.getParameter(key);
+				params.set(key, value);
+			}
+
 			if (request.getMethod().equalsIgnoreCase("post")) {
 				String contentType = request.getContentType().toLowerCase();
 				if (!contentType.contains("application/x-www-form-urlencoded")
@@ -36,7 +43,7 @@ public class FullSupportHttpMessageDeserializer extends HttpMessageDeserializer 
 							if (part.getSize() > 0) {
 								byte[] bytes = new byte[(int) part.getSize()];
 								part.getInputStream().read(bytes, 0, bytes.length);
-								params.setRaw(part.getName(), bytes);
+								params.set(part.getName(), new String(bytes));
 							}
 						}
 					} catch (Exception e) {
@@ -59,14 +66,8 @@ public class FullSupportHttpMessageDeserializer extends HttpMessageDeserializer 
 				}
 			}
 
-			Enumeration<String> it = request.getParameterNames();
-			while (it.hasMoreElements()) {
-				String key = it.nextElement();
-				String value = request.getParameter(key);
-				params.set(key, value);
-			}
 		}
-		
+
 		message.setData(params);
 	}
 }
