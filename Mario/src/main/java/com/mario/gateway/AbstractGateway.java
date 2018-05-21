@@ -14,16 +14,37 @@ import com.mario.worker.MessageEventFactory;
 import com.mario.worker.MessageHandlingWorkerPool;
 import com.nhb.eventdriven.impl.BaseEventDispatcher;
 
-public abstract class AbstractGateway<ConfigType extends GatewayConfig> extends BaseEventDispatcher implements Gateway {
+import lombok.Getter;
+import lombok.Setter;
 
+public abstract class AbstractGateway<ConfigType extends GatewayConfig> extends BaseEventDispatcher
+		implements Gateway, HasDeserializerGateway, HasSerializerGateway {
+
+	@Setter
+	@Getter
 	private String name;
+
+	@Setter
+	@Getter
 	private String extensionName;
+
+	@Getter
 	private boolean initialized = false;
+
+	@Setter
+	@Getter
 	private MessageDecoder deserializer = null;
+
+	@Setter
+	@Getter
 	private MessageEncoder serializer = null;
+
+	@Getter
 	private ConfigType config;
 
+	@Getter
 	private MessageHandler handler;
+
 	private MessageEventFactory eventFactory;
 	private MessageHandlingWorkerPool workerPool;
 
@@ -91,42 +112,6 @@ public abstract class AbstractGateway<ConfigType extends GatewayConfig> extends 
 		this._stop();
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public boolean isInitialized() {
-		return this.initialized;
-	}
-
-	public String getExtensionName() {
-		return extensionName;
-	}
-
-	public void setExtensionName(String extensionName) {
-		this.extensionName = extensionName;
-	}
-
-	public MessageDecoder getDeserializer() {
-		return deserializer;
-	}
-
-	public void setDeserializer(MessageDecoder deserializer) {
-		this.deserializer = deserializer;
-	}
-
-	public MessageEncoder getSerializer() {
-		return serializer;
-	}
-
-	public void setSerializer(MessageEncoder serializer) {
-		this.serializer = serializer;
-	}
-
-	public ConfigType getConfig() {
-		return config;
-	}
-
 	protected static boolean validateIpString(String ip) {
 		try {
 			if (ip == null || ip.isEmpty()) {
@@ -152,11 +137,6 @@ public abstract class AbstractGateway<ConfigType extends GatewayConfig> extends 
 		} catch (NumberFormatException nfe) {
 			return false;
 		}
-	}
-
-	@Override
-	public MessageHandler getHandler() {
-		return handler;
 	}
 
 	@Override

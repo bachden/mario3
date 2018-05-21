@@ -1,12 +1,22 @@
 package com.mario.config;
 
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.WaitStrategy;
 import com.nhb.common.data.PuObjectRO;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class WorkerPoolConfig {
 
 	private String threadNamePattern = "Worker #%d";
 	private int ringBufferSize = 1024;
 	private int poolSize = 1;
+	private WaitStrategy waitStrategy = new BlockingWaitStrategy();
+	private int unmarshallerSize = 2;
+	private int marshallerSize = 2;
 
 	public void readPuObject(PuObjectRO data) {
 		if (data.variableExists("threadNamePattern")) {
@@ -20,30 +30,14 @@ public class WorkerPoolConfig {
 		if (data.variableExists("poolSize")) {
 			this.setPoolSize(data.getInteger("poolSize"));
 		}
-	}
 
-	public String getThreadNamePattern() {
-		return threadNamePattern;
-	}
+		if (data.variableExists("unmarshallerSize")) {
+			this.setUnmarshallerSize(data.getInteger("unmarshallerSize"));
+		}
 
-	public void setThreadNamePattern(String threadNamePattern) {
-		this.threadNamePattern = threadNamePattern;
-	}
-
-	public int getRingBufferSize() {
-		return ringBufferSize;
-	}
-
-	public void setRingBufferSize(int ringBufferSize) {
-		this.ringBufferSize = ringBufferSize;
-	}
-
-	public int getPoolSize() {
-		return poolSize;
-	}
-
-	public void setPoolSize(int poolSize) {
-		this.poolSize = poolSize;
+		if (data.variableExists("marshallerSize")) {
+			this.setMarshallerSize(data.getInteger("marshallerSize"));
+		}
 	}
 
 	@Override

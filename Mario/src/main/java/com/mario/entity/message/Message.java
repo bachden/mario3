@@ -14,4 +14,9 @@ public interface Message extends CommandRequestParameters {
 	GatewayType getGatewayType();
 
 	MessageHandleCallback getCallback();
+
+	@SuppressWarnings("unchecked")
+	default <T extends Message> T cast(Class<T> clazz) {
+		return (T) this;
+	}
 }

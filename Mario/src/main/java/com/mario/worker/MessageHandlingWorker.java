@@ -9,6 +9,11 @@ import com.mario.entity.message.MessageRW;
 import com.nhb.common.Loggable;
 import com.nhb.common.data.PuElement;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class MessageHandlingWorker implements WorkHandler<Message>, Loggable {
 
 	private MessageHandleCallback callback;
@@ -61,22 +66,6 @@ public class MessageHandlingWorker implements WorkHandler<Message>, Loggable {
 		} else {
 			throw new NullPointerException("Cannot handle message without handler");
 		}
-	}
-
-	public MessageHandler getHandler() {
-		return handler;
-	}
-
-	public void setHandler(MessageHandler handler) {
-		this.handler = handler;
-	}
-
-	public MessageHandleCallback getCallback() {
-		return callback;
-	}
-
-	public void setCallback(MessageHandleCallback callback) {
-		this.callback = callback;
 	}
 
 }

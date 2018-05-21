@@ -17,6 +17,8 @@ import com.mario.config.gateway.GatewayType;
 import com.mario.config.gateway.KafkaGatewayConfig;
 import com.mario.config.gateway.RabbitMQGatewayConfig;
 import com.mario.config.gateway.SocketGatewayConfig;
+import com.mario.config.gateway.ZeroMQGatewayConfig;
+import com.mario.entity.ExtensionNameAware;
 import com.mario.entity.message.transcoder.MessageDecoder;
 import com.mario.entity.message.transcoder.MessageEncoder;
 import com.mario.extension.ExtensionManager;
@@ -24,10 +26,12 @@ import com.mario.gateway.http.HttpGateway;
 import com.mario.gateway.kafka.KafkaGatewayFactory;
 import com.mario.gateway.rabbitmq.RabbitMQGatewayFactory;
 import com.mario.gateway.serverwrapper.HasServerWrapper;
+import com.mario.gateway.serverwrapper.ServerWrapper;
 import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.gateway.socket.SocketGateway;
 import com.mario.gateway.socket.SocketGatewayFactory;
 import com.mario.gateway.socket.SocketSessionManager;
+import com.mario.gateway.zeromq.ZeroMQGatewayFactory;
 import com.mario.ssl.SSLContextManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.eventdriven.Event;
@@ -53,6 +57,9 @@ public final class GatewayManager extends BaseEventDispatcher {
 					break;
 				case KAFKA:
 					result = KafkaGatewayFactory.newKafkaGateway((KafkaGatewayConfig) config);
+					break;
+				case ZEROMQ:
+					result = ZeroMQGatewayFactory.newZeroMQGateway((ZeroMQGatewayConfig) config);
 					break;
 				default:
 					break;
@@ -90,9 +97,9 @@ public final class GatewayManager extends BaseEventDispatcher {
 
 		for (GatewayConfig config : gatewayConfigs) {
 			if (config.getName() == null || config.getName().trim().length() == 0) {
-				getLogger().error("cannot init gateway with empty name", new Exception());
-				continue;
+				throw new NullPointerException("Cannot init gateway with empty name");
 			}
+
 			Gateway gateway = this.gatewayFactory.newGateway(config);
 			if (gateway instanceof SSLContextAware) {
 				String sslContextName = config.getSSLContextName();
@@ -100,28 +107,59 @@ public final class GatewayManager extends BaseEventDispatcher {
 					((SSLContextAware) gateway).setSSLContext(this.sslContextManager.getSSLContext(sslContextName));
 				}
 			}
-			if (gateway instanceof AbstractGateway) {
-				((AbstractGateway<?>) gateway).setExtensionName(config.getExtensionName());
-				if (config.getDeserializerClassName() != null) {
+
+			if (gateway instanceof ExtensionNameAware) {
+				((ExtensionNameAware) gateway).setExtensionName(config.getExtensionName());
+			}
+
+			if (gateway instanceof HasDeserializerGateway) {
+				if (config.getDeserializerClassName() == null) {
+					if (((HasDeserializerGateway) gateway).isDeserializerRequired()) {
+						throw new NullPointerException(
+								"Cannot init gateway '" + config.getName() + "' without deserialize class name");
+					}
+				} else {
 					MessageDecoder deserializer = this.extensionManager.newInstance(config.getExtensionName(),
 							config.getDeserializerClassName().trim());
-					((AbstractGateway<?>) gateway).setDeserializer(deserializer);
-				} else {
-					throw new RuntimeException("cannot init gateway without MessageDeserializer");
-				}
-				if (config.getSerializerClassName() != null) {
-					MessageEncoder serializer = this.extensionManager.newInstance(config.getExtensionName(),
-							config.getSerializerClassName().trim());
-					((AbstractGateway<?>) gateway).setSerializer(serializer);
-				}
-				if (gateway instanceof HasServerWrapper) {
-					((HasServerWrapper) gateway)
-							.setServer(this.serverWrapperManager.getServerWrapper(config.getServerWrapperName()));
-				}
-				if (gateway instanceof SocketGateway) {
-					((SocketGateway) gateway).setSessionManager(this.socketSessionManager);
+
+					((HasDeserializerGateway) gateway).setDeserializer(deserializer);
 				}
 			}
+
+			if (gateway instanceof HasSerializerGateway) {
+				if (config.getSerializerClassName() == null) {
+					if (((HasSerializerGateway) gateway).isSerializerRequired()) {
+						throw new NullPointerException(
+								"Cannot init gateway '" + config.getName() + "' without serialize class name");
+					}
+				} else {
+					MessageEncoder serializer = this.extensionManager.newInstance(config.getExtensionName(),
+							config.getSerializerClassName().trim());
+					((HasSerializerGateway) gateway).setSerializer(serializer);
+				}
+			}
+
+			if (gateway instanceof HasServerWrapper) {
+				String serverWrapperName = config.getServerWrapperName();
+				if (serverWrapperName == null) {
+					throw new NullPointerException(
+							"Gateway " + config.getName() + " require server wrapper which is not exists in config");
+				}
+
+				ServerWrapper serverWrapper = this.serverWrapperManager.getServerWrapper(serverWrapperName);
+				if (serverWrapper == null) {
+					throw new NullPointerException(
+							"Cannot init gateway " + config.getName() + " without server wrapper named "
+									+ config.getServerWrapperName() + " (which may not exist)");
+				}
+
+				((HasServerWrapper) gateway).setServer(serverWrapper);
+			}
+
+			if (gateway instanceof SocketGateway) {
+				((SocketGateway) gateway).setSessionManager(this.socketSessionManager);
+			}
+
 			gateway.init(config);
 			this.gatewayByName.put(config.getName(), gateway);
 		}
