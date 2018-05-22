@@ -120,8 +120,8 @@ public class ZeroMQTaskGateway extends ZeroMQGateway {
 			handlers[i].setHandler(this.getHandler());
 		}
 
-		this.disruptor = new Disruptor<ZeroMQMessage>(ZeroMQMessage.EVENT_FACTORY, ringBufferSize,
-				threadFactory, ProducerType.SINGLE, workerPoolConfig.getWaitStrategy());
+		this.disruptor = new Disruptor<ZeroMQMessage>(ZeroMQMessage.EVENT_FACTORY, ringBufferSize, threadFactory,
+				ProducerType.SINGLE, workerPoolConfig.getWaitStrategy());
 		this.disruptor.handleEventsWithWorkerPool(unmarshallers).thenHandleEventsWithWorkerPool(handlers);
 		this.disruptor.setDefaultExceptionHandler(exceptionHandler);
 

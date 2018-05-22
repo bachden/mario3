@@ -36,15 +36,22 @@ public class ZeroMQRPCGateway extends ZeroMQTaskGateway {
 		}
 
 		String responseEndpoint = message.cast(ZeroMQMessage.class).getResponseEndpoint();
-		ZeroMQResponseWriter writer = responseWriters.get(responseEndpoint);
+		ZeroMQResponseWriter writer = null;
 		if (!this.responseWriters.containsKey(responseEndpoint)) {
+			boolean createNewSuccess = false;
 			synchronized (responseWriters) {
 				if (!this.responseWriters.containsKey(responseEndpoint)) {
 					ZMQSocket socket = this.getZMQSocketRegistry().openSocket(responseEndpoint,
 							ZMQSocketType.PUSH_CONNECT);
 					writer = new ZeroMQResponseWriter(socket, this.getConfig().getWorkerPoolConfig());
+					createNewSuccess = true;
 				}
 			}
+			if (createNewSuccess) {
+				writer.start();
+			}
+		} else {
+			writer = this.responseWriters.get(responseEndpoint);
 		}
 
 		writer.processResponse((ZeroMQMessage) message, result);
