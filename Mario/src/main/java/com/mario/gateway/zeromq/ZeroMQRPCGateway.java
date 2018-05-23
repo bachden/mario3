@@ -58,6 +58,18 @@ public class ZeroMQRPCGateway extends ZeroMQTaskGateway {
 	}
 
 	@Override
+	public void processInputMetadata(PuArray metadata, ZeroMQMessage message) {
+		if (metadata != null) {
+			if (metadata.size() < 2) {
+				throw new InvalidDataException("Metadata should be have atleast 2 element");
+			} else {
+				message.setMessageId(metadata.remove(0).getRaw());
+				message.setResponseEndpoint(metadata.remove(0).getString());
+			}
+		}
+	}
+
+	@Override
 	public void onHandleError(Message message, Throwable exception) {
 		this.onHandleComplete(message, PuValue.fromObject("Error while handling message: "
 				+ (exception.getMessage() == null ? "unknown error" : exception.getMessage())));

@@ -1,10 +1,17 @@
 package com.mario.config.gateway;
 
+import org.w3c.dom.Node;
+
 import com.mario.entity.message.transcoder.binary.BinaryMessageSerializer;
 import com.mario.entity.message.transcoder.socket.SocketMessageDeserializer;
 import com.mario.gateway.socket.SocketProtocol;
 import com.nhb.common.data.PuObjectRO;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class SocketGatewayConfig extends GatewayConfig {
 
 	private String host = null;
@@ -14,6 +21,10 @@ public class SocketGatewayConfig extends GatewayConfig {
 
 	private int bootEventLoopGroupThreads = 2;
 	private int workerEventLoopGroupThreads = 4;
+
+	private String path = "/websocket";
+	private String proxy = null;
+	private boolean autoActiveChannel = true;
 
 	{
 		this.setType(GatewayType.SOCKET);
@@ -36,54 +47,59 @@ public class SocketGatewayConfig extends GatewayConfig {
 		if (data.variableExists("protocol")) {
 			this.setProtocol(SocketProtocol.fromName(data.getString("protocol")));
 		}
+		if (data.variableExists("path")) {
+			this.setPath(data.getString("path"));
+		}
+		if (data.variableExists("proxy")) {
+			this.setProxy(data.getString("proxy"));
+		}
+		if (data.variableExists("autoActiveChannel")) {
+			this.setAutoActiveChannel(data.getBoolean("autoActiveChannel"));
+		}
 	}
 
-	public String getHost() {
-		return host;
+	@Override
+	public void readNode(Node item) {
+		Node ele = item.getFirstChild();
+		while (ele != null) {
+			if (ele.getNodeType() == 1) {
+				String nodeName = ele.getNodeName();
+				String value = ele.getTextContent().trim();
+				if (nodeName.equalsIgnoreCase("protocol")) {
+					this.setProtocol(SocketProtocol.fromName(value));
+				} else if (nodeName.equalsIgnoreCase("host")) {
+					this.setHost(value);
+				} else if (nodeName.equalsIgnoreCase("port")) {
+					this.setPort(Integer.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("path")) {
+					this.setPath(value);
+				} else if (nodeName.equalsIgnoreCase("proxy")) {
+					this.setProxy(value);
+				} else if (nodeName.equalsIgnoreCase("autoActiveChannel")) {
+					this.setAutoActiveChannel(Boolean.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("deserializer")) {
+					this.setDeserializerClassName(value);
+				} else if (nodeName.equalsIgnoreCase("serializer")) {
+					this.setSerializerClassName(value);
+				} else if (nodeName.equalsIgnoreCase("ssl")) {
+					this.setSsl(Boolean.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("sslcontextname")) {
+					this.setSslContextName(value);
+				} else if (nodeName.equalsIgnoreCase("name")) {
+					this.setName(value);
+				} else if (nodeName.equalsIgnoreCase("workerpool")) {
+					this.setWorkerPoolConfig(readWorkerPoolConfig(ele));
+				} else if (nodeName.equalsIgnoreCase("uselengthprepender")
+						|| nodeName.equalsIgnoreCase("usinglengthprepender")
+						|| nodeName.equalsIgnoreCase("prependlength")) {
+					this.setUseLengthPrepender(Boolean.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("bootGroupThreads")) {
+					this.setBootEventLoopGroupThreads(Integer.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("workerGroupThreads")) {
+					this.setWorkerEventLoopGroupThreads(Integer.valueOf(value));
+				}
+			}
+			ele = ele.getNextSibling();
+		}
 	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public SocketProtocol getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(SocketProtocol protocol) {
-		this.protocol = protocol;
-	}
-
-	public boolean isUseLengthPrepender() {
-		return useLengthPrepender;
-	}
-
-	public void setUseLengthPrepender(boolean useLengthPrepender) {
-		this.useLengthPrepender = useLengthPrepender;
-	}
-
-	public int getBootEventLoopGroupThreads() {
-		return bootEventLoopGroupThreads;
-	}
-
-	public void setBootEventLoopGroupThreads(int bootEventLoopGroupThreads) {
-		this.bootEventLoopGroupThreads = bootEventLoopGroupThreads;
-	}
-
-	public int getWorkerEventLoopGroupThreads() {
-		return workerEventLoopGroupThreads;
-	}
-
-	public void setWorkerEventLoopGroupThreads(int workerEventLoopGroupThreads) {
-		this.workerEventLoopGroupThreads = workerEventLoopGroupThreads;
-	}
-
 }

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.w3c.dom.Node;
+
+import com.mario.extension.xml.CredentialReader;
+import com.mario.extension.xml.EndpointReader;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.vo.HostAndPort;
 import com.nhb.common.vo.UserNameAndPassword;
@@ -65,6 +69,47 @@ public class RabbitMQServerWrapperConfig extends ServerWrapperConfig {
 
 	public void setCredential(String userName, String password) {
 		this.credential = new UserNameAndPassword(userName, password);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void readNode(Node item) {
+		Node curr = item.getFirstChild();
+		while (curr != null) {
+			if (curr.getNodeType() == 1) {
+				String nodeName = curr.getNodeName().trim().toLowerCase();
+				switch (nodeName) {
+				case "endpoint":
+					System.out.println("\t\t\t\t- Reading endpoint info");
+					Object endpoint = EndpointReader.read(curr);
+					if (endpoint instanceof HostAndPort) {
+						this.addEndpoint((HostAndPort) endpoint);
+					} else if (endpoint instanceof Collection) {
+						this.addEndpoints((Collection<HostAndPort>) endpoint);
+					}
+					break;
+				case "credential":
+					System.out.println("\t\t\t\t- Reading credential info");
+					Object credential = CredentialReader.read(curr);
+					if (credential instanceof UserNameAndPassword) {
+						this.setCredential((UserNameAndPassword) credential);
+					}
+					break;
+				case "name":
+					System.out.println("\t\t\t\t- Reading name info");
+					this.setName(curr.getTextContent().trim());
+					break;
+				case "autoreconnect":
+					System.out.println("\t\t\t\t- Reading autoreconnect info");
+					getLogger().warn("Autoreconnect is default and cannot be set, it's deprecated");
+					break;
+				default:
+					System.out.println("\t\t\t\t- !!! ERROR !!! --> invalid tag name: " + curr.getNodeName());
+					// throw new RuntimeException("invalid tag name:
+					// " + curr.getNodeName());
+				}
+			}
+			curr = curr.getNextSibling();
+		}
 	}
 
 }

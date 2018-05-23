@@ -1,11 +1,16 @@
 package com.mario.config.gateway;
 
+import org.w3c.dom.Node;
+
 import com.mario.config.MarioBaseConfig;
 import com.mario.config.WorkerPoolConfig;
 import com.nhb.common.data.PuObjectRO;
 
+import lombok.Getter;
 import lombok.Setter;
 
+@Setter
+@Getter
 public abstract class GatewayConfig extends MarioBaseConfig {
 
 	private String serverWrapperName;
@@ -14,8 +19,6 @@ public abstract class GatewayConfig extends MarioBaseConfig {
 	private GatewayType type;
 
 	private boolean ssl = false;
-
-	@Setter
 	private String sslContextName;
 
 	private WorkerPoolConfig workerPoolConfig;
@@ -52,61 +55,26 @@ public abstract class GatewayConfig extends MarioBaseConfig {
 		}
 	}
 
-	public String getSerializerClassName() {
-		return serializerClassName;
-	}
-
-	public void setSerializerClassName(String serializerClassName) {
-		this.serializerClassName = serializerClassName;
-	}
-
-	public String getDeserializerClassName() {
-		return deserializerClassName;
-	}
-
-	public void setDeserializerClassName(String deserializerClassName) {
-		if (deserializerClassName == null || deserializerClassName.trim().length() == 0)
-			return;
-		this.deserializerClassName = deserializerClassName;
-	}
-
-	public GatewayType getType() {
-		return type;
-	}
-
-	protected void setType(GatewayType type) {
-		this.type = type;
-	}
-
-	public boolean isSsl() {
-		return ssl;
-	}
-
-	public void setSsl(boolean ssl) {
-		this.ssl = ssl;
-	}
-
-	public WorkerPoolConfig getWorkerPoolConfig() {
+	protected WorkerPoolConfig readWorkerPoolConfig(Node node) {
+		WorkerPoolConfig workerPoolConfig = null;
+		if (node != null) {
+			workerPoolConfig = new WorkerPoolConfig();
+			Node element = node.getFirstChild();
+			while (element != null) {
+				if (element.getNodeType() == 1) {
+					String value = element.getTextContent().trim();
+					String nodeName = element.getNodeName();
+					if (nodeName.equalsIgnoreCase("poolsize")) {
+						workerPoolConfig.setPoolSize(Integer.valueOf(value));
+					} else if (nodeName.equalsIgnoreCase("ringbuffersize")) {
+						workerPoolConfig.setRingBufferSize(Integer.valueOf(value));
+					} else if (nodeName.equalsIgnoreCase("threadnamepattern")) {
+						workerPoolConfig.setThreadNamePattern(value);
+					}
+				}
+				element = element.getNextSibling();
+			}
+		}
 		return workerPoolConfig;
 	}
-
-	public void setWorkerPoolConfig(WorkerPoolConfig workerPoolConfig) {
-		this.workerPoolConfig = workerPoolConfig;
-	}
-
-	public String getServerWrapperName() {
-		return serverWrapperName;
-	}
-
-	public void setServerWrapperName(String serverWrapperName) {
-		this.serverWrapperName = serverWrapperName;
-	}
-
-	public String getSSLContextName() {
-		if (this.isSsl()) {
-			return this.sslContextName;
-		}
-		return null;
-	}
-
 }

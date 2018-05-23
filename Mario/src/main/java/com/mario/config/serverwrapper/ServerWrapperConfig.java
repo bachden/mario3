@@ -7,7 +7,7 @@ public abstract class ServerWrapperConfig extends MarioBaseConfig {
 	private ServerWrapperType type;
 
 	public static enum ServerWrapperType {
-		RABBITMQ, HTTP;
+		RABBITMQ, HTTP, ZEROMQ;
 
 		public static final ServerWrapperType fromName(String name) {
 			if (name != null) {

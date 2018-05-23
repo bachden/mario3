@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.w3c.dom.Node;
+
 import com.mario.entity.message.transcoder.kafka.KafkaDeserializer;
 import com.nhb.common.data.PuObjectRO;
 
@@ -45,4 +47,41 @@ public class KafkaGatewayConfig extends GatewayConfig {
 		}
 	}
 
+	@Override
+	public void readNode(Node item) {
+		Node ele = item.getFirstChild();
+		while (ele != null) {
+			if (ele.getNodeType() == 1) {
+				String value = ele.getTextContent().trim();
+				String nodeName = ele.getNodeName();
+				if (nodeName.equalsIgnoreCase("name")) {
+					this.setName(value);
+				} else if (nodeName.equalsIgnoreCase("serializer")) {
+					this.setSerializerClassName(value);
+				} else if (nodeName.equalsIgnoreCase("deserializer")) {
+					this.setDeserializerClassName(value);
+				} else if (nodeName.equalsIgnoreCase("workerpool")) {
+					this.setWorkerPoolConfig(readWorkerPoolConfig(ele));
+				} else if (nodeName.equalsIgnoreCase("config") || nodeName.equalsIgnoreCase("configuration")
+						|| nodeName.equalsIgnoreCase("configFile") || nodeName.equalsIgnoreCase("configurationFile")) {
+					this.setConfigFile(value);
+				} else if (nodeName.equalsIgnoreCase("topics")) {
+					String[] arr = value.split(",");
+					for (String str : arr) {
+						str = str.trim();
+						if (str.length() > 0) {
+							this.getTopics().add(str);
+						}
+					}
+				} else if (nodeName.equalsIgnoreCase("pollTimeout")) {
+					this.setPollTimeout(Integer.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("minBatchingSize")) {
+					this.setMinBatchingSize(Integer.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("maxRetentionTime")) {
+					this.setMaxRetentionTime(Long.valueOf(value));
+				}
+			}
+			ele = ele.getNextSibling();
+		}
+	}
 }

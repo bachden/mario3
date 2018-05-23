@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
 
+import org.w3c.dom.Node;
+
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuArray;
 import com.nhb.common.data.PuDataType;
@@ -227,4 +229,8 @@ public abstract class MarioBaseConfig extends BaseLoggable {
 	}
 
 	protected abstract void _readPuObject(PuObjectRO data);
+
+	public void readNode(Node item) {
+
+	}
 }

@@ -24,6 +24,9 @@ import com.nhb.common.data.msgpkg.PuElementTemplate;
 import com.nhb.messaging.zmq.ZMQSocket;
 import com.nhb.messaging.zmq.ZMQSocketType;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+
 public class ZeroMQTaskGateway extends ZeroMQGateway {
 
 	private Disruptor<ZeroMQMessage> disruptor;
@@ -48,6 +51,9 @@ public class ZeroMQTaskGateway extends ZeroMQGateway {
 			onHandleError(event, ex);
 		}
 	};
+
+	@Getter(AccessLevel.PROTECTED)
+	private ThreadFactory threadFactory;
 
 	private static class Unmarshaller implements WorkHandler<ZeroMQMessage> {
 
@@ -106,7 +112,7 @@ public class ZeroMQTaskGateway extends ZeroMQGateway {
 		int ringBufferSize = workerPoolConfig.getRingBufferSize();
 		String threadNamePattern = workerPoolConfig.getThreadNamePattern();
 
-		ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(threadNamePattern).build();
+		threadFactory = new ThreadFactoryBuilder().setNameFormat(threadNamePattern).build();
 
 		Unmarshaller[] unmarshallers = new Unmarshaller[workerPoolConfig.getUnmarshallerSize()];
 		for (int i = 0; i < unmarshallers.length; i++) {

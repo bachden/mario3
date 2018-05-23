@@ -5,7 +5,6 @@ import java.util.HashSet;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Node;
@@ -39,7 +38,7 @@ public class EndpointReader {
 		return null;
 	}
 
-	public static Object read(Node node) throws XPathExpressionException {
+	public static Object read(Node node) {
 		Node currNode = node.getFirstChild();
 		while (currNode != null) {
 			switch (currNode.getNodeType()) {

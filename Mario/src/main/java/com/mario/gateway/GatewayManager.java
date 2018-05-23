@@ -102,7 +102,7 @@ public final class GatewayManager extends BaseEventDispatcher {
 
 			Gateway gateway = this.gatewayFactory.newGateway(config);
 			if (gateway instanceof SSLContextAware) {
-				String sslContextName = config.getSSLContextName();
+				String sslContextName = config.getSslContextName();
 				if (sslContextName != null) {
 					((SSLContextAware) gateway).setSSLContext(this.sslContextManager.getSSLContext(sslContextName));
 				}

@@ -2,7 +2,6 @@ package com.mario.gateway.websocket;
 
 import javax.net.ssl.SSLEngine;
 
-import com.mario.config.gateway.WebsocketGatewayConfig;
 import com.mario.entity.message.transcoder.websocket.WebSocketDefaultDeserializer;
 import com.mario.entity.message.transcoder.websocket.WebSocketDefaultSerializer;
 import com.mario.exceptions.InvalidConfigException;
@@ -34,22 +33,18 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway {
 		if (this.getDeserializer() == null) {
 			this.setDeserializer(new WebSocketDefaultDeserializer());
 		}
-		if (this.getConfig() instanceof WebsocketGatewayConfig) {
-			this.path = ((WebsocketGatewayConfig) this.getConfig()).getPath();
-			if (this.path.equals("/")) {
-				throw new InvalidConfigException(
-						"Websocket path cannot be equal / because of test page already handled at that path, extension: "
-								+ this.getExtensionName());
-			}
-			this.proxy = ((WebsocketGatewayConfig) this.getConfig()).getProxy();
-		} else {
-			this.path = "/websocket";
+		this.path = this.getConfig().getPath() == null ? "/websocket" : this.getConfig().getPath();
+		if (this.path.equals("/")) {
+			throw new InvalidConfigException(
+					"Websocket path cannot be equal / because of test page already handled at that path, extension: "
+							+ this.getExtensionName());
 		}
 		if (!this.path.startsWith("/")) {
 			this.path = "/" + this.path;
 		}
-	}
 
+		this.proxy = this.getConfig().getProxy();
+	}
 
 	@Override
 	protected void __start() {
@@ -58,7 +53,7 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway {
 				+ (getConfig().getHost() == null ? "0.0.0.0" : this.getConfig().getHost()) + ":" + getConfig().getPort()
 				+ this.path);
 
-		boolean autoActiveChannel = ((WebsocketGatewayConfig) this.getConfig()).isAutoActiveChannel();
+		boolean autoActiveChannel = this.getConfig().isAutoActiveChannel();
 
 		bossGroup = new NioEventLoopGroup(this.getConfig().getBootEventLoopGroupThreads());
 		workerGroup = new NioEventLoopGroup(this.getConfig().getWorkerEventLoopGroupThreads());

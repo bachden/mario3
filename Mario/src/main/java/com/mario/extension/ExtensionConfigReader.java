@@ -37,7 +37,6 @@ import com.mario.config.MessageProducerConfig;
 import com.mario.config.RabbitMQProducerConfig;
 import com.mario.config.RedisConfig;
 import com.mario.config.SSLContextConfig;
-import com.mario.config.WorkerPoolConfig;
 import com.mario.config.ZMQSocketRegistryConfig;
 import com.mario.config.ZkClientConfig;
 import com.mario.config.gateway.GatewayConfig;
@@ -46,17 +45,14 @@ import com.mario.config.gateway.HttpGatewayConfig;
 import com.mario.config.gateway.KafkaGatewayConfig;
 import com.mario.config.gateway.RabbitMQGatewayConfig;
 import com.mario.config.gateway.SocketGatewayConfig;
-import com.mario.config.gateway.WebsocketGatewayConfig;
 import com.mario.config.serverwrapper.HttpServerWrapperConfig;
 import com.mario.config.serverwrapper.RabbitMQServerWrapperConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig.ServerWrapperType;
+import com.mario.config.serverwrapper.ZeroMQServerWrapperConfig;
 import com.mario.contact.ContactBook;
-import com.mario.extension.xml.CredentialReader;
 import com.mario.extension.xml.EndpointReader;
 import com.mario.external.configuration.ExternalConfigurationManager;
-import com.mario.gateway.http.JettyHttpServerOptions;
-import com.mario.gateway.socket.SocketProtocol;
 import com.mario.monitor.MonitorableStatus;
 import com.mario.monitor.config.MonitorAgentConfig;
 import com.mario.monitor.config.MonitorAlertConfig;
@@ -66,11 +62,9 @@ import com.mario.monitor.config.MonitorAlertStatusConfig;
 import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
 import com.mario.services.ServiceManager;
 import com.mario.zeromq.ZMQSocketRegistryManager;
-import com.nhb.common.data.PuElementJSONHelper;
 import com.nhb.common.data.PuObject;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.data.exception.InvalidDataException;
-import com.nhb.common.db.cassandra.CassandraDatasourceConfig;
 import com.nhb.common.db.mongodb.config.MongoDBConfig;
 import com.nhb.common.db.mongodb.config.MongoDBCredentialConfig;
 import com.nhb.common.db.mongodb.config.MongoDBReadPreferenceConfig;
@@ -78,31 +72,43 @@ import com.nhb.common.db.sql.SQLDataSourceConfig;
 import com.nhb.common.exception.UnsupportedTypeException;
 import com.nhb.common.utils.FileSystemUtils;
 import com.nhb.common.vo.HostAndPort;
-import com.nhb.common.vo.UserNameAndPassword;
 import com.nhb.messaging.MessagingModel;
 import com.nhb.messaging.http.HttpMethod;
 import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
 
+import lombok.Getter;
+
 class ExtensionConfigReader extends XmlConfigReader {
 
+	@Getter
 	private String extensionName;
 
+	@Getter
 	private List<LifeCycleConfig> lifeCycleConfigs;
+	@Getter
 	private List<GatewayConfig> gatewayConfigs;
+	@Getter
 	private List<SQLDataSourceConfig> sqlDatasourceConfigs;
+	@Getter
 	private List<HazelcastConfig> hazelcastConfigs;
+	@Getter
 	private List<RedisConfig> redisConfigs;
+	@Getter
 	private List<MongoDBConfig> mongoDBConfigs;
+	@Getter
 	private List<ServerWrapperConfig> serverWrapperConfigs;
+	@Getter
 	private List<MonitorAgentConfig> monitorAgentConfigs;
+	@Getter
 	private List<MessageProducerConfig> producerConfigs;
-
+	@Getter
 	private List<SSLContextConfig> sslContextConfigs;
-
+	@Getter
 	private final Map<String, PuObjectRO> properties = new HashMap<>();
-
+	@Getter
 	private List<ZkClientConfig> zkClientConfigs;
 
+	@Getter
 	private Collection<CassandraConfig> cassandraConfigs;
 
 	private final PuObjectRO globalProperties;
@@ -205,6 +211,15 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 
 		try {
+			System.out.println("\t\t\t- Reading zeromq configs");
+			this.readZeroMQConfigs((Node) xPath.compile("/mario/zeromq").evaluate(document, XPathConstants.NODE));
+		} catch (Exception ex) {
+			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
+				getLogger().error("Error", ex);
+			}
+		}
+
+		try {
 			System.out.println("\t\t\t- Reading server wrapper config");
 			this.readServerWrapperConfigs(
 					(Node) xPath.compile("/mario/servers").evaluate(document, XPathConstants.NODE));
@@ -262,15 +277,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 			}
 		}
 
-		try {
-			System.out.println("\t\t\t- Reading zeromq configs");
-			this.readZeroMQConfigs((Node) xPath.compile("/mario/zeromq").evaluate(document, XPathConstants.NODE));
-		} catch (Exception ex) {
-			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
-				getLogger().error("Error", ex);
-			}
-		}
-
 		System.out.println("\t\t\t- *** Reading configs done ***");
 	}
 
@@ -298,7 +304,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 						config.setExtensionName(getExtensionName());
 						this.zmqSocketRegistryManager.addConfig(config);
 					}
-				} 
+				}
 				curr = curr.getNextSibling();
 			}
 		}
@@ -634,7 +640,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void readServerWrapperConfigs(Node node) throws XPathExpressionException {
 		this.serverWrapperConfigs = new ArrayList<>();
 		if (node == null) {
@@ -643,102 +648,34 @@ class ExtensionConfigReader extends XmlConfigReader {
 		Node item = node.getFirstChild();
 		while (item != null) {
 			if (item.getNodeType() == 1) {
-				ServerWrapperType connectionType = ServerWrapperType.fromName(item.getNodeName());
-				switch (connectionType) {
-				case HTTP: {
-					HttpServerWrapperConfig httpServerWrapperConfig = new HttpServerWrapperConfig();
-
-					Node refAttr = item.getAttributes().getNamedItem("ref");
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							httpServerWrapperConfig.readPuObject(refObj);
-						}
+				Node refAttr = item.getAttributes().getNamedItem("ref");
+				PuObjectRO refObj = new PuObject();
+				if (refAttr != null) {
+					String ref = refAttr.getNodeValue();
+					if (ref != null) {
+						refObj = this.getRefProperty(ref);
 					}
-
-					Node curr = item.getFirstChild();
-					while (curr != null) {
-						if (curr.getNodeType() == 1) {
-							switch (curr.getNodeName().trim().toLowerCase()) {
-							case "name":
-								httpServerWrapperConfig.setName(curr.getTextContent());
-								break;
-							case "port":
-								httpServerWrapperConfig.setPort(Integer.valueOf(curr.getTextContent().trim()));
-								break;
-							case "options":
-								httpServerWrapperConfig.setOptions(
-										JettyHttpServerOptions.fromName(curr.getTextContent().trim()).getCode());
-								break;
-							case "sessiontimeout":
-								httpServerWrapperConfig
-										.setSessionTimeout(Integer.valueOf(curr.getTextContent().trim()));
-								break;
-							case "threadpool":
-								readHttpThreadPoolConfig(curr, httpServerWrapperConfig);
-								break;
-							}
-						}
-						curr = curr.getNextSibling();
-					}
-					this.serverWrapperConfigs.add(httpServerWrapperConfig);
-					break;
 				}
+				ServerWrapperType connectionType = ServerWrapperType.fromName(item.getNodeName());
+				ServerWrapperConfig config = null;
+				switch (connectionType) {
+				case ZEROMQ:
+					config = new ZeroMQServerWrapperConfig();
+					break;
+				case HTTP:
+					config = new HttpServerWrapperConfig();
+					break;
 				case RABBITMQ: {
-					RabbitMQServerWrapperConfig rabbitMQServerWrapperConfig = new RabbitMQServerWrapperConfig();
-					Node refAttr = item.getAttributes().getNamedItem("ref");
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							rabbitMQServerWrapperConfig.readPuObject(refObj);
-						}
-					}
-					Node curr = item.getFirstChild();
-					while (curr != null) {
-						if (curr.getNodeType() == 1) {
-							String nodeName = curr.getNodeName().trim().toLowerCase();
-							switch (nodeName) {
-							case "endpoint":
-								System.out.println("\t\t\t\t- Reading endpoint info");
-								Object endpoint = EndpointReader.read(curr);
-								if (endpoint instanceof HostAndPort) {
-									rabbitMQServerWrapperConfig.addEndpoint((HostAndPort) endpoint);
-								} else if (endpoint instanceof Collection) {
-									rabbitMQServerWrapperConfig.addEndpoints((Collection<HostAndPort>) endpoint);
-								}
-								break;
-							case "credential":
-								System.out.println("\t\t\t\t- Reading credential info");
-								Object credential = CredentialReader.read(curr);
-								if (credential instanceof UserNameAndPassword) {
-									rabbitMQServerWrapperConfig.setCredential((UserNameAndPassword) credential);
-								}
-								break;
-							case "name":
-								System.out.println("\t\t\t\t- Reading name info");
-								rabbitMQServerWrapperConfig.setName(curr.getTextContent().trim());
-								break;
-							case "autoreconnect":
-								System.out.println("\t\t\t\t- Reading autoreconnect info");
-								getLogger().warn("Autoreconnect is default and cannot be set, it's deprecated");
-								break;
-							default:
-								System.out
-										.println("\t\t\t\t- !!! ERROR !!! --> invalid tag name: " + curr.getNodeName());
-								// throw new RuntimeException("invalid tag name:
-								// " + curr.getNodeName());
-							}
-						}
-						curr = curr.getNextSibling();
-					}
-
-					this.serverWrapperConfigs.add(rabbitMQServerWrapperConfig);
+					config = new RabbitMQServerWrapperConfig();
 					break;
 				}
 				default:
-					getLogger().warn("Connection type not supported: " + connectionType);
+					getLogger().warn("ServerWrapperConfig type not supported: " + connectionType);
+				}
+				if (config != null) {
+					config.readPuObject(refObj);
+					config.readNode(item);
+					serverWrapperConfigs.add(config);
 				}
 			}
 			item = item.getNextSibling();
@@ -748,372 +685,38 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 	}
 
-	private void readHttpThreadPoolConfig(Node node, HttpServerWrapperConfig httpServerWrapperConfig) {
-		Node curr = node.getFirstChild();
-		while (curr != null) {
-			String nodeName = curr.getNodeName().toLowerCase();
-			switch (nodeName) {
-			case "minsize": {
-				String nodeValue = curr.getTextContent();
-				httpServerWrapperConfig.setMinAcceptorThreadPoolSize(Integer.valueOf(nodeValue));
-				break;
-			}
-			case "maxsize": {
-				String nodeValue = curr.getTextContent();
-				httpServerWrapperConfig.setMaxAcceptorThreadPoolSize(Integer.valueOf(nodeValue));
-				break;
-			}
-			case "taskqueue": {
-				Node taskCurrNode = curr.getFirstChild();
-				while (taskCurrNode != null) {
-					String taskQueueConfName = taskCurrNode.getNodeName().toLowerCase();
-					switch (taskQueueConfName) {
-					case "initsize": {
-						int initSize = Integer.valueOf(taskCurrNode.getTextContent().trim());
-						httpServerWrapperConfig.setTaskQueueInitSize(initSize);
-						break;
-					}
-					case "growby": {
-						int growBy = Integer.valueOf(taskCurrNode.getTextContent().trim());
-						httpServerWrapperConfig.setTaskQueueGrowBy(growBy);
-						break;
-					}
-					case "maxsize": {
-						int maxSize = Integer.valueOf(taskCurrNode.getTextContent().trim());
-						httpServerWrapperConfig.setTaskQueueMaxSize(maxSize);
-						break;
-					}
-					}
-				}
-				break;
-			}
-			}
-			curr = curr.getNextSibling();
-		}
-	}
-
-	private WorkerPoolConfig readWorkerPoolConfig(Node node) throws XPathExpressionException {
-		WorkerPoolConfig workerPoolConfig = null;
-		if (node != null) {
-			workerPoolConfig = new WorkerPoolConfig();
-
-			Node refAttr = node.getAttributes().getNamedItem("ref");
-			if (refAttr != null) {
-				String ref = refAttr.getNodeValue();
-				PuObjectRO refObj = this.getRefProperty(ref);
-				if (ref != null) {
-					workerPoolConfig.readPuObject(refObj);
-				}
-			}
-			Node element = node.getFirstChild();
-			while (element != null) {
-				if (element.getNodeType() == 1) {
-					String value = element.getTextContent().trim();
-					String nodeName = element.getNodeName();
-					if (nodeName.equalsIgnoreCase("poolsize")) {
-						workerPoolConfig.setPoolSize(Integer.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("ringbuffersize")) {
-						workerPoolConfig.setRingBufferSize(Integer.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("threadnamepattern")) {
-						workerPoolConfig.setThreadNamePattern(value);
-					}
-				}
-				element = element.getNextSibling();
-			}
-		}
-		return workerPoolConfig;
-	}
-
-	private RabbitMQQueueConfig readRabbitMQQueueConfig(Node node) {
-		RabbitMQQueueConfig queueConfig = null;
-		if (node != null) {
-			queueConfig = new RabbitMQQueueConfig();
-			Node element = node.getFirstChild();
-			while (element != null) {
-				if (element.getNodeType() == 1) {
-					String nodeName = element.getNodeName();
-					String value = element.getTextContent().trim();
-					if (nodeName.equalsIgnoreCase("name") || nodeName.equalsIgnoreCase("queuename")) {
-						queueConfig.setQueueName(value);
-					} else if (nodeName.equalsIgnoreCase("autoack")) {
-						queueConfig.setAutoAck(Boolean.valueOf(element.getTextContent()));
-					} else if (nodeName.equalsIgnoreCase("exchangename")) {
-						queueConfig.setExchangeName(value);
-					} else if (nodeName.equalsIgnoreCase("exchangetype")) {
-						queueConfig.setExchangeType(value);
-					} else if (nodeName.equalsIgnoreCase("routingkey")) {
-						queueConfig.setRoutingKey(value);
-					} else if (nodeName.equalsIgnoreCase("type") || nodeName.equalsIgnoreCase("messagingmodel")) {
-						queueConfig.setType(MessagingModel.fromName(value));
-					} else if (nodeName.equalsIgnoreCase("qos")) {
-						queueConfig.setQos(Integer.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("durable")) {
-						queueConfig.setDurable(Boolean.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("exclusive")) {
-						queueConfig.setExclusive(Boolean.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("autoDelete")) {
-						queueConfig.setAutoDelete(Boolean.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("variables") || nodeName.equalsIgnoreCase("arguments")) {
-						queueConfig.setArguments(PuObject.fromXML(element).toMap());
-					}
-				}
-				element = element.getNextSibling();
-			}
-		}
-		return queueConfig;
-	}
-
 	private void readGatewayConfigs(Node node) throws XPathExpressionException {
 		this.gatewayConfigs = new ArrayList<GatewayConfig>();
 		NodeList list = (NodeList) xPath.compile("*").evaluate(node, XPathConstants.NODESET);
 		for (int i = 0; i < list.getLength(); i++) {
 			Node item = list.item(i);
 			GatewayType type = GatewayType.fromName(item.getNodeName());
+
 			if (type != null) {
 				GatewayConfig config = null;
-				Node ele = null;
+				PuObjectRO refObj = new PuObject();
+				Node refAttr = item.getAttributes().getNamedItem("ref");
+				if (refAttr != null) {
+					String ref = refAttr.getNodeValue();
+					if (ref != null) {
+						refObj = this.getRefProperty(ref);
+					}
+				}
 				switch (type) {
 				case KAFKA: {
-					KafkaGatewayConfig kafkaGatewayConfig = new KafkaGatewayConfig();
-
-					Node refAttr = item.getAttributes().getNamedItem("ref");
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							kafkaGatewayConfig.readPuObject(refObj);
-						}
-					}
-
-					ele = item.getFirstChild();
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String value = ele.getTextContent().trim();
-							String nodeName = ele.getNodeName();
-							if (nodeName.equalsIgnoreCase("name")) {
-								kafkaGatewayConfig.setName(value);
-							} else if (nodeName.equalsIgnoreCase("serializer")) {
-								kafkaGatewayConfig.setSerializerClassName(value);
-							} else if (nodeName.equalsIgnoreCase("deserializer")) {
-								kafkaGatewayConfig.setDeserializerClassName(value);
-							} else if (nodeName.equalsIgnoreCase("workerpool")) {
-								kafkaGatewayConfig.setWorkerPoolConfig(readWorkerPoolConfig(ele));
-							} else if (nodeName.equalsIgnoreCase("config") || nodeName.equalsIgnoreCase("configuration")
-									|| nodeName.equalsIgnoreCase("configFile")
-									|| nodeName.equalsIgnoreCase("configurationFile")) {
-								kafkaGatewayConfig.setConfigFile(value);
-							} else if (nodeName.equalsIgnoreCase("topics")) {
-								String[] arr = value.split(",");
-								for (String str : arr) {
-									str = str.trim();
-									if (str.length() > 0) {
-										kafkaGatewayConfig.getTopics().add(str);
-									}
-								}
-							} else if (nodeName.equalsIgnoreCase("pollTimeout")) {
-								kafkaGatewayConfig.setPollTimeout(Integer.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("minBatchingSize")) {
-								kafkaGatewayConfig.setMinBatchingSize(Integer.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("maxRetentionTime")) {
-								kafkaGatewayConfig.setMaxRetentionTime(Long.valueOf(value));
-							}
-						}
-						ele = ele.getNextSibling();
-					}
-					config = kafkaGatewayConfig;
+					config = new KafkaGatewayConfig();
 					break;
 				}
 				case HTTP: {
-					HttpGatewayConfig httpGatewayConfig = new HttpGatewayConfig();
-					Node refAttr = item.getAttributes().getNamedItem("ref");
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							httpGatewayConfig.readPuObject(refObj);
-						}
-					}
-					ele = item.getFirstChild();
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String value = ele.getTextContent().trim();
-							String nodeName = ele.getNodeName();
-							if (nodeName.equalsIgnoreCase("deserializer")) {
-								httpGatewayConfig.setDeserializerClassName(value);
-							} else if (nodeName.equalsIgnoreCase("serializer")) {
-								httpGatewayConfig.setSerializerClassName(value);
-							} else if (nodeName.equalsIgnoreCase("name")) {
-								httpGatewayConfig.setName(value);
-							} else if (nodeName.equalsIgnoreCase("workerpool")) {
-								httpGatewayConfig.setWorkerPoolConfig(readWorkerPoolConfig(ele));
-							} else if (nodeName.equalsIgnoreCase("path") || nodeName.equalsIgnoreCase("location")) {
-								httpGatewayConfig.setPath(value);
-							} else if (nodeName.equalsIgnoreCase("async")) {
-								httpGatewayConfig.setAsync(Boolean.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("encoding")) {
-								httpGatewayConfig.setEncoding(value);
-							} else if (nodeName.equalsIgnoreCase("server")) {
-								httpGatewayConfig.setServerWrapperName(value);
-							} else if (nodeName.equalsIgnoreCase("usemultipart")
-									|| nodeName.equalsIgnoreCase("usingmultipart")) {
-								httpGatewayConfig.setUseMultipath(Boolean.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("header")) {
-								String key = ele.getAttributes().getNamedItem("name").getNodeValue();
-								if (key != null && key.trim().length() > 0) {
-									httpGatewayConfig.getHeaders().put(key.trim(), value);
-								}
-							}
-						}
-						ele = ele.getNextSibling();
-					}
-					config = httpGatewayConfig;
+					config = new HttpGatewayConfig();
 					break;
 				}
 				case RABBITMQ: {
-					RabbitMQGatewayConfig rabbitMQConfig = new RabbitMQGatewayConfig();
-					Node refAttr = item.getAttributes().getNamedItem("ref");
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							rabbitMQConfig.readPuObject(refObj);
-						}
-					}
-					ele = item.getFirstChild();
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String value = ele.getTextContent().trim();
-							if (ele.getNodeName().equalsIgnoreCase("deserializer")) {
-								rabbitMQConfig.setDeserializerClassName(value);
-							} else if (ele.getNodeName().equalsIgnoreCase("serializer")) {
-								rabbitMQConfig.setSerializerClassName(value);
-							} else if (ele.getNodeName().equalsIgnoreCase("name")) {
-								rabbitMQConfig.setName(value);
-							} else if (ele.getNodeName().equalsIgnoreCase("workerpool")) {
-								rabbitMQConfig.setWorkerPoolConfig(readWorkerPoolConfig(ele));
-							} else if (ele.getNodeName().equalsIgnoreCase("server")) {
-								rabbitMQConfig.setServerWrapperName(value);
-							} else if (ele.getNodeName().equalsIgnoreCase("queue")) {
-								rabbitMQConfig.setQueueConfig(readRabbitMQQueueConfig(ele));
-							} else if (ele.getNodeName().equalsIgnoreCase("ackOnError")) {
-								rabbitMQConfig.setAckOnError(Boolean.valueOf(ele.getTextContent()));
-							} else if (ele.getNodeName().equalsIgnoreCase("resultOnError")) {
-								rabbitMQConfig.setResultOnError(PuElementJSONHelper.fromJSON(ele.getTextContent()));
-							}
-						}
-						ele = ele.getNextSibling();
-					}
-					config = rabbitMQConfig;
+					config = new RabbitMQGatewayConfig();
 					break;
 				}
 				case SOCKET: {
-					ele = item.getFirstChild();
-					SocketProtocol protocol = null;
-					String host = null;
-					int port = -1;
-					String path = null;
-					String proxy = null;
-					String deserializer = null;
-					String serializer = null;
-					boolean ssl = false;
-					String sslContextName = null;
-					String name = null;
-					WorkerPoolConfig workerPoolConfig = null;
-					boolean isUserLengprepender = false;
-					int bootGroupThreads = -1;
-					int workerGroupThreads = -1;
-					boolean autoActiveChannel = true;
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String nodeName = ele.getNodeName();
-							String value = ele.getTextContent().trim();
-							if (nodeName.equalsIgnoreCase("protocol")) {
-								protocol = SocketProtocol.fromName(value);
-							} else if (nodeName.equalsIgnoreCase("host")) {
-								host = value;
-							} else if (nodeName.equalsIgnoreCase("port")) {
-								port = Integer.valueOf(value);
-							} else if (nodeName.equalsIgnoreCase("path")) {
-								path = value;
-							} else if (nodeName.equalsIgnoreCase("proxy")) {
-								proxy = value;
-							} else if (nodeName.equalsIgnoreCase("autoActiveChannel")) {
-								autoActiveChannel = Boolean.valueOf(value);
-							} else if (nodeName.equalsIgnoreCase("deserializer")) {
-								deserializer = value;
-							} else if (nodeName.equalsIgnoreCase("serializer")) {
-								serializer = value;
-							} else if (nodeName.equalsIgnoreCase("ssl")) {
-								ssl = Boolean.valueOf(value);
-							} else if (nodeName.equalsIgnoreCase("sslcontextname")) {
-								sslContextName = value;
-							} else if (nodeName.equalsIgnoreCase("name")) {
-								name = value;
-							} else if (nodeName.equalsIgnoreCase("workerpool")) {
-								workerPoolConfig = readWorkerPoolConfig(ele);
-							} else if (nodeName.equalsIgnoreCase("uselengthprepender")
-									|| nodeName.equalsIgnoreCase("usinglengthprepender")
-									|| nodeName.equalsIgnoreCase("prependlength")) {
-								isUserLengprepender = Boolean.valueOf(value);
-							} else if (nodeName.equalsIgnoreCase("bootGroupThreads")) {
-								bootGroupThreads = Integer.valueOf(value);
-							} else if (nodeName.equalsIgnoreCase("workerGroupThreads")) {
-								workerGroupThreads = Integer.valueOf(value);
-							}
-						}
-						ele = ele.getNextSibling();
-					}
-					SocketGatewayConfig socketGatewayConfig;
-					if (protocol == SocketProtocol.WEBSOCKET) {
-						WebsocketGatewayConfig websocketGatewayConfig = new WebsocketGatewayConfig();
-						socketGatewayConfig = websocketGatewayConfig;
-					} else {
-						socketGatewayConfig = new SocketGatewayConfig();
-					}
-
-					Node refAttr = item.getAttributes().getNamedItem("ref");
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							socketGatewayConfig.readPuObject(refObj);
-						}
-					}
-
-					if (port > 0) {
-						socketGatewayConfig.setPort(port);
-					} else {
-						throw new IllegalArgumentException("Socket gateway's port cannot be <= 0");
-					}
-
-					if (socketGatewayConfig instanceof WebsocketGatewayConfig) {
-						((WebsocketGatewayConfig) socketGatewayConfig).setAutoActiveChannel(autoActiveChannel);
-						if (proxy != null) {
-							((WebsocketGatewayConfig) socketGatewayConfig).setProxy(proxy);
-						}
-						if (path != null) {
-							((WebsocketGatewayConfig) socketGatewayConfig).setPath(path);
-						}
-					}
-
-					socketGatewayConfig.setName(name);
-					socketGatewayConfig.setHost(host);
-					socketGatewayConfig.setProtocol(protocol);
-					socketGatewayConfig.setSsl(ssl);
-					socketGatewayConfig.setSslContextName(sslContextName);
-					socketGatewayConfig.setSerializerClassName(serializer);
-					socketGatewayConfig.setDeserializerClassName(deserializer);
-					socketGatewayConfig.setUseLengthPrepender(isUserLengprepender);
-					socketGatewayConfig.setWorkerPoolConfig(workerPoolConfig);
-					if (workerGroupThreads > 0) {
-						socketGatewayConfig.setWorkerEventLoopGroupThreads(workerGroupThreads);
-					}
-					if (bootGroupThreads > 0) {
-						socketGatewayConfig.setBootEventLoopGroupThreads(bootGroupThreads);
-					}
-
-					config = socketGatewayConfig;
-
+					config = new SocketGatewayConfig();
 					break;
 				}
 				default:
@@ -1122,6 +725,8 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 				if (config != null) {
 					config.setExtensionName(this.extensionName);
+					config.readPuObject(refObj);
+					config.readNode(item);
 					gatewayConfigs.add(config);
 				}
 			} else {
@@ -1652,6 +1257,45 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 	}
 
+	private RabbitMQQueueConfig readRabbitMQQueueConfig(Node node) {
+		RabbitMQQueueConfig queueConfig = null;
+		if (node != null) {
+			queueConfig = new RabbitMQQueueConfig();
+			Node element = node.getFirstChild();
+			while (element != null) {
+				if (element.getNodeType() == 1) {
+					String nodeName = element.getNodeName();
+					String value = element.getTextContent().trim();
+					if (nodeName.equalsIgnoreCase("name") || nodeName.equalsIgnoreCase("queuename")) {
+						queueConfig.setQueueName(value);
+					} else if (nodeName.equalsIgnoreCase("autoack")) {
+						queueConfig.setAutoAck(Boolean.valueOf(element.getTextContent()));
+					} else if (nodeName.equalsIgnoreCase("exchangename")) {
+						queueConfig.setExchangeName(value);
+					} else if (nodeName.equalsIgnoreCase("exchangetype")) {
+						queueConfig.setExchangeType(value);
+					} else if (nodeName.equalsIgnoreCase("routingkey")) {
+						queueConfig.setRoutingKey(value);
+					} else if (nodeName.equalsIgnoreCase("type") || nodeName.equalsIgnoreCase("messagingmodel")) {
+						queueConfig.setType(MessagingModel.fromName(value));
+					} else if (nodeName.equalsIgnoreCase("qos")) {
+						queueConfig.setQos(Integer.valueOf(value));
+					} else if (nodeName.equalsIgnoreCase("durable")) {
+						queueConfig.setDurable(Boolean.valueOf(value));
+					} else if (nodeName.equalsIgnoreCase("exclusive")) {
+						queueConfig.setExclusive(Boolean.valueOf(value));
+					} else if (nodeName.equalsIgnoreCase("autoDelete")) {
+						queueConfig.setAutoDelete(Boolean.valueOf(value));
+					} else if (nodeName.equalsIgnoreCase("variables") || nodeName.equalsIgnoreCase("arguments")) {
+						queueConfig.setArguments(PuObject.fromXML(element).toMap());
+					}
+				}
+				element = element.getNextSibling();
+			}
+		}
+		return queueConfig;
+	}
+
 	private void readProducerConfigs(Node node) throws XPathExpressionException {
 		this.producerConfigs = new ArrayList<>();
 		if (node == null) {
@@ -1700,6 +1344,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 							rabbitMQProducerConfig.readPuObject(refObj);
 						}
 					}
+
 					while (ele != null) {
 						if (ele.getNodeType() == 1) {
 							String nodeName = ele.getNodeName();
@@ -1762,58 +1407,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 			}
 			item = item.getNextSibling();
 		}
-	}
-
-	public String getExtensionName() {
-		return extensionName;
-	}
-
-	public List<GatewayConfig> getGatewayConfigs() {
-		return this.gatewayConfigs;
-	}
-
-	public List<SQLDataSourceConfig> getSQLDataSourceConfig() {
-		return this.sqlDatasourceConfigs;
-	}
-
-	public List<HazelcastConfig> getHazelcastConfigs() {
-		return hazelcastConfigs;
-	}
-
-	public List<RedisConfig> getRedisConfigs() {
-		return this.redisConfigs;
-	}
-
-	public List<LifeCycleConfig> getLifeCycleConfigs() {
-		return this.lifeCycleConfigs;
-	}
-
-	public List<MongoDBConfig> getMongoDBConfigs() {
-		return this.mongoDBConfigs;
-	}
-
-	public List<ServerWrapperConfig> getServerWrapperConfigs() {
-		return this.serverWrapperConfigs;
-	}
-
-	public Collection<? extends MonitorAgentConfig> getMonitorAgentConfigs() {
-		return this.monitorAgentConfigs;
-	}
-
-	public Collection<? extends MessageProducerConfig> getProducerConfigs() {
-		return this.producerConfigs;
-	}
-
-	public Collection<? extends CassandraDatasourceConfig> getCassandraConfigs() {
-		return this.cassandraConfigs;
-	}
-
-	public Collection<? extends ZkClientConfig> getZkClientConfigs() {
-		return this.zkClientConfigs;
-	}
-
-	public Collection<? extends SSLContextConfig> getSSLContextConfigs() {
-		return this.sslContextConfigs;
 	}
 
 	public PuObjectRO getProperty(String name) {

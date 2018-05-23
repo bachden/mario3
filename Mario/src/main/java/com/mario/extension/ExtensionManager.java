@@ -88,8 +88,8 @@ public final class ExtensionManager extends BaseLoggable {
 		if (this.isLoaded()) {
 			List<SQLDataSourceConfig> results = new ArrayList<SQLDataSourceConfig>();
 			for (ExtensionLoader loader : this.extensionLoaderByName.values()) {
-				if (loader.getConfigReader().getSQLDataSourceConfig() != null) {
-					results.addAll(loader.getConfigReader().getSQLDataSourceConfig());
+				if (loader.getConfigReader().getSqlDatasourceConfigs() != null) {
+					results.addAll(loader.getConfigReader().getSqlDatasourceConfigs());
 				}
 			}
 			return results;
@@ -232,8 +232,8 @@ public final class ExtensionManager extends BaseLoggable {
 		if (this.isLoaded()) {
 			Collection<SSLContextConfig> results = new ArrayList<>();
 			for (ExtensionLoader loader : this.extensionLoaderByName.values()) {
-				if (loader.getConfigReader().getSSLContextConfigs() != null) {
-					results.addAll(loader.getConfigReader().getSSLContextConfigs());
+				if (loader.getConfigReader().getSslContextConfigs() != null) {
+					results.addAll(loader.getConfigReader().getSslContextConfigs());
 				}
 			}
 			return results;
