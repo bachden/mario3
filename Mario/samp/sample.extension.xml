@@ -211,6 +211,22 @@
 			<config>[relative/to/config/file]</config>
 			<topic>[topic_name]</topic>
 		</kafka>
+		<zeromq ref="[the property which hold the config, optional]">
+			<name>[producer_name]</name>
+			<type>[RPC | TASK | PUB]</type>
+			<registry>[zmq_registry_name]</registry>
+			<endpoint>[target_endpoint]</endpoint>
+			<numSenders>[number_of senders, default 1]</numSenders>
+
+			<responseEndpoint>[response_endpoint, which will be open as ZMQSocketType.PULL_BIND, port is optional which will be random if absent]</responseEndpoint>
+			<responseWorkerSize>[receive_worker_size, default 1, indicate number of thread for RPC to handle response]</responseWorkerSize>
+
+			<bufferCapacity>[buffer_capacity, default 1024, only use for RPC producer]</bufferCapacity>
+			<messageBufferSize>[message_buffer_size, use for PuElement.toBytes() method]</messageBufferSize>
+			<threadNamePattern>[thread_name_pattern, optional]</threadNamePattern>
+			<queueSize>[ringbuffer_size, default 1024]</queueSize>
+			<hwm>[zmq_socket_high_water_mark, default 1e6]</hwm>
+		</zeromq>
 	</producers>
 
 	<gateways>
@@ -302,6 +318,7 @@
 			<type>[RPC | TASK | SUB]</type>
 			<endpoint>[(tcp | pgm | inproc | ipc)://host:port]</endpoint>
 
+			<threadNamePattern>[thread_name_pattern, optional]</threadNamePattern>
 			<queueSize>[ringbuffer_queue_size, default 1024]</queueSize>
 			<numHandlers>[num_handlers, number of handlers to process request, default 1]</numHandlers>
 			<numSenders>[num_senders, default 1, use for RPC gateway to send response to producer]</numSenders>

@@ -79,7 +79,7 @@ public class ZeroMQGateway extends BaseEventDispatcher implements Gateway, ZMQMe
 		long hwm = this.config.getHwm();
 		ZMQSocketRegistryManager zmqSocketRegistryManager = Mario.getInstance().getZmqSocketRegistryManager();
 		ZMQSocketRegistry socketRegistry = zmqSocketRegistryManager.getZMQSocketRegistry(this.config.getRegistryName());
-		ZMQSocketWriter socketWriter = ZMQSocketWriter.newNonBlockingWriter(this.config.getMessageBufferSize() * 2);
+		ZMQSocketWriter socketWriter = ZMQSocketWriter.newNonBlockingWriter(this.config.getMessageBufferSize());
 
 		ZMQSocketOptions socketOptions = ZMQSocketOptions.builder() //
 				.hwm(hwm) //
@@ -98,6 +98,7 @@ public class ZeroMQGateway extends BaseEventDispatcher implements Gateway, ZMQMe
 		config.setMessageProcessor(this);
 		config.setQueueSize(this.config.getQueueSize());
 		config.setReceiveWorkerSize(this.config.getNumHandlers());
+		config.setThreadNamePattern(this.config.getThreadNamePattern());
 		switch (this.config.getZeroMQGatewayType()) {
 		case RPC:
 		case TASK:

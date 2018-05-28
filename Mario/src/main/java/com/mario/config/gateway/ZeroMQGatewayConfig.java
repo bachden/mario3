@@ -21,16 +21,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-@Setter(AccessLevel.PACKAGE)
+@Setter(AccessLevel.PRIVATE)
 public class ZeroMQGatewayConfig extends GatewayConfig {
 
 	private static final Set<String> SUB_KEY_TYPES = new HashSet<>(Arrays.asList("text", "base64", "hex"));
 
-	private String endpoint = null;
-	private ZeroMQGatewayType zeroMQGatewayType;
+	private String endpoint;
 	private String registryName;
+	private ZeroMQGatewayType zeroMQGatewayType;
 
-	private String threadNamePattern;
+	private String threadNamePattern = "gateway-worker-#%d";
 	private int queueSize = 1024;
 	private int numSenders = 1;
 	private int bufferCapacity = 1024 * 1024;
@@ -116,6 +116,9 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 					break;
 				case "numhandlers":
 					this.setNumHandlers(Integer.valueOf(value));
+					break;
+				case "threadnamepattern":
+					this.setThreadNamePattern(value);
 					break;
 				case "numsenders":
 					this.setNumSenders(Integer.valueOf(value));
