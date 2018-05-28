@@ -94,29 +94,29 @@ public class RabbitMQGatewayConfig extends GatewayConfig {
 
 	@Override
 	public void readNode(Node item) {
-		Node ele = item.getFirstChild();
-		while (ele != null) {
-			if (ele.getNodeType() == 1) {
-				String value = ele.getTextContent().trim();
-				if (ele.getNodeName().equalsIgnoreCase("deserializer")) {
+		Node curr = item.getFirstChild();
+		while (curr != null) {
+			if (curr.getNodeType() == 1) {
+				String value = curr.getTextContent().trim();
+				if (curr.getNodeName().equalsIgnoreCase("deserializer")) {
 					this.setDeserializerClassName(value);
-				} else if (ele.getNodeName().equalsIgnoreCase("serializer")) {
+				} else if (curr.getNodeName().equalsIgnoreCase("serializer")) {
 					this.setSerializerClassName(value);
-				} else if (ele.getNodeName().equalsIgnoreCase("name")) {
+				} else if (curr.getNodeName().equalsIgnoreCase("name")) {
 					this.setName(value);
-				} else if (ele.getNodeName().equalsIgnoreCase("workerpool")) {
-					this.setWorkerPoolConfig(readWorkerPoolConfig(ele));
-				} else if (ele.getNodeName().equalsIgnoreCase("server")) {
+				} else if (curr.getNodeName().equalsIgnoreCase("workerpool")) {
+					this.readWorkerPoolConfig(curr);
+				} else if (curr.getNodeName().equalsIgnoreCase("server")) {
 					this.setServerWrapperName(value);
-				} else if (ele.getNodeName().equalsIgnoreCase("queue")) {
-					this.setQueueConfig(readQueueConfig(ele));
-				} else if (ele.getNodeName().equalsIgnoreCase("ackOnError")) {
-					this.setAckOnError(Boolean.valueOf(ele.getTextContent()));
-				} else if (ele.getNodeName().equalsIgnoreCase("resultOnError")) {
-					this.setResultOnError(PuElementJSONHelper.fromJSON(ele.getTextContent()));
+				} else if (curr.getNodeName().equalsIgnoreCase("queue")) {
+					this.setQueueConfig(readQueueConfig(curr));
+				} else if (curr.getNodeName().equalsIgnoreCase("ackOnError")) {
+					this.setAckOnError(Boolean.valueOf(curr.getTextContent()));
+				} else if (curr.getNodeName().equalsIgnoreCase("resultOnError")) {
+					this.setResultOnError(PuElementJSONHelper.fromJSON(curr.getTextContent()));
 				}
 			}
-			ele = ele.getNextSibling();
+			curr = curr.getNextSibling();
 		}
 	}
 }

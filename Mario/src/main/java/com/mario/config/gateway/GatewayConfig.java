@@ -55,26 +55,8 @@ public abstract class GatewayConfig extends MarioBaseConfig {
 		}
 	}
 
-	protected WorkerPoolConfig readWorkerPoolConfig(Node node) {
-		WorkerPoolConfig workerPoolConfig = null;
-		if (node != null) {
-			workerPoolConfig = new WorkerPoolConfig();
-			Node element = node.getFirstChild();
-			while (element != null) {
-				if (element.getNodeType() == 1) {
-					String value = element.getTextContent().trim();
-					String nodeName = element.getNodeName();
-					if (nodeName.equalsIgnoreCase("poolsize")) {
-						workerPoolConfig.setPoolSize(Integer.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("ringbuffersize")) {
-						workerPoolConfig.setRingBufferSize(Integer.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("threadnamepattern")) {
-						workerPoolConfig.setThreadNamePattern(value);
-					}
-				}
-				element = element.getNextSibling();
-			}
-		}
-		return workerPoolConfig;
+	protected void readWorkerPoolConfig(Node item) {
+		this.workerPoolConfig = new WorkerPoolConfig();
+		workerPoolConfig.readNode(item);
 	}
 }

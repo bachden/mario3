@@ -60,11 +60,11 @@ public class SocketGatewayConfig extends GatewayConfig {
 
 	@Override
 	public void readNode(Node item) {
-		Node ele = item.getFirstChild();
-		while (ele != null) {
-			if (ele.getNodeType() == 1) {
-				String nodeName = ele.getNodeName();
-				String value = ele.getTextContent().trim();
+		Node curr = item.getFirstChild();
+		while (curr != null) {
+			if (curr.getNodeType() == 1) {
+				String nodeName = curr.getNodeName();
+				String value = curr.getTextContent().trim();
 				if (nodeName.equalsIgnoreCase("protocol")) {
 					this.setProtocol(SocketProtocol.fromName(value));
 				} else if (nodeName.equalsIgnoreCase("host")) {
@@ -88,7 +88,7 @@ public class SocketGatewayConfig extends GatewayConfig {
 				} else if (nodeName.equalsIgnoreCase("name")) {
 					this.setName(value);
 				} else if (nodeName.equalsIgnoreCase("workerpool")) {
-					this.setWorkerPoolConfig(readWorkerPoolConfig(ele));
+					this.readWorkerPoolConfig(curr);
 				} else if (nodeName.equalsIgnoreCase("uselengthprepender")
 						|| nodeName.equalsIgnoreCase("usinglengthprepender")
 						|| nodeName.equalsIgnoreCase("prependlength")) {
@@ -99,7 +99,7 @@ public class SocketGatewayConfig extends GatewayConfig {
 					this.setWorkerEventLoopGroupThreads(Integer.valueOf(value));
 				}
 			}
-			ele = ele.getNextSibling();
+			curr = curr.getNextSibling();
 		}
 	}
 }

@@ -17,7 +17,6 @@ import com.mario.config.gateway.GatewayType;
 import com.mario.config.gateway.KafkaGatewayConfig;
 import com.mario.config.gateway.RabbitMQGatewayConfig;
 import com.mario.config.gateway.SocketGatewayConfig;
-import com.mario.config.gateway.ZeroMQGatewayConfig;
 import com.mario.entity.ExtensionNameAware;
 import com.mario.entity.message.transcoder.MessageDecoder;
 import com.mario.entity.message.transcoder.MessageEncoder;
@@ -31,7 +30,7 @@ import com.mario.gateway.serverwrapper.ServerWrapperManager;
 import com.mario.gateway.socket.SocketGateway;
 import com.mario.gateway.socket.SocketGatewayFactory;
 import com.mario.gateway.socket.SocketSessionManager;
-import com.mario.gateway.zeromq.ZeroMQGatewayFactory;
+import com.mario.gateway.zeromq.ZeroMQGateway;
 import com.mario.ssl.SSLContextManager;
 import com.nhb.common.BaseLoggable;
 import com.nhb.eventdriven.Event;
@@ -59,7 +58,7 @@ public final class GatewayManager extends BaseEventDispatcher {
 					result = KafkaGatewayFactory.newKafkaGateway((KafkaGatewayConfig) config);
 					break;
 				case ZEROMQ:
-					result = ZeroMQGatewayFactory.newZeroMQGateway((ZeroMQGatewayConfig) config);
+					result = new ZeroMQGateway(config);
 					break;
 				default:
 					break;

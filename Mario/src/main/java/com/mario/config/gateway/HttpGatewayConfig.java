@@ -65,7 +65,7 @@ public class HttpGatewayConfig extends GatewayConfig {
 				} else if (nodeName.equalsIgnoreCase("name")) {
 					this.setName(value);
 				} else if (nodeName.equalsIgnoreCase("workerpool")) {
-					this.setWorkerPoolConfig(readWorkerPoolConfig(ele));
+					this.readWorkerPoolConfig(ele);
 				} else if (nodeName.equalsIgnoreCase("path") || nodeName.equalsIgnoreCase("location")) {
 					this.setPath(value);
 				} else if (nodeName.equalsIgnoreCase("async")) {

@@ -61,7 +61,7 @@ public class KafkaGatewayConfig extends GatewayConfig {
 				} else if (nodeName.equalsIgnoreCase("deserializer")) {
 					this.setDeserializerClassName(value);
 				} else if (nodeName.equalsIgnoreCase("workerpool")) {
-					this.setWorkerPoolConfig(readWorkerPoolConfig(ele));
+					this.readWorkerPoolConfig(ele);
 				} else if (nodeName.equalsIgnoreCase("config") || nodeName.equalsIgnoreCase("configuration")
 						|| nodeName.equalsIgnoreCase("configFile") || nodeName.equalsIgnoreCase("configurationFile")) {
 					this.setConfigFile(value);

@@ -19,4 +19,5 @@ public interface Gateway extends EventDispatcher, Loggable, MessageHandleCallbac
 	void setHandler(MessageHandler handler);
 
 	String getName();
+
 }

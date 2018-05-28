@@ -1,54 +1,46 @@
 package com.mario.gateway.zeromq;
 
-import com.lmax.disruptor.EventFactory;
 import com.mario.config.gateway.GatewayType;
+import com.mario.entity.MessageHandleCallback;
 import com.mario.entity.message.CloneableMessage;
-import com.mario.entity.message.impl.BaseMessage;
-import com.mario.gateway.zeromq.metadata.ZeroMQInputMetadataProcessor;
+import com.mario.entity.message.Message;
+import com.nhb.common.async.CompletableFuture;
+import com.nhb.common.data.PuElement;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ZeroMQMessage extends BaseMessage implements CloneableMessage {
+public class ZeroMQMessage implements Message, CloneableMessage {
 
-	protected static EventFactory<ZeroMQMessage> EVENT_FACTORY = new EventFactory<ZeroMQMessage>() {
-
-		@Override
-		public ZeroMQMessage newInstance() {
-			return new ZeroMQMessage();
-		}
-	};
-
+	@Getter
 	@Setter(AccessLevel.PACKAGE)
-	@Getter(AccessLevel.PACKAGE)
-	private byte[] rawInput;
+	private PuElement data;
 
+	@Getter
 	@Setter(AccessLevel.PACKAGE)
-	@Getter(AccessLevel.PACKAGE)
-	private String responseEndpoint;
+	private String gatewayName;
 
+	@Getter
 	@Setter(AccessLevel.PACKAGE)
-	@Getter(AccessLevel.PACKAGE)
-	private byte[] messageId;
+	private GatewayType gatewayType;
 
+	@Getter
 	@Setter(AccessLevel.PACKAGE)
-	@Getter(AccessLevel.PACKAGE)
-	private ZeroMQInputMetadataProcessor metadataProcessor;
+	private MessageHandleCallback callback;
 
-	public ZeroMQMessage() {
-		this.setGatewayType(GatewayType.ZEROMQ);
-	}
+	@Getter(AccessLevel.PACKAGE)
+	@Setter(AccessLevel.PACKAGE)
+	private CompletableFuture<PuElement> future;
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public ZeroMQMessage makeClone() {
-		ZeroMQMessage result = new ZeroMQMessage();
-		this.fillProperties(result);
-		result.messageId = this.messageId;
-		result.rawInput = this.rawInput;
-		result.responseEndpoint = this.responseEndpoint;
-		result.metadataProcessor = this.metadataProcessor;
-		return result;
+	public <T extends Message> T makeClone() {
+		ZeroMQMessage cloneMessage = new ZeroMQMessage();
+		cloneMessage.setData(this.getData());
+		cloneMessage.setFuture(this.getFuture());
+		cloneMessage.setCallback(this.getCallback());
+		cloneMessage.setGatewayName(this.getGatewayName());
+		cloneMessage.setGatewayType(this.getGatewayType());
+		return cloneMessage.cast();
 	}
 }

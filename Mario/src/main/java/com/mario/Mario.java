@@ -364,6 +364,7 @@ public final class Mario extends BaseLoggable {
 					if (gateway == null) {
 						throw new NullPointerException("Gateway can not be found for name: " + gatewayName);
 					} else {
+						getLogger().info("Binding gateway {} to handler {}", gateway.getName(), handler.getName());
 						handler.bind(gateway);
 					}
 				});

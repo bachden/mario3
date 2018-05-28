@@ -158,4 +158,5 @@ public abstract class AbstractGateway<ConfigType extends GatewayConfig> extends 
 		}
 		return null;
 	}
+
 }

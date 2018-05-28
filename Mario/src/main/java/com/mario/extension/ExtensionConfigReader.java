@@ -45,11 +45,11 @@ import com.mario.config.gateway.HttpGatewayConfig;
 import com.mario.config.gateway.KafkaGatewayConfig;
 import com.mario.config.gateway.RabbitMQGatewayConfig;
 import com.mario.config.gateway.SocketGatewayConfig;
+import com.mario.config.gateway.ZeroMQGatewayConfig;
 import com.mario.config.serverwrapper.HttpServerWrapperConfig;
 import com.mario.config.serverwrapper.RabbitMQServerWrapperConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig;
 import com.mario.config.serverwrapper.ServerWrapperConfig.ServerWrapperType;
-import com.mario.config.serverwrapper.ZeroMQServerWrapperConfig;
 import com.mario.contact.ContactBook;
 import com.mario.extension.xml.EndpointReader;
 import com.mario.external.configuration.ExternalConfigurationManager;
@@ -659,9 +659,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 				ServerWrapperType connectionType = ServerWrapperType.fromName(item.getNodeName());
 				ServerWrapperConfig config = null;
 				switch (connectionType) {
-				case ZEROMQ:
-					config = new ZeroMQServerWrapperConfig();
-					break;
 				case HTTP:
 					config = new HttpServerWrapperConfig();
 					break;
@@ -686,52 +683,56 @@ class ExtensionConfigReader extends XmlConfigReader {
 	}
 
 	private void readGatewayConfigs(Node node) throws XPathExpressionException {
-		this.gatewayConfigs = new ArrayList<GatewayConfig>();
-		NodeList list = (NodeList) xPath.compile("*").evaluate(node, XPathConstants.NODESET);
-		for (int i = 0; i < list.getLength(); i++) {
-			Node item = list.item(i);
-			GatewayType type = GatewayType.fromName(item.getNodeName());
+		if (this.gatewayConfigs == null) {
+			this.gatewayConfigs = new ArrayList<GatewayConfig>();
+		}
+		Node item = node.getFirstChild();
+		while (item != null) {
+			if (item.getNodeType() == Element.ELEMENT_NODE) {
+				GatewayType type = GatewayType.fromName(item.getNodeName());
+				if (type != null) {
+					GatewayConfig config = null;
 
-			if (type != null) {
-				GatewayConfig config = null;
-				PuObjectRO refObj = new PuObject();
-				Node refAttr = item.getAttributes().getNamedItem("ref");
-				if (refAttr != null) {
-					String ref = refAttr.getNodeValue();
-					if (ref != null) {
-						refObj = this.getRefProperty(ref);
+					PuObjectRO refObj = new PuObject();
+					Node refAttr = item.getAttributes().getNamedItem("ref");
+					if (refAttr != null) {
+						String ref = refAttr.getNodeValue();
+						if (ref != null) {
+							refObj = this.getRefProperty(ref);
+						}
 					}
-				}
-				switch (type) {
-				case KAFKA: {
-					config = new KafkaGatewayConfig();
-					break;
-				}
-				case HTTP: {
-					config = new HttpGatewayConfig();
-					break;
-				}
-				case RABBITMQ: {
-					config = new RabbitMQGatewayConfig();
-					break;
-				}
-				case SOCKET: {
-					config = new SocketGatewayConfig();
-					break;
-				}
-				default:
-					throw new RuntimeException(type + " gateway doesn't supported now");
-				}
 
-				if (config != null) {
-					config.setExtensionName(this.extensionName);
-					config.readPuObject(refObj);
-					config.readNode(item);
-					gatewayConfigs.add(config);
+					switch (type) {
+					case ZEROMQ:
+						config = new ZeroMQGatewayConfig();
+						break;
+					case KAFKA:
+						config = new KafkaGatewayConfig();
+						break;
+					case HTTP:
+						config = new HttpGatewayConfig();
+						break;
+					case RABBITMQ:
+						config = new RabbitMQGatewayConfig();
+						break;
+					case SOCKET:
+						config = new SocketGatewayConfig();
+						break;
+					default:
+						throw new RuntimeException(type + " gateway doesn't supported now");
+					}
+
+					if (config != null) {
+						config.setExtensionName(this.extensionName);
+						config.readPuObject(refObj);
+						config.readNode(item);
+						gatewayConfigs.add(config);
+					}
+				} else {
+					getLogger().warn("gateway type not found: {}", item.getNodeName());
 				}
-			} else {
-				getLogger().warn("gateway type not found: {}", item.getNodeName());
 			}
+			item = item.getNextSibling();
 		}
 	}
 

@@ -19,4 +19,9 @@ public interface Message extends CommandRequestParameters {
 	default <T extends Message> T cast(Class<T> clazz) {
 		return (T) this;
 	}
+
+	@SuppressWarnings("unchecked")
+	default <T extends Message> T cast() {
+		return (T) this;
+	}
 }

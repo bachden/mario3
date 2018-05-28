@@ -177,11 +177,6 @@
 				will be ignored if options != sessions)
 			</sessiontimeout>
 		</http>
-		<zeromq>
-			<!-- this config is dummy, just to equalize between zeromq gateway and the other gateways which has server wrapper -->
-			<name>[zeromq_server_wrapper_name]</name>
-			<registryname>[zeromq_registry_name]</registryname>
-		</zeromq>
 	</servers>
 
 	<zeromq>
@@ -303,20 +298,21 @@
 		</kafka>
 		<zeromq>
 			<name>[zeromq_gateway_name]</name>
-			<server>[zeromq_server_wrapper_name]</server>
-			<type>[RPC | PUB_SUB | TASK_QUEUE]</type>
-			<queue>
-				<endpoint>[(tcp | udp | pgm | inproc | ipc)://host:port]</endpoint>
-				<subkeys>
-					<!-- only use if type == PUB_SUB, multi values accepted -->
-					<entry>[subscribe_key]</entry>
-				</subkeys>
-			</queue>
-			<workerpool>
-				<poolsize>8</poolsize>
-				<ringbuffersize>2048</ringbuffersize>
-				<threadnamepattern>Worker Pool #%d</threadnamepattern>
-			</workerpool>
+			<registry>[zeromq_registry_name]</registry>
+			<type>[RPC | TASK | SUB]</type>
+			<endpoint>[(tcp | pgm | inproc | ipc)://host:port]</endpoint>
+
+			<queueSize>[ringbuffer_queue_size, default 1024]</queueSize>
+			<numHandlers>[num_handlers, number of handlers to process request, default 1]</numHandlers>
+			<numSenders>[num_senders, default 1, use for RPC gateway to send response to producer]</numSenders>
+			<messageBufferSize>[message_buffer_size, use for PuElement.toBytes() method in RPC gateway type, default 1024]</messageBufferSize>
+			<bufferCapacity>[byte_buffer_capacity, use in zeroCopy receive method, should be as large as possible, default 1024 * 1024]</bufferCapacity>
+			<hwm>[high_water_mark, use in ZMQSocket == queued unsent message]</hwm>
+
+			<subkeys>
+				<!-- only use if type == PUB_SUB, multi values accepted -->
+				<entry type="[text | base64 | hex, default is text]">[subscribe_key]</entry>
+			</subkeys>
 		</zeromq>
 	</gateways>
 

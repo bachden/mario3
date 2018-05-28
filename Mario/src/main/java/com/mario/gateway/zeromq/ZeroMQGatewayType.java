@@ -2,7 +2,7 @@ package com.mario.gateway.zeromq;
 
 public enum ZeroMQGatewayType {
 
-	TASK, RPC, PUB_SUB;
+	TASK, RPC, SUB;
 
 	public static ZeroMQGatewayType forName(String name) {
 		if (name != null) {

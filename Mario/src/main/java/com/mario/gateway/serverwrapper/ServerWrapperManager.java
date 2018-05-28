@@ -21,18 +21,16 @@ public final class ServerWrapperManager {
 				}
 				ServerWrapper serverWrapper = null;
 				switch (config.getType()) {
-				case HTTP: {
+				case HTTP:
 					JettyHttpServerWrapper jettyHttpServer = new JettyHttpServerWrapper();
 					jettyHttpServer.setConfig(config);
 					serverWrapper = jettyHttpServer;
 					break;
-				}
-				case RABBITMQ: {
+				case RABBITMQ:
 					RabbitMQServerWrapper rabbitMQServer = new RabbitMQServerWrapper();
 					rabbitMQServer.setConfig(config);
 					serverWrapper = rabbitMQServer;
 					break;
-				}
 				default:
 					break;
 				}
