@@ -33,6 +33,7 @@ import com.nhb.messaging.rabbit.producer.RabbitMQRPCProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQRoutingProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQRoutingRPCProducer;
 import com.nhb.messaging.rabbit.producer.RabbitMQTaskProducer;
+import com.nhb.messaging.zmq.ZMQSocketOptions;
 import com.nhb.messaging.zmq.ZMQSocketType;
 import com.nhb.messaging.zmq.ZMQSocketWriter;
 import com.nhb.messaging.zmq.producer.ZMQProducer;
@@ -105,6 +106,8 @@ public class MessageProducerManager extends BaseLoggable {
 				Mario.getInstance().getZmqSocketRegistryManager().getZMQSocketRegistry(config.getRegistryName()));
 		_config.setSocketWriter(ZMQSocketWriter.newNonBlockingWriter(config.getMessageBufferSize()));
 		_config.setThreadNamePattern(config.getThreadNamePattern());
+		_config.setSendSocketOptions(ZMQSocketOptions.builder().hwm(config.getHwm()).sndHWM(config.getHwm())
+				.rcvHWM(config.getHwm()).build());
 
 		producer.setName(config.getName());
 		producer.init(_config);

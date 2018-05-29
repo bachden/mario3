@@ -218,10 +218,10 @@
 			<endpoint>[target_endpoint]</endpoint>
 			<numSenders>[number_of senders, default 1]</numSenders>
 
-			<responseEndpoint>[response_endpoint, which will be open as ZMQSocketType.PULL_BIND, port is optional which will be random if absent]</responseEndpoint>
-			<responseWorkerSize>[receive_worker_size, default 1, indicate number of thread for RPC to handle response]</responseWorkerSize>
+			<receiveEndpoint>[response_endpoint, which will be open as ZMQSocketType.PULL_BIND, port is optional which will be random if absent]</receiveEndpoint>
+			<receiveWorkerSize>[receive_worker_size, default 1, indicate number of thread for RPC to handle response]</receiveWorkerSize>
 
-			<bufferCapacity>[buffer_capacity, default 1024, only use for RPC producer]</bufferCapacity>
+			<bufferCapacity>[buffer_capacity, default 1024, use for receiver to init ByteBuffer to receiveZeroCopy]</bufferCapacity>
 			<messageBufferSize>[message_buffer_size, use for PuElement.toBytes() method]</messageBufferSize>
 			<threadNamePattern>[thread_name_pattern, optional]</threadNamePattern>
 			<queueSize>[ringbuffer_size, default 1024]</queueSize>

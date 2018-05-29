@@ -38,6 +38,7 @@ import com.mario.config.RabbitMQProducerConfig;
 import com.mario.config.RedisConfig;
 import com.mario.config.SSLContextConfig;
 import com.mario.config.ZMQSocketRegistryConfig;
+import com.mario.config.ZeroMQProducerConfig;
 import com.mario.config.ZkClientConfig;
 import com.mario.config.gateway.GatewayConfig;
 import com.mario.config.gateway.GatewayType;
@@ -72,9 +73,6 @@ import com.nhb.common.db.sql.SQLDataSourceConfig;
 import com.nhb.common.exception.UnsupportedTypeException;
 import com.nhb.common.utils.FileSystemUtils;
 import com.nhb.common.vo.HostAndPort;
-import com.nhb.messaging.MessagingModel;
-import com.nhb.messaging.http.HttpMethod;
-import com.nhb.messaging.rabbit.RabbitMQQueueConfig;
 
 import lombok.Getter;
 
@@ -1075,9 +1073,15 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	private void readLifeCycleConfigs(Node node) throws XPathExpressionException {
 		// read startup config
-		this.lifeCycleConfigs = new ArrayList<LifeCycleConfig>();
 		if (node == null) {
 			return;
+		}
+		if (this.lifeCycleConfigs == null) {
+			synchronized (this) {
+				if (this.lifeCycleConfigs == null) {
+					this.lifeCycleConfigs = new ArrayList<LifeCycleConfig>();
+				}
+			}
 		}
 		Node item = node.getFirstChild();
 		while (item != null) {
@@ -1258,150 +1262,57 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 	}
 
-	private RabbitMQQueueConfig readRabbitMQQueueConfig(Node node) {
-		RabbitMQQueueConfig queueConfig = null;
-		if (node != null) {
-			queueConfig = new RabbitMQQueueConfig();
-			Node element = node.getFirstChild();
-			while (element != null) {
-				if (element.getNodeType() == 1) {
-					String nodeName = element.getNodeName();
-					String value = element.getTextContent().trim();
-					if (nodeName.equalsIgnoreCase("name") || nodeName.equalsIgnoreCase("queuename")) {
-						queueConfig.setQueueName(value);
-					} else if (nodeName.equalsIgnoreCase("autoack")) {
-						queueConfig.setAutoAck(Boolean.valueOf(element.getTextContent()));
-					} else if (nodeName.equalsIgnoreCase("exchangename")) {
-						queueConfig.setExchangeName(value);
-					} else if (nodeName.equalsIgnoreCase("exchangetype")) {
-						queueConfig.setExchangeType(value);
-					} else if (nodeName.equalsIgnoreCase("routingkey")) {
-						queueConfig.setRoutingKey(value);
-					} else if (nodeName.equalsIgnoreCase("type") || nodeName.equalsIgnoreCase("messagingmodel")) {
-						queueConfig.setType(MessagingModel.fromName(value));
-					} else if (nodeName.equalsIgnoreCase("qos")) {
-						queueConfig.setQos(Integer.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("durable")) {
-						queueConfig.setDurable(Boolean.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("exclusive")) {
-						queueConfig.setExclusive(Boolean.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("autoDelete")) {
-						queueConfig.setAutoDelete(Boolean.valueOf(value));
-					} else if (nodeName.equalsIgnoreCase("variables") || nodeName.equalsIgnoreCase("arguments")) {
-						queueConfig.setArguments(PuObject.fromXML(element).toMap());
-					}
-				}
-				element = element.getNextSibling();
-			}
-		}
-		return queueConfig;
-	}
-
 	private void readProducerConfigs(Node node) throws XPathExpressionException {
-		this.producerConfigs = new ArrayList<>();
 		if (node == null) {
 			return;
 		}
+		if (this.producerConfigs == null) {
+			synchronized (this) {
+				if (this.producerConfigs == null) {
+					this.producerConfigs = new ArrayList<>();
+				}
+			}
+		}
+
 		Node item = node.getFirstChild();
 		while (item != null) {
-			if (item.getNodeType() == 1) {
-				GatewayType gatewayType = GatewayType.fromName(item.getNodeName());
+			if (item.getNodeType() == Element.ELEMENT_NODE) {
 				Node refAttr = item.getAttributes().getNamedItem("ref");
-				MessageProducerConfig config = null;
-				Node ele = item.getFirstChild();
-				switch (gatewayType) {
-				case KAFKA: {
-					KafkaMessageProducerConfig kafkaProducerConfig = new KafkaMessageProducerConfig();
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							kafkaProducerConfig.readPuObject(refObj);
-						}
-					}
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String nodeName = ele.getNodeName();
-							String value = ele.getTextContent().trim();
-							if (nodeName.equalsIgnoreCase("config") || nodeName.equalsIgnoreCase("configuration")
-									|| nodeName.equalsIgnoreCase("configFile")
-									|| nodeName.equalsIgnoreCase("configurationFile")) {
-								kafkaProducerConfig.setConfigFile(value);
-							} else if (nodeName.equalsIgnoreCase("topic")) {
-								kafkaProducerConfig.setTopic(value);
-							}
-						}
-						ele = ele.getNextSibling();
-					}
-					config = kafkaProducerConfig;
-					break;
+				PuObjectRO refObj = null;
+				if (refAttr != null) {
+					String ref = refAttr.getNodeValue();
+					refObj = this.getRefProperty(ref);
 				}
-				case RABBITMQ: {
-					RabbitMQProducerConfig rabbitMQProducerConfig = new RabbitMQProducerConfig();
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							rabbitMQProducerConfig.readPuObject(refObj);
-						}
-					}
 
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String nodeName = ele.getNodeName();
-							String value = ele.getTextContent().trim();
-							if (nodeName.equalsIgnoreCase("server")) {
-								rabbitMQProducerConfig.setConnectionName(value);
-							} else if (nodeName.equalsIgnoreCase("timeout")) {
-								rabbitMQProducerConfig.setTimeout(Integer.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("queue")) {
-								rabbitMQProducerConfig.setQueueConfig(readRabbitMQQueueConfig(ele));
-							}
-						}
-						ele = ele.getNextSibling();
-					}
-					config = rabbitMQProducerConfig;
+				MessageProducerConfig config = null;
+
+				GatewayType gatewayType = GatewayType.fromName(item.getNodeName());
+				switch (gatewayType) {
+				case KAFKA:
+					config = new KafkaMessageProducerConfig();
 					break;
-				}
-				case HTTP: {
-					HttpMessageProducerConfig httpMessageProducerConfig = new HttpMessageProducerConfig();
-					if (refAttr != null) {
-						String ref = refAttr.getNodeValue();
-						PuObjectRO refObj = this.getRefProperty(ref);
-						if (ref != null) {
-							httpMessageProducerConfig.readPuObject(refObj);
-						}
-					}
-					while (ele != null) {
-						if (ele.getNodeType() == 1) {
-							String nodeName = ele.getNodeName();
-							String value = ele.getTextContent().trim();
-							if (nodeName.equalsIgnoreCase("endpoint")) {
-								httpMessageProducerConfig.setEndpoint(value);
-							} else if (nodeName.equalsIgnoreCase("method")) {
-								httpMessageProducerConfig.setHttpMethod(HttpMethod.fromName(value));
-							} else if (nodeName.equalsIgnoreCase("async")) {
-								httpMessageProducerConfig.setAsync(Boolean.valueOf(value));
-							} else if (nodeName.equalsIgnoreCase("usemultipart")
-									|| nodeName.equalsIgnoreCase("usingmultipart")) {
-								httpMessageProducerConfig.setUsingMultipart(Boolean.valueOf(value));
-							}
-						}
-						ele = ele.getNextSibling();
-					}
-					config = httpMessageProducerConfig;
+				case RABBITMQ:
+					config = new RabbitMQProducerConfig();
 					break;
-				}
+				case HTTP:
+					config = new HttpMessageProducerConfig();
+					break;
+				case ZEROMQ:
+					config = new ZeroMQProducerConfig();
+					break;
 				case SOCKET:
 				default:
 					throw new UnsupportedTypeException();
 				}
 
 				if (config != null) {
+					if (refObj != null) {
+						config.readPuObject(refObj);
+					}
+					config.readNode(item);
 					if (config.getGatewayType() == null) {
 						config.setGatewayType(gatewayType);
 					}
-					config.setName(((Node) xPath.compile("name").evaluate(item, XPathConstants.NODE)).getTextContent());
 					config.setExtensionName(this.extensionName);
 					this.producerConfigs.add(config);
 				}
