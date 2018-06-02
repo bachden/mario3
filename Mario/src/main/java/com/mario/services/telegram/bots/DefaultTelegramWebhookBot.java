@@ -62,6 +62,9 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 
 	private EventDispatcher eventDispatcher = new BaseEventDispatcher();
 
+	@Setter
+	private boolean sendAckEvenRegistered = false;
+	
 	public DefaultTelegramWebhookBot(String name, TelegramBotStorageConfig storageConfig,
 			TelegramBotRegisterStrategy registerStrategy) {
 		this.setName(name);
@@ -132,7 +135,9 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 			reply.setChatId(chatId);
 			if (userName != null) {
 				if (getChatId(userName) > 0) {
-					reply.setText("Hello, you're already registered, now you just have to wait for alert");
+					if (sendAckEvenRegistered) {
+						reply.setText("Hello, you're already registered, now you just have to wait for alert");
+					}
 				} else {
 					try {
 						if (this.storage.saveChatId(userName, chatId)) {

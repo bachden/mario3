@@ -60,6 +60,9 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 
 	private final TelegramBotStorageConfig storageConfig;
 
+	@Setter
+	private boolean sendAckEvenRegistered = false;
+	
 	private TelegramBotStorage storage;
 
 	public DefaultTelegramLongPollingBot(String name, TelegramBotStorageConfig storageConfig,
@@ -176,7 +179,9 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 
 			if (userName != null) {
 				if (getChatId(userName) > 0) {
-					reply.setText("Hello, you're already registered, now you just have to wait for alert");
+					if (sendAckEvenRegistered) {
+						reply.setText("Hello, you're already registered, now you just have to wait for alert");						
+					}
 				} else {
 					try {
 						if (this.storage.saveChatId(userName, chatId)) {

@@ -31,4 +31,6 @@ public interface TelegramBot extends Pluggable {
 	TelegramBotRegisterStrategy getRegisterStrategy();
 
 	long getChatId(String phoneNumber);
+	
+	void setSendAckEvenRegistered(boolean value);
 }
