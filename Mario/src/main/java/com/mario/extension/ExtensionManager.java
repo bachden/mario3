@@ -192,9 +192,8 @@ public final class ExtensionManager extends BaseLoggable {
 		if (this.isLoaded()) {
 			List<MessageProducerConfig> results = new ArrayList<>();
 			for (ExtensionLoader loader : this.extensionLoaderByName.values()) {
-				if (loader.getConfigReader().getServerWrapperConfigs() != null) {
+				if (loader.getConfigReader().getProducerConfigs() != null) {
 					results.addAll(loader.getConfigReader().getProducerConfigs());
-
 				}
 			}
 			return results;

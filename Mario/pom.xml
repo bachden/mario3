@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.20.0</version>
+	<version>3.20.1</version>
 
 	<properties>
 		<project.name>${project.artifactId}</project.name>
