@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -54,12 +53,7 @@ import com.mario.config.serverwrapper.ServerWrapperConfig.ServerWrapperType;
 import com.mario.contact.ContactBook;
 import com.mario.extension.xml.EndpointReader;
 import com.mario.external.configuration.ExternalConfigurationManager;
-import com.mario.monitor.MonitorableStatus;
 import com.mario.monitor.config.MonitorAgentConfig;
-import com.mario.monitor.config.MonitorAlertConfig;
-import com.mario.monitor.config.MonitorAlertRecipientsConfig;
-import com.mario.monitor.config.MonitorAlertServicesConfig;
-import com.mario.monitor.config.MonitorAlertStatusConfig;
 import com.mario.schedule.distributed.impl.config.HzDistributedSchedulerConfigManager;
 import com.mario.services.ServiceManager;
 import com.mario.zeromq.ZMQSocketRegistryManager;
@@ -82,32 +76,32 @@ class ExtensionConfigReader extends XmlConfigReader {
 	private String extensionName;
 
 	@Getter
-	private List<LifeCycleConfig> lifeCycleConfigs;
+	private final List<LifeCycleConfig> lifeCycleConfigs = new ArrayList<>();
 	@Getter
-	private List<GatewayConfig> gatewayConfigs;
+	private final List<GatewayConfig> gatewayConfigs = new ArrayList<>();
 	@Getter
-	private List<SQLDataSourceConfig> sqlDatasourceConfigs;
+	private final List<SQLDataSourceConfig> sqlDatasourceConfigs = new ArrayList<>();
 	@Getter
-	private List<HazelcastConfig> hazelcastConfigs;
+	private final List<HazelcastConfig> hazelcastConfigs = new ArrayList<>();
 	@Getter
-	private List<RedisConfig> redisConfigs;
+	private final List<RedisConfig> redisConfigs = new ArrayList<>();
 	@Getter
-	private List<MongoDBConfig> mongoDBConfigs;
+	private final List<MongoDBConfig> mongoDBConfigs = new ArrayList<>();
 	@Getter
-	private List<ServerWrapperConfig> serverWrapperConfigs;
+	private final List<ServerWrapperConfig> serverWrapperConfigs = new ArrayList<>();
 	@Getter
-	private List<MonitorAgentConfig> monitorAgentConfigs;
+	private final List<MonitorAgentConfig> monitorAgentConfigs = new ArrayList<>();
 	@Getter
-	private List<MessageProducerConfig> producerConfigs;
+	private final List<MessageProducerConfig> producerConfigs = new ArrayList<>();
 	@Getter
-	private List<SSLContextConfig> sslContextConfigs;
+	private final List<SSLContextConfig> sslContextConfigs = new ArrayList<>();
 	@Getter
 	private final Map<String, PuObjectRO> properties = new HashMap<>();
 	@Getter
-	private List<ZkClientConfig> zkClientConfigs;
+	private final List<ZkClientConfig> zkClientConfigs = new ArrayList<>();
 
 	@Getter
-	private Collection<CassandraConfig> cassandraConfigs;
+	private final Collection<CassandraConfig> cassandraConfigs = new HashSet<>();
 
 	private final PuObjectRO globalProperties;
 
@@ -267,8 +261,10 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 		try {
 			System.out.println("\t\t\t- Reading zookeeper configs");
-			this.readCooperationsConfigs(
+			this.readCooperationConfigs(
 					(Node) xPath.compile("/mario/cooperations").evaluate(document, XPathConstants.NODE));
+			this.readCooperationConfigs(
+					(Node) xPath.compile("/mario/cooperation").evaluate(document, XPathConstants.NODE));
 		} catch (Exception ex) {
 			if (!(ex instanceof TransformerException) && !(ex instanceof XPathExpressionException)) {
 				getLogger().error("Error", ex);
@@ -435,7 +431,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 	}
 
 	private void readSSLContextConfigs(Node evaluate) {
-		this.sslContextConfigs = new LinkedList<>();
 		if (evaluate == null) {
 			return;
 		}
@@ -615,8 +610,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 		return config;
 	}
 
-	private void readCooperationsConfigs(Node node) {
-		this.zkClientConfigs = new ArrayList<>();
+	private void readCooperationConfigs(Node node) {
 		if (node == null) {
 			return;
 		}
@@ -639,7 +633,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 	}
 
 	private void readServerWrapperConfigs(Node node) throws XPathExpressionException {
-		this.serverWrapperConfigs = new ArrayList<>();
 		if (node == null) {
 			return;
 		}
@@ -681,9 +674,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 	}
 
 	private void readGatewayConfigs(Node node) throws XPathExpressionException {
-		if (this.gatewayConfigs == null) {
-			this.gatewayConfigs = new ArrayList<GatewayConfig>();
-		}
 		Node item = node.getFirstChild();
 		while (item != null) {
 			if (item.getNodeType() == Element.ELEMENT_NODE) {
@@ -762,9 +752,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 
 	@SuppressWarnings("unchecked")
 	private void readDataSourceConfigs(Node node) throws XPathExpressionException {
-		if (this.sqlDatasourceConfigs == null) {
-			this.sqlDatasourceConfigs = new ArrayList<SQLDataSourceConfig>();
-		}
 
 		NodeList list = (NodeList) xPath.compile("*").evaluate(node, XPathConstants.NODESET);
 		for (int i = 0; i < list.getLength(); i++) {
@@ -823,27 +810,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 						config.readPuObject(refObj);
 					}
 				}
-				Node currNode = item.getFirstChild();
-				while (currNode != null) {
-					if (currNode.getNodeType() == 1) {
-						if (currNode.getNodeName().equalsIgnoreCase("name")) {
-							config.setName(currNode.getTextContent().trim());
-						} else if (currNode.getNodeName().equalsIgnoreCase("endpoint")) {
-							Object obj = EndpointReader.read(currNode);
-							if (obj instanceof HostAndPort) {
-								config.getEndpoints().add((HostAndPort) obj);
-							} else if (obj instanceof Collection<?>) {
-								config.getEndpoints().addAll((Collection<? extends HostAndPort>) obj);
-							}
-						} else if (currNode.getNodeName().equalsIgnoreCase("keyspace")) {
-							config.setKeyspace(currNode.getTextContent().trim());
-						}
-					}
-					currNode = currNode.getNextSibling();
-				}
-				if (this.cassandraConfigs == null) {
-					this.cassandraConfigs = new HashSet<>();
-				}
+				config.readNode(item);
 				this.cassandraConfigs.add(config);
 			} else if (item.getNodeName().equalsIgnoreCase("hazelcast")) {
 				HazelcastConfig config = new HazelcastConfig();
@@ -855,55 +822,8 @@ class ExtensionConfigReader extends XmlConfigReader {
 						config.readPuObject(refObj);
 					}
 				}
-				Node curr = item.getFirstChild();
-				while (curr != null) {
-					if (curr.getNodeType() == 1) {
-						String value = curr.getTextContent().trim();
-						switch (curr.getNodeName().trim().toLowerCase()) {
-						case "name":
-							config.setName(value);
-							break;
-						case "config":
-						case "configfile":
-							config.setConfigFilePath(value);
-							break;
-						case "member":
-						case "ismember":
-							config.setMember(Boolean.valueOf(value));
-							break;
-						case "initializer":
-						case "initializerClass":
-							getLogger().warn(
-									"the initializer class config is now DEPRECATED, please use 'initializers' to specific lifecycle names");
-							config.setInitializerClass(value);
-							break;
-						case "lazyinit":
-						case "islazyinit":
-							config.setLazyInit(Boolean.valueOf(value));
-							break;
-						case "autoinit":
-						case "autoinitonextensionready":
-							config.setAutoInitOnExtensionReady(Boolean.valueOf(value));
-							break;
-						case "initializers":
-							Node entryNode = curr.getFirstChild();
-							while (entryNode != null) {
-								if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
-									config.getInitializers().add(entryNode.getTextContent().trim());
-								}
-								entryNode = entryNode.getNextSibling();
-							}
-							break;
-						default:
-							break;
-						}
-					}
-					curr = curr.getNextSibling();
-				}
+				config.readNode(item);
 				config.setExtensionName(extensionName);
-				if (this.hazelcastConfigs == null) {
-					this.hazelcastConfigs = new ArrayList<>();
-				}
 				this.hazelcastConfigs.add(config);
 			} else if (item.getNodeName().equalsIgnoreCase("redis")) {
 				RedisConfig config = new RedisConfig();
@@ -915,66 +835,8 @@ class ExtensionConfigReader extends XmlConfigReader {
 						config.readPuObject(refObj);
 					}
 				}
-				config.setName(((Node) xPath.compile("name").evaluate(item, XPathConstants.NODE)).getTextContent());
-				try {
-					config.setRedisType(
-							((Node) xPath.compile("type").evaluate(item, XPathConstants.NODE)).getTextContent());
-				} catch (Exception ex) {
-					// default is false
-				}
-				try {
-					config.setMasterName(
-							((Node) xPath.compile("mastername").evaluate(item, XPathConstants.NODE)).getTextContent());
-				} catch (Exception ex) {
-					// do nothing
-				}
-				NodeList endpoints = (NodeList) xPath.compile("endpoint/entry").evaluate(item, XPathConstants.NODESET);
-				for (int j = 0; j < endpoints.getLength(); j++) {
-					Node endpointNode = endpoints.item(j);
-					String host = null;
-					int port = -1;
-					boolean isMaster = false;
-					try {
-						host = ((Node) xPath.compile("host").evaluate(endpointNode, XPathConstants.NODE))
-								.getTextContent();
-					} catch (Exception ex) {
-						getLogger().warn("host config is invalid : " + endpointNode.getTextContent(), ex);
-					}
-					try {
-						port = Integer
-								.valueOf(((Node) xPath.compile("port").evaluate(endpointNode, XPathConstants.NODE))
-										.getTextContent());
-					} catch (Exception ex) {
-						getLogger().warn("port config is invalid : " + endpointNode.getTextContent(), ex);
-					}
-					try {
-						isMaster = Boolean
-								.valueOf(((Node) xPath.compile("master").evaluate(endpointNode, XPathConstants.NODE))
-										.getTextContent());
-					} catch (Exception ex) {
-						// getLogger().warn("master config is invalid : " +
-						// endpointNode.getTextContent(), ex);
-					}
-					if (host != null && port > 0) {
-						HostAndPort endpoint = new HostAndPort(host, port);
-						endpoint.setMaster(isMaster);
-						config.addEndpoint(endpoint);
-					}
-				}
-				try {
-					config.setTimeout(Integer.valueOf(
-							((Node) xPath.compile("timeout").evaluate(item, XPathConstants.NODE)).getTextContent()));
-				} catch (Exception ex) {
-				}
-				try {
-					config.setPoolSize(Integer.valueOf(
-							((Node) xPath.compile("poolsize").evaluate(item, XPathConstants.NODE)).getTextContent()));
-				} catch (Exception ex) {
-				}
+				config.readNode(item);
 				config.setExtensionName(extensionName);
-				if (this.redisConfigs == null) {
-					this.redisConfigs = new ArrayList<>();
-				}
 				this.redisConfigs.add(config);
 			} else if (item.getNodeName().equalsIgnoreCase("mongodb")) {
 				MongoDBConfig config = new MongoDBConfig();
@@ -1061,9 +923,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 					}
 					currNode = currNode.getNextSibling();
 				}
-				if (this.mongoDBConfigs == null) {
-					this.mongoDBConfigs = new ArrayList<MongoDBConfig>();
-				}
 				this.mongoDBConfigs.add(config);
 			} else {
 				getLogger().warn("datasource type is not supported: " + item.getNodeName());
@@ -1075,13 +934,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 		// read startup config
 		if (node == null) {
 			return;
-		}
-		if (this.lifeCycleConfigs == null) {
-			synchronized (this) {
-				if (this.lifeCycleConfigs == null) {
-					this.lifeCycleConfigs = new ArrayList<LifeCycleConfig>();
-				}
-			}
 		}
 		Node item = node.getFirstChild();
 		while (item != null) {
@@ -1133,91 +985,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 		}
 	}
 
-	private MonitorAlertConfig readMonitorAlertConfig(Node node) {
-		if (node != null) {
-			Node curr = node.getFirstChild();
-			MonitorAlertConfig config = new MonitorAlertConfig();
-			while (curr != null) {
-				if (curr.getNodeType() == Element.ELEMENT_NODE) {
-					String nodeName = curr.getNodeName().toLowerCase();
-					if (nodeName.equalsIgnoreCase("autoSendRecovery")) {
-						Boolean value = Boolean.valueOf(curr.getTextContent().trim());
-						config.setAutoSendRecovery(value);
-					} else {
-						MonitorableStatus status = MonitorableStatus.fromName(nodeName);
-						if (status != null) {
-							MonitorAlertStatusConfig statusConfig = new MonitorAlertStatusConfig();
-							statusConfig.setStatus(status);
-
-							Node statusEle = curr.getFirstChild();
-							while (statusEle != null) {
-								if (statusEle.getNodeType() == Element.ELEMENT_NODE) {
-									String statusEleName = statusEle.getNodeName().toLowerCase();
-									switch (statusEleName) {
-									case "recipients":
-										MonitorAlertRecipientsConfig recipientsConfig = new MonitorAlertRecipientsConfig();
-										Node recipientsEle = statusEle.getFirstChild();
-										while (recipientsEle != null) {
-											if (recipientsEle.getNodeType() == Element.ELEMENT_NODE) {
-												String recipientsNodeName = recipientsEle.getNodeName().toLowerCase();
-												switch (recipientsNodeName) {
-												case "contact":
-													recipientsConfig.getContacts()
-															.add(recipientsEle.getTextContent().trim());
-													break;
-												case "group":
-													recipientsConfig.getGroups()
-															.add(recipientsEle.getTextContent().trim());
-													break;
-												}
-											}
-											recipientsEle = recipientsEle.getNextSibling();
-										}
-										statusConfig.setRecipientsConfig(recipientsConfig);
-										break;
-									case "services":
-										MonitorAlertServicesConfig servicesConfig = new MonitorAlertServicesConfig();
-										Node servicesEle = statusEle.getFirstChild();
-										while (servicesEle != null) {
-											if (servicesEle.getNodeType() == Element.ELEMENT_NODE) {
-												String servicesNodeName = servicesEle.getNodeName().toLowerCase();
-												switch (servicesNodeName) {
-												case "sms":
-													servicesConfig.getSmsServices()
-															.add(servicesEle.getTextContent().trim());
-													break;
-												case "email":
-													servicesConfig.getEmailServices()
-															.add(servicesEle.getTextContent().trim());
-													break;
-												case "telegram":
-												case "telegrambot":
-													servicesConfig.getTelegramBots()
-															.add(servicesEle.getTextContent().trim());
-													break;
-												}
-											}
-											servicesEle = servicesEle.getNextSibling();
-										}
-										statusConfig.setServicesConfig(servicesConfig);
-										break;
-									}
-								}
-								statusEle = statusEle.getNextSibling();
-							}
-							config.getStatusToConfigs().put(status, statusConfig);
-						}
-					}
-				}
-				curr = curr.getNextSibling();
-			}
-			return config;
-		}
-		return null;
-	}
-
 	private void readMonitorAgentConfigs(Node node) throws Exception {
-		this.monitorAgentConfigs = new ArrayList<>();
 		if (node == null) {
 			return;
 		}
@@ -1226,35 +994,9 @@ class ExtensionConfigReader extends XmlConfigReader {
 			if (curr.getNodeType() == Element.ELEMENT_NODE) {
 				String nodeName = curr.getNodeName().toLowerCase();
 				if (nodeName.equalsIgnoreCase("agent")) {
-					Node ele = curr.getFirstChild();
 					MonitorAgentConfig config = new MonitorAgentConfig();
+					config.readNode(curr);
 					config.setExtensionName(getExtensionName());
-					while (ele != null) {
-						if (ele.getNodeType() == Element.ELEMENT_NODE) {
-							String eleName = ele.getNodeName();
-							switch (eleName) {
-							case "name":
-								config.setName(ele.getTextContent().trim());
-								break;
-							case "scheduler":
-								config.setSchedulerName(ele.getTextContent().trim());
-								break;
-							case "target":
-								config.setTarget(ele.getTextContent().trim());
-								break;
-							case "interval":
-								config.setInterval(Long.valueOf(ele.getTextContent().trim()));
-								break;
-							case "alert":
-								config.setAlertConfig(this.readMonitorAlertConfig(ele));
-								break;
-							case "variables":
-								config.setMonitoringParams(PuObject.fromXML(ele));
-								break;
-							}
-						}
-						ele = ele.getNextSibling();
-					}
 					this.monitorAgentConfigs.add(config);
 				}
 			}
@@ -1265,13 +1007,6 @@ class ExtensionConfigReader extends XmlConfigReader {
 	private void readProducerConfigs(Node node) throws XPathExpressionException {
 		if (node == null) {
 			return;
-		}
-		if (this.producerConfigs == null) {
-			synchronized (this) {
-				if (this.producerConfigs == null) {
-					this.producerConfigs = new ArrayList<>();
-				}
-			}
 		}
 
 		Node item = node.getFirstChild();

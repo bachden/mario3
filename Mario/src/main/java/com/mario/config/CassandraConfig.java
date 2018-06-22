@@ -3,6 +3,9 @@ package com.mario.config;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.w3c.dom.Node;
+
+import com.mario.extension.xml.EndpointReader;
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.db.cassandra.CassandraDatasourceConfig;
 import com.nhb.common.vo.HostAndPort;
@@ -38,5 +41,28 @@ public class CassandraConfig extends MarioBaseConfig implements CassandraDatasou
 
 	public void setKeyspace(String keyspace) {
 		this.keyspace = keyspace;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void readNode(Node item) {
+		Node currNode = item.getFirstChild();
+		while (currNode != null) {
+			if (currNode.getNodeType() == 1) {
+				if (currNode.getNodeName().equalsIgnoreCase("name")) {
+					this.setName(currNode.getTextContent().trim());
+				} else if (currNode.getNodeName().equalsIgnoreCase("endpoint")) {
+					Object obj = EndpointReader.read(currNode);
+					if (obj instanceof HostAndPort) {
+						this.getEndpoints().add((HostAndPort) obj);
+					} else if (obj instanceof Collection<?>) {
+						this.getEndpoints().addAll((Collection<? extends HostAndPort>) obj);
+					}
+				} else if (currNode.getNodeName().equalsIgnoreCase("keyspace")) {
+					this.setKeyspace(currNode.getTextContent().trim());
+				}
+			}
+			currNode = currNode.getNextSibling();
+		}
 	}
 }

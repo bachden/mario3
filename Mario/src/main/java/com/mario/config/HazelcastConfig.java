@@ -3,17 +3,37 @@ package com.mario.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Node;
+
 import com.nhb.common.data.PuObjectRO;
 import com.nhb.common.data.PuValue;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class HazelcastConfig extends MarioBaseConfig {
 
-	private boolean isMember;
+	@Setter
+	@Getter
+	private boolean member;
+
+	@Setter
+	@Getter
 	private String configFilePath;
+
+	@Setter
+	@Getter
 	private String initializerClass;
 
+	@Setter
+	@Getter
 	private boolean lazyInit = false;
+
+	@Setter
+	@Getter
 	private boolean autoInitOnExtensionReady = true;
+
+	@Getter
 	private final List<String> initializers = new ArrayList<>();
 
 	@Override
@@ -49,47 +69,52 @@ public class HazelcastConfig extends MarioBaseConfig {
 		}
 	}
 
-	public String getConfigFilePath() {
-		return configFilePath;
-	}
-
-	public void setConfigFilePath(String configFilePath) {
-		this.configFilePath = configFilePath;
-	}
-
-	public boolean isMember() {
-		return isMember;
-	}
-
-	public void setMember(boolean isMember) {
-		this.isMember = isMember;
-	}
-
-	public String getInitializerClass() {
-		return initializerClass;
-	}
-
-	public void setInitializerClass(String initializerClass) {
-		this.initializerClass = initializerClass;
-	}
-
-	public boolean isLazyInit() {
-		return lazyInit;
-	}
-
-	public void setLazyInit(boolean lazyInit) {
-		this.lazyInit = lazyInit;
-	}
-
-	public List<String> getInitializers() {
-		return initializers;
-	}
-
-	public boolean isAutoInitOnExtensionReady() {
-		return autoInitOnExtensionReady;
-	}
-
-	public void setAutoInitOnExtensionReady(boolean autoInitOnExtensionReady) {
-		this.autoInitOnExtensionReady = autoInitOnExtensionReady;
+	@Override
+	public void readNode(Node item) {
+		Node curr = item.getFirstChild();
+		while (curr != null) {
+			if (curr.getNodeType() == 1) {
+				String value = curr.getTextContent().trim();
+				switch (curr.getNodeName().trim().toLowerCase()) {
+				case "name":
+					this.setName(value);
+					break;
+				case "config":
+				case "configfile":
+					this.setConfigFilePath(value);
+					break;
+				case "member":
+				case "ismember":
+					this.setMember(Boolean.valueOf(value));
+					break;
+				case "initializer":
+				case "initializerClass":
+					getLogger().warn(
+							"the initializer class config is now DEPRECATED, please use 'initializers' to specific lifecycle names");
+					this.setInitializerClass(value);
+					break;
+				case "lazyinit":
+				case "islazyinit":
+					this.setLazyInit(Boolean.valueOf(value));
+					break;
+				case "autoinit":
+				case "autoinitonextensionready":
+					this.setAutoInitOnExtensionReady(Boolean.valueOf(value));
+					break;
+				case "initializers":
+					Node entryNode = curr.getFirstChild();
+					while (entryNode != null) {
+						if (entryNode.getNodeType() == Node.ELEMENT_NODE) {
+							this.getInitializers().add(entryNode.getTextContent().trim());
+						}
+						entryNode = entryNode.getNextSibling();
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			curr = curr.getNextSibling();
+		}
 	}
 }
