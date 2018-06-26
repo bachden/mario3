@@ -77,7 +77,7 @@ public final class ExtensionLoader extends BaseLoggable {
 			String variableKey = "\\$\\{" + normalizeKey(key) + "\\}";
 			String variableValue = variables.getProperty(key);
 			result = result.replaceAll(variableKey, variableValue);
-			log.info("Injected {}={}", variableKey, variableValue);
+			log.info("Injected {}={}", key, variableValue);
 		}
 		return result;
 	}

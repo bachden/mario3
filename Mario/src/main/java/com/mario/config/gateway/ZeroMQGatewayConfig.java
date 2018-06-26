@@ -14,7 +14,7 @@ import org.w3c.dom.Node;
 import com.mario.exceptions.InvalidConfigException;
 import com.mario.gateway.zeromq.ZeroMQGatewayType;
 import com.nhb.common.utils.Converter;
-import com.nhb.common.vo.ByteArrayWrapper;
+import com.nhb.common.vo.ByteArray;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,7 +38,7 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 	private long hwm = (long) 1e6;
 	private int numHandlers = 1;
 
-	private final Set<ByteArrayWrapper> subKeys = new HashSet<>();
+	private final Set<ByteArray> subKeys = new HashSet<>();
 
 	public ZeroMQGatewayConfig() {
 		this.setType(GatewayType.ZEROMQ);
@@ -46,7 +46,7 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 
 	public Collection<byte[]> getListSubKeys() {
 		List<byte[]> list = new ArrayList<>();
-		for (ByteArrayWrapper baw : this.subKeys) {
+		for (ByteArray baw : this.subKeys) {
 			list.add(baw.getSource());
 		}
 		return list;
@@ -80,7 +80,7 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 						valueBytes = Converter.hexToBytes(value);
 						break;
 					}
-					this.subKeys.add(ByteArrayWrapper.newInstanceWithJavaSafeHashCodeCalculator(valueBytes));
+					this.subKeys.add(ByteArray.newInstanceWithJavaSafeHashCodeCalculator(valueBytes));
 				}
 			}
 			curr = curr.getNextSibling();
