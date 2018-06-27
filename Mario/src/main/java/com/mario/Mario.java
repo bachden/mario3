@@ -373,6 +373,12 @@ public final class Mario extends BaseLoggable {
 	}
 
 	private void stop() {
+		if (this.zkClientManager != null) {
+			System.out.print("Stopping zkClientManager... ");
+			this.zkClientManager.close();
+			System.out.println("DONE");
+		}
+
 		if (this.schedulerFactory != null) {
 			System.out.print("Stopping scheduler factory... ");
 			this.schedulerFactory.stop();
