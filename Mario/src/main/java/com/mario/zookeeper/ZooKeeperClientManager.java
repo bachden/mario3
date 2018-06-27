@@ -1,20 +1,22 @@
 package com.mario.zookeeper;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.I0Itec.zkclient.ZkClient;
+import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.proto.WatcherEvent;
 
@@ -57,8 +59,8 @@ public class ZooKeeperClientManager extends BaseLoggable implements Closeable {
 				if (!this.zooKeeperClients.containsKey(name)) {
 					try {
 						this.zooKeeperClients.put(name, this.initZooKeeper(this.zooKeeperConfigs.get(name)));
-					} catch (IOException e) {
-						throw new ZooKeeperIOException("ZooKeeper IOException, name: " + name + ", extension: "
+					} catch (Exception e) {
+						throw new ZooKeeperException("ZooKeeper exception, name: " + name + ", extension: "
 								+ this.zooKeeperConfigs.get(name).getExtensionName(), e);
 					}
 				}
@@ -99,18 +101,22 @@ public class ZooKeeperClientManager extends BaseLoggable implements Closeable {
 				config.getOperationRetryTimeout());
 	}
 
-	private ZooKeeper initZooKeeper(final ZkClientConfig config) throws IOException {
+	private ZooKeeper initZooKeeper(final ZkClientConfig config) throws Exception {
 		if (config.getServers() == null || config.getServers().trim().length() == 0) {
 			throw new IllegalArgumentException("ZkClientConfig must contains non-empty servers, config name: "
 					+ config.getName() + ", extension: " + config.getExtensionName());
 		}
 		this.zooKeeperNameToWatchers.put(config.getName(), new CopyOnWriteArraySet<>());
-		return new ZooKeeper(config.getServers(), config.getSessionTimeout(), new Watcher() {
+		CountDownLatch connectedSignal = new CountDownLatch(1);
+		ZooKeeper zookeeper = new ZooKeeper(config.getServers(), config.getSessionTimeout(), new Watcher() {
 
 			private final String zooKepperName = config.getName();
 
 			@Override
 			public void process(WatchedEvent watchedEvent) {
+				if (connectedSignal.getCount() > 0 && KeeperState.SyncConnected.equals(watchedEvent.getState())) {
+					connectedSignal.countDown();
+				}
 				if (zooKeeperNameToWatchers.containsKey(this.zooKepperName)) {
 					WatcherEvent wrapper = watchedEvent.getWrapper();
 					for (Watcher watcher : zooKeeperNameToWatchers.get(this.zooKepperName)) {
@@ -123,6 +129,11 @@ public class ZooKeeperClientManager extends BaseLoggable implements Closeable {
 				}
 			}
 		});
+		if (!connectedSignal.await(15, TimeUnit.SECONDS)) {
+			zookeeper.close();
+			throw new TimeoutException("Cannot connect zooKeeper after 15 seconds");
+		}
+		return zookeeper;
 	}
 
 	@Override

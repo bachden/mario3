@@ -1,28 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mario>
-	<name>TestZooKeeper</name>
-
-	<servers>
-		<http>
-			<name>http_server_at_8880</name>
-			<port>8880</port>
-			<!-- <options>sessions</options> -->
-			<!-- <sessiontimeout>60</sessiontimeout> -->
-		</http>
-	</servers>
-
-	<gateways>
-		<http>
-			<name>test_http_gateway</name>
-			<server>http_server_at_8880</server>
-			<path>/keep_server_alive</path>
-			<workerpool>
-				<poolsize>1</poolsize>
-				<ringbuffersize>2</ringbuffersize>
-				<threadnamepattern>Keep Alive Http Gateway #%d</threadnamepattern>
-			</workerpool>
-		</http>
-	</gateways>
+	<name>test-zookeeper</name>
 
 	<cooperations>
 		<zookeeper>
@@ -43,15 +21,13 @@
 		<handler>
 			<name>test_zookeeper_leader_election_handler1</name>
 			<handle>com.mario.test.zookeeper.TestZooKeeperLeaderElection</handle>
-			<bind>
-				<gateway>test_http_gateway</gateway>
-			</bind>
 			<variables>
 				<variable name="id" type="integer">1</variable>
 				<variable name="zkclient" type="string">zkclient1</variable>
 				<variable name="timeToLiveMillis" type="long">5000</variable>
 			</variables>
 		</handler>
+
 		<entry>
 			<name>test_zookeeper_leader_election_handler2</name>
 			<handle>com.mario.test.zookeeper.TestZooKeeperLeaderElection</handle>
@@ -61,6 +37,7 @@
 				<variable name="timeToLiveMillis" type="long">-1</variable>
 			</variables>
 		</entry>
+
 		<entry>
 			<name>test_zookeeper_leader_election_handler3</name>
 			<handle>com.mario.test.zookeeper.TestZooKeeperLeaderElection</handle>
