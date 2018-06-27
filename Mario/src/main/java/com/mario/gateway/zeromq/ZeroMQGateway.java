@@ -37,6 +37,7 @@ public class ZeroMQGateway extends BaseEventDispatcher implements Gateway, ZMQMe
 	@Getter
 	private MessageHandler handler;
 
+	@Getter
 	private final ZeroMQGatewayConfig config;
 
 	@Getter
