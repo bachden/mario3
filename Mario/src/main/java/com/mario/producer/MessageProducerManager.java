@@ -108,6 +108,8 @@ public class MessageProducerManager extends BaseLoggable {
 		_config.setThreadNamePattern(config.getThreadNamePattern());
 		_config.setSendSocketOptions(ZMQSocketOptions.builder().hwm(config.getHwm()).sndHWM(config.getHwm())
 				.rcvHWM(config.getHwm()).build());
+		_config.setSentCountEnabled(config.isSentCountEnabled());
+		_config.setReceivedCountEnable(config.isReceivedCountEnabled());
 
 		producer.setName(config.getName());
 		producer.init(_config);

@@ -384,21 +384,25 @@ public final class Mario extends BaseLoggable {
 			this.schedulerFactory.stop();
 			System.out.println("DONE");
 		}
+		
 		if (this.producerManager != null) {
 			System.out.print("Stopping producer manager... ");
 			this.producerManager.stop();
 			System.out.println("DONE");
 		}
+		
 		if (this.serverWrapperManager != null) {
 			System.out.print("Stopping server wrappers... ");
 			this.serverWrapperManager.stop();
 			System.out.println("DONE");
 		}
+
 		if (this.running) {
 			System.out.print("Stopping gateways... ");
 			this.gatewayManager.stop();
 			System.out.println("DONE");
 		}
+
 		if (this.entityManager != null) {
 			System.out.print("Destroying entities... ");
 			this.entityManager.destroy();

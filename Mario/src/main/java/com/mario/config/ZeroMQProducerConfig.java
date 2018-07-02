@@ -39,6 +39,9 @@ public class ZeroMQProducerConfig extends MessageProducerConfig {
 	private long hwm = (long) 1e6;
 	private String receiveEndpoint; // only use for RPC
 	private int receiveWorkerSize = 1;
+	
+	private boolean sentCountEnabled = false;
+	private boolean receivedCountEnabled = false;
 
 	@Override
 	public void readNode(Node node) {
@@ -87,6 +90,12 @@ public class ZeroMQProducerConfig extends MessageProducerConfig {
 					break;
 				case "receiveworkersize":
 					this.receiveWorkerSize = Integer.valueOf(value);
+					break;
+				case "receivedcountenabled":
+					this.receivedCountEnabled = Boolean.valueOf(value);
+					break;
+				case "sentcountenabled":
+					this.sentCountEnabled = Boolean.valueOf(value);
 					break;
 				}
 			}

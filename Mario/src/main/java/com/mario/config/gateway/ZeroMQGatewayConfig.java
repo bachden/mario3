@@ -38,6 +38,9 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 	private long hwm = (long) 1e6;
 	private int numHandlers = 1;
 
+	private boolean receivedCountEnabled = false;
+	private boolean respondedCountEnabled = false;
+
 	private final Set<ByteArray> subKeys = new HashSet<>();
 
 	public ZeroMQGatewayConfig() {
@@ -134,6 +137,12 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 					break;
 				case "subkeys":
 					this.readSubscribeKeys(curr);
+					break;
+				case "respondedcountenabled":
+					this.setRespondedCountEnabled(Boolean.valueOf(value));
+					break;
+				case "receivedcountenabled":
+					this.setReceivedCountEnabled(Boolean.valueOf(value));
 					break;
 				}
 			}

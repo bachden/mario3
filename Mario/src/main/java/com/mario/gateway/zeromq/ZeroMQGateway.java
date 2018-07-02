@@ -100,6 +100,9 @@ public class ZeroMQGateway extends BaseEventDispatcher implements Gateway, ZMQMe
 		config.setQueueSize(this.config.getQueueSize());
 		config.setReceiveWorkerSize(this.config.getNumHandlers());
 		config.setThreadNamePattern(this.config.getThreadNamePattern());
+		config.setReceivedCountEnabled(this.config.isReceivedCountEnabled());
+		config.setRespondedCountEnabled(this.config.isRespondedCountEnabled());
+
 		switch (this.config.getZeroMQGatewayType()) {
 		case RPC:
 		case TASK:

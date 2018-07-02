@@ -226,6 +226,8 @@
 			<threadNamePattern>[thread_name_pattern, optional]</threadNamePattern>
 			<queueSize>[ringbuffer_size, default 1024]</queueSize>
 			<hwm>[zmq_socket_high_water_mark, default 1e6]</hwm>
+			<sentCountEnabled>[enable sent count, default false]</sentCountEnabled>
+			<receivedCountEnabled>[enable received count for RPC only, default false]</receivedCountEnabled>
 		</zeromq>
 	</producers>
 
@@ -325,6 +327,8 @@
 			<messageBufferSize>[message_buffer_size, use for PuElement.toBytes() method in RPC gateway type, default 1024]</messageBufferSize>
 			<bufferCapacity>[byte_buffer_capacity, use in zeroCopy receive method, should be as large as possible, default 1024 * 1024]</bufferCapacity>
 			<hwm>[high_water_mark, use in ZMQSocket == queued unsent message]</hwm>
+			<respondedCountEnabled>[enable responded count, default false]</respondedCountEnabled>
+			<receivedCountEnabled>[enable received count for RPC only, default false]</receivedCountEnabled>
 
 			<subkeys>
 				<!-- only use if type == PUB_SUB, multi values accepted -->
