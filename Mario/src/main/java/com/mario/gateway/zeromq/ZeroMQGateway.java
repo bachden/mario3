@@ -187,4 +187,15 @@ public class ZeroMQGateway extends BaseEventDispatcher implements Gateway, ZMQMe
 		}
 	}
 
+	public long getReceivedCount() {
+		return this.consumer.getReceivedCount();
+	}
+
+	public long getRespondedCount() {
+		if (this.consumer instanceof ZMQRPCConsumer) {
+			return ((ZMQRPCConsumer) this.consumer).getRespondedCount();
+		}
+		throw new UnsupportedOperationException("Responded count only supported in RPC gateway");
+	}
+
 }
