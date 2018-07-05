@@ -1,6 +1,6 @@
 package com.mario.gateway;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.mario.config.WorkerPoolConfig;
 import com.mario.config.gateway.GatewayConfig;
@@ -154,7 +154,7 @@ public abstract class AbstractGateway<ConfigType extends GatewayConfig> extends 
 
 	protected String getFullStacktrace(Throwable throwable) {
 		if (throwable != null) {
-			return ExceptionUtils.getFullStackTrace(throwable);
+			return ExceptionUtils.getStackTrace(throwable);
 		}
 		return null;
 	}
