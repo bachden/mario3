@@ -68,7 +68,7 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	}
 
 	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+	public void channelActive(ChannelHandlerContext ctx) throws IOException {
 		// do nothing
 		if (this.autoActive) {
 			super.channelActive(ctx);

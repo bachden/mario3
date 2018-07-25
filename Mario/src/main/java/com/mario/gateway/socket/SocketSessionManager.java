@@ -2,9 +2,9 @@ package com.mario.gateway.socket;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.hashids.Hashids;
 
 import com.mario.statics.Fields;
@@ -19,7 +19,7 @@ public class SocketSessionManager extends BaseEventDispatcher {
 	private static AtomicLong idSeed = new AtomicLong();
 	private Hashids hashids = new Hashids(UUID.randomUUID().toString(), 8,
 			"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-	private Map<String, SocketSession> idToSessionMap = new ConcurrentHashMap<>();
+	private Map<String, SocketSession> idToSessionMap = new NonBlockingHashMap<>();
 
 	public String register(SocketSession session) {
 		String sessionId = null;

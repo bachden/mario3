@@ -131,6 +131,7 @@ public class NettyTCPSocketSession extends ChannelInboundHandlerAdapter implemen
 
 	@Override
 	public void close() throws IOException {
+		this.deactiveChannel();
 		this.getChannelHandlerContext().channel().close();
 		this.getChannelHandlerContext().close();
 		this.setChannelHandlerContext(null);
@@ -138,6 +139,7 @@ public class NettyTCPSocketSession extends ChannelInboundHandlerAdapter implemen
 
 	@Override
 	public void closeSync() throws IOException, InterruptedException {
+		this.deactiveChannel();
 		this.getChannelHandlerContext().close().sync();
 		this.setChannelHandlerContext(null);
 	}
@@ -148,41 +150,44 @@ public class NettyTCPSocketSession extends ChannelInboundHandlerAdapter implemen
 	}
 
 	@Override
-	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+	public void channelActive(ChannelHandlerContext ctx) throws IOException {
 		this.setChannelHandlerContext(ctx);
 		this.setId(this.getSessionManager().register(this));
 		// getLogger().debug("socket active: " + this.getId());
 		this.receiver.sessionOpened(this.getId());
 	}
 
-	@Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		// getLogger().debug("socket inactive: " + this.getId());
-		if (this.getId() != null) {
-			this.getSessionManager().deregister(this.getId());
-		}
-
+	private boolean deactiveChannel() {
 		String _id = null;
 		SocketReceiver _receiver = null;
-		synchronized (this) {
-			_id = this.getId();
-			this.setId(null);
 
-			_receiver = this.receiver;
-			this.receiver = null;
+		if (this.getId() != null) {
+			synchronized (this) {
+				if (this.getId() != null) {
+					_id = this.getId();
+					this.setId(null);
 
-			this.setChannelHandlerContext(null);
-			this.sessionManager = null;
+					_receiver = this.getReceiver();
+					this.receiver = null;
+
+					this.setChannelHandlerContext(null);
+				}
+			}
 		}
 
-		if (_id == null) {
-			return;
-		}
-
-		if (_receiver != null) {
+		if (_id != null) {
+			this.sessionManager.deregister(_id);
 			this.dispatchEvent(new SocketSessionEvent(SocketSessionEvent.SESSION_CLOSED, _id));
 			_receiver.sessionClosed(_id);
+			return true;
 		}
+
+		return false;
+	}
+
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws IOException {
+		this.deactiveChannel();
 	}
 
 	@Override
