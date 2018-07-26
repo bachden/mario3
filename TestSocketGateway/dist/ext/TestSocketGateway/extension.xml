@@ -49,14 +49,12 @@
 		<socket>
 			<name>websocket-echo-gateway</name>
 			<protocol>WEBSOCKET</protocol>
-			<ssl>true</ssl>
-			<sslcontextname>websocket-ssl-context</sslcontextname>
+			<!-- <ssl>true</ssl> <sslcontextname>websocket-ssl-context</sslcontextname> -->
 			<port>8888</port>
 			<workerpool>
 				<poolsize>8</poolsize>
 				<ringbuffersize>2048</ringbuffersize>
-				<threadnamepattern>WebSocket Echo Server Worker Pool #%d
-				</threadnamepattern>
+				<threadnamepattern>WebSocket Echo Server Worker Pool #%d</threadnamepattern>
 			</workerpool>
 		</socket>
 	</gateways>
@@ -64,8 +62,7 @@
 	<lifecycles>
 		<handler>
 			<name>echo-server-handler</name>
-			<handle>com.mario.test.socket.echo.server.EchoSocketServerHandler
-			</handle>
+			<handle>com.mario.test.socket.echo.server.EchoSocketServerHandler</handle>
 			<bind>
 				<!-- <gateway>tcp-echo-gateway</gateway> -->
 				<!-- <gateway>udt-echo-gateway</gateway> -->

@@ -201,8 +201,12 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 					String.format("%s frame types not supported", frame.getClass().getName()));
 		}
 
-		String request = ((TextWebSocketFrame) frame).text();
-		this.getReceiver().receive(getId(), request);
+		if (this.getId() == null) {
+			getLogger().debug("Channel is not active or being closed");
+		} else {
+			String request = ((TextWebSocketFrame) frame).text();
+			this.getReceiver().receive(getId(), request);
+		}
 	}
 
 	private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {

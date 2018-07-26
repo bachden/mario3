@@ -192,7 +192,11 @@ public class NettyTCPSocketSession extends ChannelInboundHandlerAdapter implemen
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
-		this.receiver.receive(getId(), msg);
+		if (this.getId() == null) {
+			getLogger().debug("Channel is not active or being closed");
+		} else {
+			this.receiver.receive(getId(), msg);
+		}
 	}
 
 	@Override

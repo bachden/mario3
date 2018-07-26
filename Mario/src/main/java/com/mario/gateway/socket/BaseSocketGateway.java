@@ -1,8 +1,11 @@
 package com.mario.gateway.socket;
 
 import com.mario.config.gateway.SocketGatewayConfig;
+import com.mario.entity.DecodeErrorHandler;
+import com.mario.entity.message.DecodingErrorMessage;
 import com.mario.entity.message.Message;
 import com.mario.entity.message.impl.BaseSocketMessage;
+import com.mario.entity.message.transcoder.MessageDecodingException;
 import com.mario.entity.message.transcoder.socket.SocketMessageDeserializer;
 import com.mario.gateway.AbstractGateway;
 import com.mario.worker.MessageEventFactory;
@@ -73,6 +76,11 @@ public abstract class BaseSocketGateway extends AbstractGateway<SocketGatewayCon
 
 	@Override
 	public void onHandleError(Message message, Throwable exception) {
-		getLogger().error("Error while handling message: ", exception);
+		if (this.getHandler() instanceof DecodeErrorHandler && message instanceof DecodingErrorMessage
+				&& ((DecodingErrorMessage) message).getDecodingFailedCause() instanceof MessageDecodingException) {
+			((DecodeErrorHandler) this.getHandler()).onDecodeError(message, exception);
+		} else {
+			getLogger().error("Error while handling message: ", exception);
+		}
 	}
 }
