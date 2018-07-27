@@ -17,6 +17,17 @@ public class SocketMessageDeserializer extends BinaryMessageDeserializer {
 			Object[] arr = (Object[]) data;
 			Object body = arr[0];
 
+			if (message instanceof SocketMessage) {
+				if (arr.length > 1) {
+					String sessionId = (String) arr[1];
+					((SocketMessage) message).setSessionId(sessionId);
+					if (arr.length > 2) {
+						SocketMessageType socketMessageType = (SocketMessageType) arr[2];
+						((SocketMessage) message).setSocketMessageType(socketMessageType);
+					}
+				}
+			}
+
 			if (body instanceof byte[]) {
 				super.decode(body, message);
 			} else if (body instanceof PuElement) {
@@ -28,16 +39,6 @@ public class SocketMessageDeserializer extends BinaryMessageDeserializer {
 				message.setData(PuElementJSONHelper.fromJSON(bodyString));
 			}
 
-			if (message instanceof SocketMessage) {
-				if (arr.length > 1) {
-					String sessionId = (String) arr[1];
-					((SocketMessage) message).setSessionId(sessionId);
-					if (arr.length > 2) {
-						SocketMessageType socketMessageType = (SocketMessageType) arr[2];
-						((SocketMessage) message).setSocketMessageType(socketMessageType);
-					}
-				}
-			}
 		}
 	}
 }
