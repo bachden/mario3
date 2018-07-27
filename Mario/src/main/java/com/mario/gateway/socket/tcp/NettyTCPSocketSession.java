@@ -2,6 +2,7 @@ package com.mario.gateway.socket.tcp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,17 +132,18 @@ public class NettyTCPSocketSession extends ChannelInboundHandlerAdapter implemen
 
 	@Override
 	public void close() throws IOException {
-		this.deactiveChannel();
-		this.getChannelHandlerContext().channel().close();
-		this.getChannelHandlerContext().close();
-		this.setChannelHandlerContext(null);
+		if (this.stopHandling()) {
+			this.getChannelHandlerContext().close();
+			this.setChannelHandlerContext(null);
+		}
 	}
 
 	@Override
 	public void closeSync() throws IOException, InterruptedException {
-		this.deactiveChannel();
-		this.getChannelHandlerContext().close().sync();
-		this.setChannelHandlerContext(null);
+		if (this.stopHandling()) {
+			this.getChannelHandlerContext().close().sync();
+			this.setChannelHandlerContext(null);
+		}
 	}
 
 	@Override
@@ -157,22 +159,18 @@ public class NettyTCPSocketSession extends ChannelInboundHandlerAdapter implemen
 		this.receiver.sessionOpened(this.getId());
 	}
 
-	private boolean deactiveChannel() {
+	private final AtomicBoolean stopFlag = new AtomicBoolean(false);
+
+	private boolean stopHandling() {
 		String _id = null;
 		SocketReceiver _receiver = null;
 
-		if (this.getId() != null) {
-			synchronized (this) {
-				if (this.getId() != null) {
-					_id = this.getId();
-					this.setId(null);
+		if (this.stopFlag.compareAndSet(false, true)) {
+			_id = this.getId();
+			this.setId(null);
 
-					_receiver = this.getReceiver();
-					this.receiver = null;
-
-					this.setChannelHandlerContext(null);
-				}
-			}
+			_receiver = this.getReceiver();
+			this.receiver = null;
 		}
 
 		if (_id != null) {
@@ -187,7 +185,7 @@ public class NettyTCPSocketSession extends ChannelInboundHandlerAdapter implemen
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws IOException {
-		this.deactiveChannel();
+		this.close();
 	}
 
 	@Override

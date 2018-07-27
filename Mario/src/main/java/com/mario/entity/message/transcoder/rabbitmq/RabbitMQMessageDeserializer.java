@@ -3,12 +3,13 @@ package com.mario.entity.message.transcoder.rabbitmq;
 import com.mario.entity.message.MessageRW;
 import com.mario.entity.message.RabbitMQDeliveredMessage;
 import com.mario.entity.message.RabbitMQMessage;
+import com.mario.entity.message.transcoder.MessageDecodingException;
 import com.mario.entity.message.transcoder.binary.BinaryMessageDeserializer;
 
 public class RabbitMQMessageDeserializer extends BinaryMessageDeserializer {
 
 	@Override
-	public void decode(Object data, MessageRW message) {
+	public void decode(Object data, MessageRW message) throws MessageDecodingException {
 		if (data instanceof byte[]) {
 			super.decode(data, message);
 		} else if (data instanceof Object[]) {

@@ -2,6 +2,7 @@ package com.mario.entity.message.transcoder.socket;
 
 import com.mario.entity.message.MessageRW;
 import com.mario.entity.message.SocketMessage;
+import com.mario.entity.message.transcoder.MessageDecodingException;
 import com.mario.entity.message.transcoder.binary.BinaryMessageDeserializer;
 import com.mario.gateway.socket.SocketMessageType;
 import com.nhb.common.data.PuElement;
@@ -10,7 +11,7 @@ import com.nhb.common.data.PuElementJSONHelper;
 public class SocketMessageDeserializer extends BinaryMessageDeserializer {
 
 	@Override
-	public void decode(Object data, MessageRW message) {
+	public void decode(Object data, MessageRW message) throws MessageDecodingException {
 		if (data instanceof byte[]) {
 			super.decode(data, message);
 		} else if (data instanceof Object[]) {
@@ -37,8 +38,10 @@ public class SocketMessageDeserializer extends BinaryMessageDeserializer {
 				String bodyString = (String) body;
 				bodyString = bodyString.trim();
 				message.setData(PuElementJSONHelper.fromJSON(bodyString));
+			} else if (body instanceof Throwable) {
+				throw body instanceof MessageDecodingException ? (MessageDecodingException) body
+						: new MessageDecodingException(message, (Throwable) body);
 			}
-
 		}
 	}
 }

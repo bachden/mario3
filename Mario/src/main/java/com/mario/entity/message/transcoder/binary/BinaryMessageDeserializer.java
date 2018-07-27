@@ -7,6 +7,7 @@ import org.msgpack.MessagePack;
 
 import com.mario.entity.message.MessageRW;
 import com.mario.entity.message.transcoder.MessageDecoder;
+import com.mario.entity.message.transcoder.MessageDecodingException;
 import com.nhb.common.BaseLoggable;
 import com.nhb.common.data.PuElement;
 import com.nhb.common.data.msgpkg.PuElementTemplate;
@@ -16,7 +17,7 @@ public class BinaryMessageDeserializer extends BaseLoggable implements MessageDe
 	private static final MessagePack msgpack = new MessagePack();
 
 	@Override
-	public void decode(Object data, MessageRW message) {
+	public void decode(Object data, MessageRW message) throws MessageDecodingException {
 		if (data != null) {
 			PuElement puo;
 			try {

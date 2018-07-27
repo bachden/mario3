@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
+import com.mario.entity.message.transcoder.MessageDecodingException;
 import com.mario.entity.message.transcoder.MessageEncoder;
 import com.mario.gateway.socket.SocketReceiver;
 import com.mario.gateway.socket.SocketSessionManager;
@@ -187,26 +188,38 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 
 	private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
 
+		if (frame == null) {
+			return;
+		}
+
 		// Check for closing frame
 		if (frame instanceof CloseWebSocketFrame) {
 			handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
 			return;
 		}
+
 		if (frame instanceof PingWebSocketFrame) {
 			ctx.channel().write(new PongWebSocketFrame(frame.content().retain()));
 			return;
 		}
-		if (!(frame instanceof TextWebSocketFrame)) {
-			throw new UnsupportedOperationException(
-					String.format("%s frame types not supported", frame.getClass().getName()));
+
+		SocketReceiver _receiver = this.getReceiver();
+		String _id = this.getId();
+
+		if (_receiver == null || _id == null) {
+			getLogger().debug("Channel is not active or being closed");
+			return;
 		}
 
-		if (this.getId() == null) {
-			getLogger().debug("Channel is not active or being closed");
-		} else {
-			String request = ((TextWebSocketFrame) frame).text();
-			this.getReceiver().receive(getId(), request);
+		if (!(frame instanceof TextWebSocketFrame)) {
+			getLogger().debug("Unsuported websocket frame type: " + frame.getClass());
+			_receiver.receive(_id,
+					new MessageDecodingException(frame.getClass().getName() + " frame types not supported"));
+			return;
 		}
+
+		String request = ((TextWebSocketFrame) frame).text();
+		_receiver.receive(_id, request);
 	}
 
 	private static void sendHttpResponse(ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {

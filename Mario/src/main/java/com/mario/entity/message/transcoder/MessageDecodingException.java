@@ -8,6 +8,15 @@ public class MessageDecodingException extends Exception {
 
 	private final Message target;
 
+	public MessageDecodingException(String message) {
+		super(message);
+		this.target = null;
+	}
+
+	public MessageDecodingException(Message target) {
+		this.target = target;
+	}
+
 	public MessageDecodingException(Message target, Throwable cause) {
 		super(cause);
 		this.target = target;
