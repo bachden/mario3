@@ -23,7 +23,7 @@ public class ZMQSocketRegistryManager implements Loggable {
 
 	public ZMQSocketRegistry getZMQSocketRegistry(String name) {
 		if (!this.map.containsKey(name) && this.nameToConfig.containsKey(name)) {
-			this.map.put(name, new ZMQSocketRegistry(this.nameToConfig.get(name).getNumIOThreads(), false));
+			this.map.put(name, new ZMQSocketRegistry(this.nameToConfig.get(name).getNumIOThreads()));
 		}
 		return this.map.get(name);
 	}
