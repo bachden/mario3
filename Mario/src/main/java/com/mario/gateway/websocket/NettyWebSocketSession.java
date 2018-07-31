@@ -72,7 +72,11 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	public void channelActive(ChannelHandlerContext ctx) throws IOException {
 		// do nothing
 		if (this.autoActive) {
-			super.channelActive(ctx);
+			if (this.proxy == null) {
+				super.channelActive(ctx);
+			} else {
+				getLogger().debug("WEBSOCKET - gateway behind proxy, waiting for FullHttpRequest to active channel");
+			}
 		} else {
 			getLogger()
 					.info("Websocket mark as not-autoActiveChannel... waiting for the first message to active it...");
@@ -116,7 +120,7 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 		}
 	}
 
-	private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) {
+	private void handleHttpRequest(ChannelHandlerContext ctx, FullHttpRequest req) throws IOException {
 		// Handle a bad request.
 		if (!req.getDecoderResult().isSuccess()) {
 			sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
@@ -173,6 +177,9 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 			} catch (UnknownHostException e) {
 				getLogger().error("Error while create real ip", e);
 			}
+
+			getLogger().debug("WEBSOCKET - execute channel active after FullHttpRequest");
+			super.channelActive(ctx);
 		}
 
 		// Handshake
