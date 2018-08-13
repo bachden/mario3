@@ -41,6 +41,8 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 	private boolean receivedCountEnabled = false;
 	private boolean respondedCountEnabled = false;
 
+	private long responderMaxIdleMinutes = 30;
+
 	private final Set<ByteArray> subKeys = new HashSet<>();
 
 	public ZeroMQGatewayConfig() {
@@ -143,6 +145,9 @@ public class ZeroMQGatewayConfig extends GatewayConfig {
 					break;
 				case "receivedcountenabled":
 					this.setReceivedCountEnabled(Boolean.valueOf(value));
+					break;
+				case "respondermaxidleminutes":
+					this.setResponderMaxIdleMinutes(Long.valueOf(value));
 					break;
 				}
 			}
