@@ -1,5 +1,7 @@
 package com.mario.entity.message.transcoder.socket;
 
+import java.io.InputStream;
+
 import com.mario.entity.message.MessageRW;
 import com.mario.entity.message.SocketMessage;
 import com.mario.entity.message.transcoder.MessageDecodingException;
@@ -29,7 +31,7 @@ public class SocketMessageDeserializer extends BinaryMessageDeserializer {
 				}
 			}
 
-			if (body instanceof byte[]) {
+			if (body instanceof byte[] || body instanceof InputStream) {
 				super.decode(body, message);
 			} else if (body instanceof PuElement) {
 				message.setData((PuElement) body);

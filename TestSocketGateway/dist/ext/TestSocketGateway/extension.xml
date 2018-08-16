@@ -32,27 +32,38 @@
 		<!-- <threadnamepattern>UDT Echo Server Worker Pool #%d</threadnamepattern> -->
 		<!-- </workerpool> -->
 		<!-- </socket> -->
-		<!-- <socket> -->
-		<!-- <name>tcp-echo-gateway</name> -->
-		<!-- <protocol>TCP</protocol> -->
-		<!-- <port>9999</port> -->
-		<!-- <uselengthprepender> -->
-		<!-- false -->
-		<!-- </uselengthprepender> -->
-		<!-- <workerpool> -->
-		<!-- <poolsize>64</poolsize> -->
-		<!-- <ringbuffersize>1048576</ringbuffersize> -->
-		<!-- <threadnamepattern>TPC Echo Server Worker Pool #%d -->
-		<!-- </threadnamepattern> -->
-		<!-- </workerpool> -->
-		<!-- </socket> -->
 		<socket>
-			<name>websocket-echo-gateway</name>
+			<name>tcp-echo-gateway</name>
+			<protocol>TCP</protocol>
+			<port>9999</port>
+			<uselengthprepender>false</uselengthprepender>
+			<workerpool>
+				<poolsize>2</poolsize>
+				<ringbuffersize>1024</ringbuffersize>
+				<threadnamepattern>TPC Echo Server Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</socket>
+		-->
+		<socket>
+			<name>websocket-echo-gateway-binary</name>
 			<protocol>WEBSOCKET</protocol>
 			<!-- <ssl>true</ssl> <sslcontextname>websocket-ssl-context</sslcontextname> -->
 			<port>8888</port>
+			<frameFormat>BINARY</frameFormat>
 			<workerpool>
-				<poolsize>8</poolsize>
+				<poolsize>2</poolsize>
+				<ringbuffersize>2048</ringbuffersize>
+				<threadnamepattern>WebSocket Echo Server Worker Pool #%d</threadnamepattern>
+			</workerpool>
+		</socket>
+
+		<socket>
+			<name>websocket-echo-gateway-text</name>
+			<protocol>WEBSOCKET</protocol>
+			<!-- <ssl>true</ssl> <sslcontextname>websocket-ssl-context</sslcontextname> -->
+			<port>8889</port>
+			<workerpool>
+				<poolsize>2</poolsize>
 				<ringbuffersize>2048</ringbuffersize>
 				<threadnamepattern>WebSocket Echo Server Worker Pool #%d</threadnamepattern>
 			</workerpool>
@@ -64,9 +75,10 @@
 			<name>echo-server-handler</name>
 			<handle>com.mario.test.socket.echo.server.EchoSocketServerHandler</handle>
 			<bind>
-				<!-- <gateway>tcp-echo-gateway</gateway> -->
+				<gateway>tcp-echo-gateway</gateway>
 				<!-- <gateway>udt-echo-gateway</gateway> -->
-				<gateway>websocket-echo-gateway</gateway>
+				<gateway>websocket-echo-gateway-text</gateway>
+				<gateway>websocket-echo-gateway-binary</gateway>
 				<!-- <gateway>http-echo-gateway</gateway> -->
 			</bind>
 			<variables>

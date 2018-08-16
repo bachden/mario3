@@ -14,6 +14,22 @@ import lombok.Setter;
 @Getter
 public class SocketGatewayConfig extends GatewayConfig {
 
+	public enum WebsocketFrameFormat {
+		TEXT, BINARY;
+
+		public static final WebsocketFrameFormat fromString(String name) {
+			if (name != null) {
+				name = name.trim();
+				for (WebsocketFrameFormat value : values()) {
+					if (value.name().equalsIgnoreCase(name)) {
+						return value;
+					}
+				}
+			}
+			return null;
+		}
+	}
+
 	private String host = null;
 	private int port = -1;
 	private boolean useLengthPrepender = true;
@@ -25,6 +41,8 @@ public class SocketGatewayConfig extends GatewayConfig {
 	private String path = "/websocket";
 	private String proxy = null;
 	private boolean autoActiveChannel = true;
+
+	private WebsocketFrameFormat frameFormat = WebsocketFrameFormat.TEXT;
 
 	{
 		this.setType(GatewayType.SOCKET);
@@ -55,6 +73,13 @@ public class SocketGatewayConfig extends GatewayConfig {
 		}
 		if (data.variableExists("autoActiveChannel")) {
 			this.setAutoActiveChannel(data.getBoolean("autoActiveChannel"));
+		}
+		if (data.variableExists("frameFormat")) {
+			this.setFrameFormat(WebsocketFrameFormat.fromString(data.getString("frameFormat")));
+			if (this.getFrameFormat() == null) {
+				throw new RuntimeException(
+						"Frame format invalid, expect TEXT or BINARY, got " + data.getString("frameFormat"));
+			}
 		}
 	}
 
@@ -97,6 +122,11 @@ public class SocketGatewayConfig extends GatewayConfig {
 					this.setBootEventLoopGroupThreads(Integer.valueOf(value));
 				} else if (nodeName.equalsIgnoreCase("workerGroupThreads")) {
 					this.setWorkerEventLoopGroupThreads(Integer.valueOf(value));
+				} else if (nodeName.equalsIgnoreCase("frameFormat")) {
+					this.setFrameFormat(WebsocketFrameFormat.fromString(value));
+					if (this.getFrameFormat() == null) {
+						throw new RuntimeException("Frame format invalid, expect TEXT or BINARY, got " + value);
+					}
 				}
 			}
 			curr = curr.getNextSibling();

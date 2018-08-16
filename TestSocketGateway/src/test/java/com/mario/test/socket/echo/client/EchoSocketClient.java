@@ -62,8 +62,8 @@ public class EchoSocketClient extends NettySocketClient {
 
 		DecimalFormat df = new DecimalFormat("0.##");
 
-		int numMessages = (int) 1024 * 1024;
-		int numThreads = 4;
+		int numMessages = 1;// (int) 1024 * 1024;
+		int numThreads = 1;
 		int messagePerThread = numMessages / numThreads;
 
 		if (messagePerThread * numThreads < numMessages) {
@@ -90,6 +90,8 @@ public class EchoSocketClient extends NettySocketClient {
 
 			@Override
 			public void onEvent(Event event) throws Exception {
+				SocketEvent socketEvent = (SocketEvent) event;
+				System.out.println("got data: " + socketEvent.getData());
 				doneSignal.countDown();
 			}
 		});
@@ -175,7 +177,7 @@ public class EchoSocketClient extends NettySocketClient {
 	}
 
 	public void onConnectedHandler(Event event) {
-		System.out.println("Connected to server at " + this.getServerAddress() + " --> start ping");
+		System.out.println("Connected to server at " + this.getServerAddress() + " --> start sending");
 		new Thread() {
 			public void run() {
 				try {

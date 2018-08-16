@@ -278,6 +278,7 @@
 			<autoactivechannel>[for websocket only, auto active channel after connect. For render test page, set to false. Default true]</autoactivechannel>
 			<host>127.0.0.1</host>
 			<port>9999</port>
+			<frameFormat>[use for websocket only, must be TEXT or BINARY, default is TEXT]</frameFormat>
 			<uselengthprepender>[true | false]</uselengthprepender>
 			<bootGroupThreads>[number of thread use for boot event loop group, default 2]</bootGroupThreads>
 			<workerGroupThreads>[number of threads use for worker event loop group, default 4]</workerGroupThreads>
@@ -329,7 +330,7 @@
 			<hwm>[high_water_mark, use in ZMQSocket == queued unsent message]</hwm>
 			<respondedCountEnabled>[enable responded count for RPC only, default false]</respondedCountEnabled>
 			<receivedCountEnabled>[enable received count, default false]</receivedCountEnabled>
-			<responderMaxIdleMinutes>[max idle time in minute to a responder (for and endpoint) get stopped, default 30 minutes]</responderMaxIdleMinutes>
+			<responderMaxIdleMinutes>[max idle time in minute to a responder (for an endpoint) get stopped, default 30 minutes]</responderMaxIdleMinutes>
 
 			<subkeys>
 				<!-- only use if type == PUB_SUB, multi values accepted -->

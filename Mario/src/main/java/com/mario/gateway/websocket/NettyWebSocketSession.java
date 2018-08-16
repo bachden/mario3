@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
+import com.mario.config.gateway.SocketGatewayConfig.WebsocketFrameFormat;
 import com.mario.entity.message.transcoder.MessageDecodingException;
 import com.mario.entity.message.transcoder.MessageEncoder;
 import com.mario.gateway.socket.SocketReceiver;
@@ -22,6 +23,8 @@ import com.mario.gateway.socket.tcp.NettyTCPSocketSession;
 import com.nhb.common.data.PuElement;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -30,6 +33,7 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
@@ -55,9 +59,11 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	private InetSocketAddress proxiedRemoteAddress;
 	private boolean autoActive = true;
 
-	public NettyWebSocketSession(String gatewayName, boolean ssl, String path, String proxy,
-			InetSocketAddress inetSocketAddress, SocketSessionManager sessionManager, SocketReceiver receiver,
-			MessageEncoder serializer, boolean autoActive) {
+	private final WebsocketFrameFormat frameFormat;
+
+	public NettyWebSocketSession(String gatewayName, WebsocketFrameFormat frameFormat, boolean ssl, String path,
+			String proxy, InetSocketAddress inetSocketAddress, SocketSessionManager sessionManager,
+			SocketReceiver receiver, MessageEncoder serializer, boolean autoActive) {
 		super(inetSocketAddress, sessionManager, receiver, serializer);
 		this.ssl = ssl;
 		this.proxy = proxy;
@@ -66,6 +72,7 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 			path = "/" + path;
 		}
 		this.autoActive = autoActive;
+		this.frameFormat = frameFormat == null ? WebsocketFrameFormat.TEXT : frameFormat;
 	}
 
 	@Override
@@ -87,7 +94,7 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws IOException {
 		try {
 			if (msg instanceof FullHttpRequest) {
-				getLogger().debug("Http query...");
+				// getLogger().debug("Http query...");
 				FullHttpRequest fullHttpRequest = (FullHttpRequest) msg;
 				handleHttpRequest(ctx, fullHttpRequest);
 			} else if (msg instanceof WebSocketFrame) {
@@ -218,14 +225,18 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 			return;
 		}
 
-		if (!(frame instanceof TextWebSocketFrame)) {
-			getLogger().debug("Unsuported websocket frame type: " + frame.getClass());
+		Object request = null;
+
+		if (frameFormat == WebsocketFrameFormat.TEXT && frame instanceof TextWebSocketFrame) {
+			request = ((TextWebSocketFrame) frame).text();
+		} else if (frameFormat == WebsocketFrameFormat.BINARY && frame instanceof BinaryWebSocketFrame) {
+			request = new ByteBufInputStream(((BinaryWebSocketFrame) frame).content());
+		} else {
 			_receiver.receive(_id,
-					new MessageDecodingException(frame.getClass().getName() + " frame types not supported"));
+					new MessageDecodingException("Received frame format doesn't match require format: " + frameFormat));
 			return;
 		}
 
-		String request = ((TextWebSocketFrame) frame).text();
 		_receiver.receive(_id, request);
 	}
 
@@ -259,39 +270,37 @@ public class NettyWebSocketSession extends NettyTCPSocketSession {
 		if (obj == null) {
 			return;
 		}
-		String msg = null;
-		if (obj instanceof String) {
-			msg = (String) obj;
-		} else if (obj instanceof PuElement) {
-			msg = ((PuElement) obj).toJSON();
-		} else if (this.getSerializer() != null) {
+		if (this.getSerializer() != null) {
 			try {
-				Object serializedData = this.getSerializer().encode(obj);
-				if (serializedData instanceof String) {
-					msg = (String) serializedData;
-				} else {
-					throw new IllegalArgumentException("Unable to send message of type " + obj.getClass()
-							+ ", after serialize: " + serializedData);
-				}
+				obj = this.getSerializer().encode(obj);
 			} catch (Exception e) {
 				throw new RuntimeException("Error while serializing message", e);
 			}
-		} else if (obj instanceof byte[]) {
-			msg = new String((byte[]) obj);
-		} else if (obj instanceof PuElement) {
-			msg = ((PuElement) obj).toJSON();
 		}
-		if (msg != null) {
-			try {
-				this.send(msg);
-			} catch (IOException e) {
-				throw new RuntimeException("Error while sending message", e);
-			}
-		}
-	}
 
-	public void send(String msg) throws IOException {
-		this.getChannelHandlerContext().writeAndFlush(new TextWebSocketFrame(msg));
+		WebSocketFrame frame = null;
+		try (ByteBufOutputStream output = new ByteBufOutputStream(Unpooled.buffer())) {
+			if (obj instanceof String) {
+				output.write(((String) obj).getBytes());
+			} else if (obj instanceof PuElement) {
+				if (this.frameFormat == WebsocketFrameFormat.TEXT) {
+					output.write(((PuElement) obj).toJSON().getBytes());
+				} else if (this.frameFormat == WebsocketFrameFormat.BINARY) {
+					((PuElement) obj).writeTo(output);
+				}
+			} else if (obj instanceof byte[]) {
+				output.write((byte[]) obj);
+			}
+
+			if (this.frameFormat == WebsocketFrameFormat.TEXT) {
+				frame = new TextWebSocketFrame(output.buffer());
+			} else {
+				frame = new BinaryWebSocketFrame(output.buffer());
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error while serializing message", e);
+		}
+		this.getChannelHandlerContext().writeAndFlush(frame);
 	}
 
 	@Override

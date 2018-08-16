@@ -75,7 +75,7 @@ public class NettyWebSocketGateway extends NettyTCPSocketGateway {
 				}
 				pipeline.addLast(new HttpServerCodec());
 				pipeline.addLast(new HttpObjectAggregator(65536));
-				pipeline.addLast(new NettyWebSocketSession(getName(), getConfig().isSsl(),
+				pipeline.addLast(new NettyWebSocketSession(getName(), getConfig().getFrameFormat(), getConfig().isSsl(),
 						NettyWebSocketGateway.this.path, NettyWebSocketGateway.this.proxy, ch.remoteAddress(),
 						NettyWebSocketGateway.this.getSessionManager(), NettyWebSocketGateway.this,
 						NettyWebSocketGateway.this.getSerializer(), autoActiveChannel));
