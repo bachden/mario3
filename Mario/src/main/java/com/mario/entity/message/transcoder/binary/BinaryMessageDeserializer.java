@@ -24,11 +24,11 @@ public class BinaryMessageDeserializer extends BaseLoggable implements MessageDe
 					in = (InputStream) data;
 				}
 
-				if (data instanceof InputStream) {
+				if (in != null) {
 					PuElement parsedData = PuElementTemplate.getInstance().read(in);
 					message.setData(parsedData);
 				} else {
-					throw new RuntimeException("Cannot deserialize data which is not byte[] either InputStream");
+					throw new RuntimeException("Cannot deserialize data which is not byte[] either InputStream: " + data.getClass());
 				}
 			} catch (IOException e) {
 				throw new RuntimeException("Unable to decode binary: " + new String((byte[]) data), e);
