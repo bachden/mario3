@@ -170,6 +170,7 @@ public class HttpServerWrapperConfig extends ServerWrapperConfig {
 						break;
 					}
 					}
+					taskCurrNode = taskCurrNode.getNextSibling();
 				}
 				break;
 			}
