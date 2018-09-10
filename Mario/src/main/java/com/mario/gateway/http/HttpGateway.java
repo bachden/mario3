@@ -27,6 +27,7 @@ import com.nhb.common.data.PuElement;
 import com.nhb.common.data.PuNull;
 import com.nhb.common.data.PuValue;
 import com.nhb.common.utils.PrimitiveTypeUtils;
+import com.nhb.common.utils.UUIDUtils;
 
 public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 		implements HasServerWrapper<JettyHttpServerWrapper> {
@@ -216,9 +217,10 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 						} else if (res instanceof PuElement) {
 							responser.getWriter().write(((PuElement) res).toJSON());
 						} else if (res instanceof Throwable) {
-							getLogger().error("Http gateway {}@{} error", this.getName(), this.getExtensionName(),
-									((Throwable) res));
-							responser.getWriter().write(((Throwable) res).getMessage());
+							String errorId = UUIDUtils.timebasedUUIDAsString();
+							getLogger().error("Http gateway {}@{} error: {}", this.getName(), this.getExtensionName(),
+									errorId, ((Throwable) res));
+							responser.getWriter().write("Internal server error: " + errorId);
 						} else if (PrimitiveTypeUtils.isPrimitiveOrWrapperType(res.getClass())) {
 							responser.getWriter().write(PrimitiveTypeUtils.getStringValueFrom(res));
 						} else {
