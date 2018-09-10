@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
@@ -217,7 +216,9 @@ public class HttpGateway extends AbstractGateway<HttpGatewayConfig>
 						} else if (res instanceof PuElement) {
 							responser.getWriter().write(((PuElement) res).toJSON());
 						} else if (res instanceof Throwable) {
-							responser.getWriter().write(ExceptionUtils.getStackTrace((Throwable) res));
+							getLogger().error("Http gateway {}@{} error", this.getName(), this.getExtensionName(),
+									((Throwable) res));
+							responser.getWriter().write(((Throwable) res).getMessage());
 						} else if (PrimitiveTypeUtils.isPrimitiveOrWrapperType(res.getClass())) {
 							responser.getWriter().write(PrimitiveTypeUtils.getStringValueFrom(res));
 						} else {
