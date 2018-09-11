@@ -43,7 +43,6 @@
 				<threadnamepattern>TPC Echo Server Worker Pool #%d</threadnamepattern>
 			</workerpool>
 		</socket>
-		-->
 		<socket>
 			<name>websocket-echo-gateway-binary</name>
 			<protocol>WEBSOCKET</protocol>

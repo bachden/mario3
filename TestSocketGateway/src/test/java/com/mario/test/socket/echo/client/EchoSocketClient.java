@@ -62,7 +62,7 @@ public class EchoSocketClient extends NettySocketClient {
 
 		DecimalFormat df = new DecimalFormat("0.##");
 
-		int numMessages = 1;// (int) 1024 * 1024;
+		int numMessages = 100;// (int) 1024 * 1024;
 		int numThreads = 1;
 		int messagePerThread = numMessages / numThreads;
 
