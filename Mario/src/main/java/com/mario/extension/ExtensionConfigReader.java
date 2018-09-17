@@ -770,6 +770,7 @@ class ExtensionConfigReader extends XmlConfigReader {
 				}
 
 				Node ele = item.getFirstChild();
+				PuObject variables = null;
 				while (ele != null) {
 					if (ele.getNodeType() == Node.ELEMENT_NODE) {
 						String nodeName = ele.getNodeName().toLowerCase();
@@ -779,24 +780,28 @@ class ExtensionConfigReader extends XmlConfigReader {
 							break;
 						}
 						case "properties":
-						case "propertiesFile": {
+						case "propertiesfile": {
 							try (InputStream is = readFile(ele.getTextContent().trim())) {
 								Properties props = new Properties();
 								props.load(is);
 								config.setProperties(props);
 							} catch (Exception e) {
 								throw new RuntimeException(
-										"Read file error, SQL config at extension name: " + this.getExtensionName());
+										"Read file error, SQL config at extension name: " + this.getExtensionName(), e);
 							}
 							break;
 						}
 						case "variables": {
-							config.setProperties(PuObject.fromXML(ele));
+							variables = PuObject.fromXML(ele);
 							break;
 						}
 						}
 					}
 					ele = ele.getNextSibling();
+				}
+
+				if (variables != null) {
+					config.setProperties(variables);
 				}
 
 				this.sqlDatasourceConfigs.add(config);

@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.lang.management.ThreadInfo;
 import java.util.Arrays;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.IOUtils;
@@ -239,7 +240,8 @@ public final class Mario extends BaseLoggable {
 
 		System.out.println("Register sql datasource config");
 		for (SQLDataSourceConfig dataSourceConfig : this.extensionManager.getDataSourceConfigs()) {
-			this.sqlDataSourceManager.registerDataSource(dataSourceConfig.getName(), dataSourceConfig.getProperties());
+			Properties properties = dataSourceConfig.getProperties();
+			this.sqlDataSourceManager.registerDataSource(dataSourceConfig.getName(), properties);
 		}
 
 		System.out.println("Init cassandra datasource manager by loaded configs");
@@ -384,13 +386,13 @@ public final class Mario extends BaseLoggable {
 			this.schedulerFactory.stop();
 			System.out.println("DONE");
 		}
-		
+
 		if (this.producerManager != null) {
 			System.out.print("Stopping producer manager... ");
 			this.producerManager.stop();
 			System.out.println("DONE");
 		}
-		
+
 		if (this.serverWrapperManager != null) {
 			System.out.print("Stopping server wrappers... ");
 			this.serverWrapperManager.stop();
