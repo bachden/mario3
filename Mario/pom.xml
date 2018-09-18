@@ -204,13 +204,6 @@
 			<version>9.3.14.v20161028</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast-all -->
-		<dependency>
-			<groupId>com.hazelcast</groupId>
-			<artifactId>hazelcast-all</artifactId>
-			<version>3.8</version>
-		</dependency>
-
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>deadlockmonitor</artifactId>
