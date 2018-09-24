@@ -46,8 +46,6 @@ public interface MarioApi {
 
 	MongoClient getMongoClient(String name);
 
-	com.mongodb.async.client.MongoClient getAsyncMongoClient(String name);
-
 	HazelcastInstance getHazelcastInstance(String name);
 
 	/**

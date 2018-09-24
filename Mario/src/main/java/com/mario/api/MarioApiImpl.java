@@ -217,13 +217,6 @@ class MarioApiImpl implements MarioApi {
 	}
 
 	@Override
-	public com.mongodb.async.client.MongoClient getAsyncMongoClient(String name) {
-		assert name != null;
-		assert this.mongoDBSourceManager != null;
-		return this.mongoDBSourceManager.getAsyncMongoClient(name);
-	}
-
-	@Override
 	public SocketSession getSocketSession(String sessionId) {
 		return this.sessionManager.getSessionFromId(sessionId);
 	}
