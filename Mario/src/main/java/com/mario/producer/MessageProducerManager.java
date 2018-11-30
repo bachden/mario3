@@ -78,7 +78,11 @@ public class MessageProducerManager extends BaseLoggable {
 			switch (config.getType()) {
 			case PUB:
 				producer = new ZMQTaskProducer();
-				_config.setSendSocketType(ZMQSocketType.PUB_CONNECT);
+				if (_config.getSendEndpoint().startsWith("pgm") || _config.getSendEndpoint().startsWith("epgm")) {
+					_config.setSendSocketType(ZMQSocketType.PUB_CONNECT);
+				} else {
+					_config.setSendSocketType(ZMQSocketType.PUB_BIND);
+				}
 				break;
 			case TASK:
 				producer = new ZMQTaskProducer();

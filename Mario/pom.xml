@@ -8,7 +8,7 @@
 	<properties>
 		<project.name>${project.artifactId}</project.name>
 		<project.dir>${project.name}-${project.version}</project.dir>
-		<nhb.common.version>1.5.15</nhb.common.version>
+		<nhb.common.version>1.5.16</nhb.common.version>
 	</properties>
 
 	<build>
