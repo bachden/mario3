@@ -144,8 +144,7 @@ public class ZeroMQGateway extends BaseEventDispatcher implements Gateway, ZMQMe
 	@Override
 	public void process(PuElement data, CompletableFuture<PuElement> future) {
 		if (this.handler == null) {
-			future.setFailedCause(new NullPointerException("No handle to process request"));
-			future.setAndDone(null);
+			future.setFailedAndDone(new NullPointerException("No handle to process request"));
 		} else {
 			ZeroMQMessage message = new ZeroMQMessage();
 			message.setData(data);
@@ -182,8 +181,7 @@ public class ZeroMQGateway extends BaseEventDispatcher implements Gateway, ZMQMe
 			ZeroMQMessage zmqMessage = (ZeroMQMessage) message;
 			CompletableFuture<PuElement> future = zmqMessage.getFuture();
 			if (future != null) {
-				future.setFailedCause(exception);
-				future.setAndDone(null);
+				future.setFailedAndDone(exception);
 			}
 		}
 	}
