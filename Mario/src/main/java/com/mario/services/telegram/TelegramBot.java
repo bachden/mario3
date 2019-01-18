@@ -33,4 +33,6 @@ public interface TelegramBot extends Pluggable {
 	long getChatId(String phoneNumber);
 	
 	void setSendAckEvenRegistered(boolean value);
+
+	void setAutoSendAck(boolean autoSendAck);
 }

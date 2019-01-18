@@ -62,7 +62,10 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 
 	@Setter
 	private boolean sendAckEvenRegistered = false;
-	
+
+	@Setter
+	private boolean autoSendAck = false;
+
 	private TelegramBotStorage storage;
 
 	public DefaultTelegramLongPollingBot(String name, TelegramBotStorageConfig storageConfig,
@@ -180,7 +183,7 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 			if (userName != null) {
 				if (getChatId(userName) > 0) {
 					if (sendAckEvenRegistered) {
-						reply.setText("Hello, you're already registered, now you just have to wait for alert");						
+						reply.setText("Hello, you're already registered, now you just have to wait for alert");
 					}
 				} else {
 					try {
@@ -203,10 +206,12 @@ public class DefaultTelegramLongPollingBot extends TelegramLongPollingBot
 				reply.setText("Your userName doesn't set, please do it in profile setting and chat with me again");
 			}
 
-			try {
-				this.sendMessage(reply);
-			} catch (TelegramApiException e) {
-				getLogger().error("Cannot send reply message", e);
+			if (autoSendAck) {
+				try {
+					this.sendMessage(reply);
+				} catch (TelegramApiException e) {
+					getLogger().error("Cannot send reply message", e);
+				}
 			}
 		} else {
 			event = TelegramEvent.newUpdateEvent(-1, null, update);

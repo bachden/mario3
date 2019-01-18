@@ -103,6 +103,7 @@ public class ServiceManager implements Loggable {
 		TelegramBotStorageConfig storageConfig = null;
 		TelegramBotRegisterStrategy registerStrategy = null;
 		boolean sendAckEvenRegistered = false;
+		boolean autoSendAck = false;
 
 		Node ele = node.getFirstChild();
 		while (ele != null) {
@@ -131,6 +132,9 @@ public class ServiceManager implements Loggable {
 					break;
 				case "sendackevenregistered":
 					sendAckEvenRegistered = Boolean.valueOf(eleValue);
+					break;
+				case "autosendack":
+					autoSendAck = Boolean.valueOf(eleValue);
 					break;
 				}
 
@@ -166,6 +170,7 @@ public class ServiceManager implements Loggable {
 
 		if (bot != null) {
 			bot.setSendAckEvenRegistered(sendAckEvenRegistered);
+			bot.setAutoSendAck(autoSendAck);
 			this.telegramBotManager.register(bot);
 		}
 	}

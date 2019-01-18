@@ -438,6 +438,7 @@
 				<filePath>[/path/to/file - use for 'file' storage type]</filePath>
 				<datasource>[datasource name - use for mysql | mongo storage type]</datasource>
 			</storage>
+			<autoSendAck>[default false, indicate that bot will auto send ack message on register action]</autoSendAck>
 			<sendAckEvenRegistered>[send ack message even user registered before, default false]</sendAckEvenRegistered>
 			<!-- <webhookurl>[the url which telegram will call if the bot has updated, not supported right now]</webhookurl> -->
 		</telegrambot>

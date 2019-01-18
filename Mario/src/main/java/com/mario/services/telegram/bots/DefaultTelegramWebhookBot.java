@@ -64,7 +64,10 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 
 	@Setter
 	private boolean sendAckEvenRegistered = false;
-	
+
+	@Setter
+	private boolean autoSendAck = false;
+
 	public DefaultTelegramWebhookBot(String name, TelegramBotStorageConfig storageConfig,
 			TelegramBotRegisterStrategy registerStrategy) {
 		this.setName(name);
@@ -159,10 +162,12 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 				reply.setText("Your userName doesn't set, please do it in profile setting and chat with me again");
 			}
 
-			try {
-				this.sendMessage(reply);
-			} catch (TelegramApiException e) {
-				getLogger().error("Cannot send reply message", e);
+			if (autoSendAck) {
+				try {
+					this.sendMessage(reply);
+				} catch (TelegramApiException e) {
+					getLogger().error("Cannot send reply message", e);
+				}
 			}
 		} else {
 			event = TelegramEvent.newUpdateEvent(-1, null, update);
