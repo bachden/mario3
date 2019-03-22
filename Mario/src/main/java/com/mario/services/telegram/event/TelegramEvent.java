@@ -1,6 +1,6 @@
 package com.mario.services.telegram.event;
 
-import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 import com.nhb.eventdriven.Event;
 import com.nhb.eventdriven.impl.AbstractEvent;

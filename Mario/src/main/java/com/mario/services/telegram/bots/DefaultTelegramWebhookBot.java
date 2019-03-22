@@ -2,12 +2,12 @@ package com.mario.services.telegram.bots;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.telegram.telegrambots.api.methods.BotApiMethod;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.objects.Message;
-import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import com.mario.api.MarioApi;
 import com.mario.services.telegram.TelegramBot;
@@ -164,7 +164,7 @@ public class DefaultTelegramWebhookBot extends TelegramWebhookBot implements Eve
 
 			if (autoSendAck) {
 				try {
-					this.sendMessage(reply);
+					this.execute(reply);
 				} catch (TelegramApiException e) {
 					getLogger().error("Cannot send reply message", e);
 				}

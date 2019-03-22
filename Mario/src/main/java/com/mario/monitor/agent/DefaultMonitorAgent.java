@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.bots.AbsSender;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 
 import com.mario.contact.Contact;
 import com.mario.monitor.MonitorableResponse;
@@ -171,7 +171,7 @@ public class DefaultMonitorAgent extends BaseMonitorAgent implements Loggable {
 						long chatId = bot.getChatId(telegramPhoneNumber);
 						if (chatId > 0) {
 							message.setChatId(chatId);
-							((AbsSender) bot).sendMessage(message);
+							((AbsSender) bot).execute(message);
 						} else {
 							getLogger().warn("Cannot fetch telegram chat id for phone number {}", telegramPhoneNumber);
 						}
