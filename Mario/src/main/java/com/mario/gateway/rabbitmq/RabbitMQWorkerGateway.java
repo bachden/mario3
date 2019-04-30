@@ -157,7 +157,8 @@ public class RabbitMQWorkerGateway extends RabbitMQGateway {
 				}
 			}
 
-			@Override
+			@SuppressWarnings("unchecked")
+            @Override
 			public <E, T extends MessageProducer<E>> E forward(T producer, String routingKey) {
 				if (producer != null) {
 					RabbitMQDeliveredMessage dm = rabbitMQMessage.getDeliveredMessage();
@@ -176,7 +177,8 @@ public class RabbitMQWorkerGateway extends RabbitMQGateway {
 				if (producer != null) {
 					RabbitMQDeliveredMessage dm = rabbitMQMessage.getDeliveredMessage();
 					if (dm != null && producer instanceof RabbitMQProducer<?>) {
-						RabbitMQProducer<E> rabbitMQProducer = (RabbitMQProducer<E>) producer;
+						@SuppressWarnings("unchecked")
+                        RabbitMQProducer<E> rabbitMQProducer = (RabbitMQProducer<E>) producer;
 						return rabbitMQProducer.forward(dm.getBody(), dm.getProperties(), null);
 					} else {
 						return producer.publish(message.getData());
