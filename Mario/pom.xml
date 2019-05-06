@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nhb</groupId>
 	<artifactId>mario</artifactId>
-	<version>3.21.3</version>
+	<version>3.21.4</version>
 
 	<properties>
 		<project.name>${project.artifactId}</project.name>
 		<project.dir>${project.name}-${project.version}</project.dir>
-		<nhb.common.version>1.5.20</nhb.common.version>
+		<nhb.common.version>1.5.21</nhb.common.version>
 	</properties>
 
 	<build>
