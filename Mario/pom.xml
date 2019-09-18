@@ -6,152 +6,208 @@
 	<version>3.21.8</version>
 
 	<properties>
-		<project.name>${project.artifactId}</project.name>
-		<project.dir>${project.name}-${project.version}</project.dir>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<nhb.common.version>1.5.25</nhb.common.version>
+		<dist.artifactId>${project.artifactId}</dist.artifactId>
+		<dist.name>${dist.artifactId}-${project.version}</dist.name>
+		<delombok.output>${project.build.directory}/delombok</delombok.output>
 	</properties>
 
 	<build>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.1.0</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.1.1</version>
+					<executions>
+						<execution>
+							<id>javadoc-jar</id>
+							<phase>package</phase>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+							<configuration>
+								<sourcepath>${delombok.output}</sourcepath>
+								<additionalOptions>-Xdoclint:none</additionalOptions>
+								<additionalJOption>-Xdoclint:none</additionalJOption>
+								<additionalparam>-Xdoclint:none</additionalparam>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.1.1</version>
+					<executions>
+						<execution>
+							<id>copy-dependencies</id>
+							<phase>package</phase>
+							<goals>
+								<goal>copy-dependencies</goal>
+							</goals>
+							<configuration>
+								<outputDirectory>${project.build.directory}/${dist.name}/lib</outputDirectory>
+								<overWriteReleases>true</overWriteReleases>
+								<overWriteSnapshots>false</overWriteSnapshots>
+								<overWriteIfNewer>true</overWriteIfNewer>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.projectlombok</groupId>
+										<artifactId>lombok-maven-plugin</artifactId>
+										<versionRange>[1,)</versionRange>
+										<goals>
+											<goal>delombok</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-enforcer-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>enforce</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.8</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<configuration>
+								<target>
+									<echo message="${project.build.directory}/${dist.name}" />
+									<delete failonerror="false" dir="${project.build.directory}/${dist.name}" />
+									<mkdir dir="${project.build.directory}/${dist.name}" />
+									<copy todir="${project.build.directory}/${dist.name}/conf" failonerror="false">
+										<fileset dir="${project.basedir}/conf" />
+									</copy>
+									<copy todir="${project.build.directory}/${dist.name}/lib">
+										<fileset dir="${project.basedir}/lib-local">
+											<include name="*.jar" />
+										</fileset>
+									</copy>
+									<copy todir="${project.build.directory}/${dist.name}/lib-boot">
+										<fileset dir="${project.basedir}/lib-boot">
+											<include name="*.jar" />
+										</fileset>
+									</copy>
+									<copy todir="${project.build.directory}/${dist.name}/lib-agents">
+										<fileset dir="${project.basedir}/lib-agents" />
+									</copy>
+									<copy todir="${project.build.directory}/${dist.name}/lib">
+										<fileset dir="${project.build.directory}">
+											<exclude name="*-sources.jar" />
+											<exclude name="*-javadoc.jar" />
+											<include name="*.jar" />
+										</fileset>
+									</copy>
+									<copy todir="${project.build.directory}/${dist.name}/extensions" failonerror="false">
+										<fileset dir="${project.basedir}/extensions" />
+									</copy>
+									<copy todir="${project.build.directory}/${dist.name}">
+										<fileset dir="${project.basedir}/sbin" />
+									</copy>
+								</target>
+							</configuration>
+							<goals>
+								<goal>run</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.projectlombok</groupId>
+					<artifactId>lombok-maven-plugin</artifactId>
+					<version>1.18.8.1</version>
+					<configuration>
+						<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+						<outputDirectory>${delombok.output}</outputDirectory>
+						<addOutputDirectory>false</addOutputDirectory>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>generate-sources</phase>
+							<goals>
+								<goal>delombok</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
 			</plugin>
-
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
-
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
-				<executions>
-					<execution>
-						<id>javadoc-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<additionalparam>-Xdoclint:none</additionalparam>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok-maven-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<configuration>
-							<target>
-								<delete failonerror="false">
-									<fileset dir="${project.build.directory}/${project.dir}" />
-								</delete>
-								<mkdir dir="${project.build.directory}/${project.dir}" />
-								<copy todir="${project.build.directory}/${project.dir}/conf" failonerror="false">
-									<fileset dir="${project.basedir}/conf" />
-								</copy>
-								<copy todir="${project.build.directory}/${project.dir}/lib">
-									<fileset dir="${project.basedir}/lib-local">
-										<include name="*.jar" />
-									</fileset>
-								</copy>
-								<copy todir="${project.build.directory}/${project.dir}/lib-boot">
-									<fileset dir="${project.basedir}/lib-boot">
-										<include name="*.jar" />
-									</fileset>
-								</copy>
-								<copy todir="${project.build.directory}/${project.dir}/lib-agents">
-									<fileset dir="${project.basedir}/lib-agents" />
-								</copy>
-								<copy todir="${project.build.directory}/${project.dir}/lib">
-									<fileset dir="${project.build.directory}">
-										<exclude name="*-sources.jar" />
-										<exclude name="*-javadoc.jar" />
-										<include name="*.jar" />
-									</fileset>
-								</copy>
-								<copy todir="${project.build.directory}/${project.dir}/extensions" failonerror="false">
-									<fileset dir="${project.basedir}/extensions" />
-								</copy>
-								<copy todir="${project.build.directory}/${project.dir}">
-									<fileset dir="${project.basedir}/sbin" />
-								</copy>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-					<!-- <execution> -->
-					<!-- <id>copy-to-server</id> -->
-					<!-- <phase>install</phase> -->
-					<!-- <configuration> -->
-					<!-- <target> -->
-					<!-- <sshexec host="${remote.host}" username="${remote.user}" password="${remote.password}" trust="true" command="cd ~; mkdir -p ~/${project.name}s/${project.dir}" -->
-					<!-- failonerror="false" /> -->
-					<!-- <scp failonerror="false" trust="true" todir="${remote.user}:${remote.password}@${remote.host}:~/${project.name}s/${project.dir}"> -->
-					<!-- <fileset dir="${project.build.directory}/${project.dir}" /> -->
-					<!-- </scp> -->
-					<!-- <sshexec failonerror="false" host="${remote.host}" username="${remote.user}" password="${remote.password}" trust="true" -->
-					<!-- command="ln -sfn ~/${project.name}s/${project.dir} ~/${project.name}; cd ~/${project.name}; chmod +x *.sh; mkdir -p extensions; mkdir -p extensions/__lib__" 
-						/> -->
-					<!-- </target> -->
-					<!-- </configuration> -->
-					<!-- <goals> -->
-					<!-- <goal>run</goal> -->
-					<!-- </goals> -->
-					<!-- </execution> -->
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>com.jcraft</groupId>
-						<artifactId>jsch</artifactId>
-						<version>0.1.54</version>
-					</dependency>
-
-					<dependency>
-						<groupId>org.apache.ant</groupId>
-						<artifactId>ant-jsch</artifactId>
-						<version>1.9.7</version>
-					</dependency>
-				</dependencies>
 			</plugin>
-
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/${project.dir}/lib</outputDirectory>
-							<overWriteReleases>true</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
-							<overWriteIfNewer>true</overWriteIfNewer>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -180,34 +236,26 @@
 			<artifactId>lfsappenders</artifactId>
 			<version>4.3.2</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<version>9.3.14.v20161028</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
 			<version>9.3.14.v20161028</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlets -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
 			<version>9.3.14.v20161028</version>
 		</dependency>
-
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>deadlockmonitor</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-messaging</artifactId>
@@ -227,14 +275,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/com.lmax/disruptor -->
 		<dependency>
 			<groupId>com.lmax</groupId>
 			<artifactId>disruptor</artifactId>
 			<version>3.3.6</version>
 		</dependency>
-
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-core</artifactId>
@@ -246,7 +291,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
 		<dependency>
 			<groupId>nhb.common</groupId>
 			<artifactId>nhb-common-db</artifactId>
@@ -274,15 +318,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.16.22</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/javax.mail/mail -->
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
@@ -294,8 +334,6 @@
 			<artifactId>telegrambots</artifactId>
 			<version>4.1.2</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/com.esotericsoftware.yamlbeans/yamlbeans -->
 		<dependency>
 			<groupId>com.esotericsoftware.yamlbeans</groupId>
 			<artifactId>yamlbeans</artifactId>
@@ -308,12 +346,12 @@
 		<repository>
 			<id>central</id>
 			<name>releases</name>
-			<url>${env.ARTIFACTORY_CONTEXT_URL}/libs-release-local</url>
+			<url>${RELEASE_URL}</url>
 		</repository>
 		<snapshotRepository>
 			<id>snapshots</id>
 			<name>snapshots</name>
-			<url>${env.ARTIFACTORY_CONTEXT_URL}/libs-snapshot-local</url>
+			<url>${SNAPSHOT_URL}</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>
